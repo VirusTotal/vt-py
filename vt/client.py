@@ -22,8 +22,7 @@ from .version import __version__
 __all__ = ['Client']
 
 
-_API_HOST = 'https://devel-dot-core-dot-virustotalcloud.appspot.com'
-#_API_HOST = 'www.virustotal.com'
+_API_HOST = 'https://www.virustotal.com'
 
 # All API endpoints start with this prefix, you don't need to include the
 # prefix in the paths you request as it's prepended automatically.

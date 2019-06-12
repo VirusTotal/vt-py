@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+
+# pytest
+/.cache/
+/.pytest_cache/
+
+# setuptools
+/build/
+/dist/
+vt_py.egg-info

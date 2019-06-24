@@ -130,6 +130,7 @@ class Feed:
     self._count += 1
     return Object.from_dict(json.loads(next_item))
 
+  @property
   def cursor(self):
     """Returns a cursor indicating the last item retrievied from the feed.
 

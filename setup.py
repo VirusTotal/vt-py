@@ -26,7 +26,8 @@ if sys.version_info < (3, 5, 0):
   raise RuntimeError("vt-py requires Python 3.5.0+")
 
 install_requires = [
-    'asks>=1.3.6'
+    'asyncio',
+    'aiohttp',
     'pytest',
     'pytest_httpserver',
     'trio>=0.11.00',

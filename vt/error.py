@@ -1,5 +1,4 @@
-#!/usr/local/bin/python
-# -*- coding: utf-8 -*-
+
 # Copyright © 2019 The vt-py authors. All Rights Reserved.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,8 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import asks
 
-from .client import *
-from .object import *
-from .version import __version__
+class APIError(Exception):
+  """Class that encapsules errors returned by the VirusTotal API."""
+
+  @classmethod
+  def from_dict(cls, dict_error):
+    return cls(dict_error['code'], dict_error.get('message'))
+
+  def __init__(self, code, message):
+    self.code = code
+    self.message = message

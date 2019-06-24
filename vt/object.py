@@ -45,9 +45,14 @@ class Object:
       if field not in obj_dict:
         raise ValueError('Object {} not found'.format(field))
 
-    return cls(obj_dict['type'], obj_dict['id'], obj_dict['attributes'])
+    return cls(
+        obj_dict['type'],
+        obj_dict['id'],
+        obj_dict['attributes'],
+        obj_dict.get('context_attributes'))
 
-  def __init__(self, obj_type: str, obj_id: str, obj_attributes: dict):
+  def __init__(self, obj_type: str, obj_id: str,
+               obj_attributes: dict, context_attributes: dict=None):
     """Initializes a VirusTotal API object."""
 
     if not isinstance(obj_attributes, dict):
@@ -61,6 +66,7 @@ class Object:
 
     self._type = obj_type
     self._id = obj_id
+    self.context_attributes = context_attributes
 
   @property
   def id(self):

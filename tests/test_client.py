@@ -106,8 +106,7 @@ def test_iterator(httpserver):
           'id': 'dummy_id_1',
           'type': 'dummy_type',
           'attributes': {'order': 0}
-          }],
-      'meta': {'cursor': 'dummy_cursor'}
+          }]
   })
 
   client = Client('dummy_api_key',
@@ -115,4 +114,5 @@ def test_iterator(httpserver):
 
   it = client.iterator('/dummy_collection')
   for i, obj in enumerate(it):
-    assert obj.order == i
+    print(obj.id)
+    assert 0 == i

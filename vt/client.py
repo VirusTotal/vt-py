@@ -11,15 +11,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import asks
-import functools
-import trio
+import aiohttp
+import asyncio
+import enum
 
+from .feed import Feed
 from .object import Object
 from .iterator import Iterator
 from .version import __version__
 
-__all__ = ['Client']
+__all__ = [
+    'Client',
+    'FeedType']
 
 
 _API_HOST = 'https://www.virustotal.com'
@@ -47,11 +50,14 @@ class APIError(Exception):
     self.message = message
 
 
+class FeedType(enum.Enum):
+  FILES = 'files'
+
+
 class Client:
   """Client for interacting with VirusTotal."""
 
-  def __init__(self, apikey: str, agent: str="unknown",
-               max_connections: int=50, host: str=None):
+  def __init__(self, apikey: str, agent: str="unknown", host: str=None):
     """Intialize the client with the provided API key.
 
     Args:
@@ -59,15 +65,48 @@ class Client:
       agent: Optional string identifying your application. Using a agent string
           is highly recommendable, as it may help in debugging issues with your
           requests server-side.
-      max_connections: Maximum number of concurrent connections that the client
-          can stablish to the server at any time. Default: 50.
     """
-    self._session = asks.Session(host or _API_HOST, connections=max_connections)
-    self._session.endpoint = _ENDPOINT_PREFIX
-    self._session.headers['Accept-Encoding'] = 'gzip'
-    self._session.headers['X-Apikey'] = apikey
-    self._session.headers['User-Agent'] = _USER_AGENT_FMT.format_map({
-        'agent': agent, 'version': __version__})
+    if not apikey:
+      raise ValueError('Expecting API key, got: %s' % str(apikey))
+
+    self._host = host or _API_HOST
+    self._apikey = apikey
+    self._agent = agent
+    self._session = aiohttp.ClientSession(
+        connector=aiohttp.TCPConnector(ssl=False),
+        headers={
+            'X-Apikey': apikey,
+            'Accept-Encoding': 'gzip',
+            'User-Agent': _USER_AGENT_FMT.format_map({
+                'agent': agent, 'version': __version__})})
+
+  def _full_url(self, path):
+    if path.startswith('http'):
+      return path
+    return self._host + _ENDPOINT_PREFIX + path
+
+  async def __aenter__(self):
+    return self
+
+  async def __aexit__(self, exc_type, exc, tb):
+    await self.close_async()
+
+  def __enter__(self):
+    return self
+
+  def __exit__(self):
+    self.close()
+
+  async def get_error(self, response):
+    if response.status == 200:
+      return None
+    if response.status >= 400 and response.status <= 499:
+      json_resp = await response.json()
+      error = json_resp.get('error')
+      if error:
+        return APIError.from_dict(error)
+      return APIError('ClientError', await response.text())
+    return APIError('ServerError', await response.text())
 
   async def get_async(self, path: str, params: dict=None):
     """Sends a GET request to the given path.
@@ -76,7 +115,7 @@ class Client:
     checking nor response parsing is performed. See get_json_response_async,
     get_data_async and get_object_async for higher-level functions.
     """
-    return await self._session.get(path=path, params=params)
+    return await self._session.get(self._full_url(path), params=params)
 
   async def get_json_response_async(self, path: str, params: dict=None):
     """Sends a GET request to the given path and parses the response.
@@ -85,11 +124,10 @@ class Client:
     JSON, check for errors, and return the server response as a dictionary.
     """
     http_resp = await self.get_async(path, params=params)
-    json_resp = http_resp.json()
-    error = json_resp.get('error')
+    error = await self.get_error(http_resp)
     if error:
-      raise APIError.from_dict(error)
-    return json_resp
+      raise error
+    return await http_resp.json()
 
   async def get_data_async(self, path: str, params: dict=None):
     """Sends a GET request to the given path and returns response's data.
@@ -130,20 +168,28 @@ class Client:
       raise ValueError(
           '{} did not return an object: {}'.format(path, err))
 
+  async def close_async(self):
+    await self._session.close()
+
   def get(self, *args, **kwargs):
-    return trio.run(self.get_async, *args, **kwargs)
+    return asyncio.get_event_loop().run_until_complete(
+        self.get_async(*args, **kwargs))
 
   def get_json_response(self, *args, **kwargs):
-    return trio.run(functools.partial(
-        self.get_json_response_async, *args, **kwargs))
+    return asyncio.get_event_loop().run_until_complete(
+        self.get_json_response_async(*args, **kwargs))
 
   def get_data(self, *args, **kwargs):
-    return trio.run(functools.partial(
-        self.get_data_async, *args, **kwargs))
+    return asyncio.get_event_loop().run_until_complete(
+        self.get_data_async(*args, **kwargs))
 
   def get_object(self, *args, **kwargs):
-    return trio.run(functools.partial(
-        self.get_object_async, *args, **kwargs))
+    return asyncio.get_event_loop().run_until_complete(
+        self.get_object_async(*args, **kwargs))
+
+  def close(self, *args, **kwargs):
+    return asyncio.get_event_loop().run_until_complete(
+        self.close(*args, **kwargs))
 
   def iterator(self, path: str, cursor: str=None,
                limit: int=None, batch_size: int=None):
@@ -165,3 +211,18 @@ class Client:
     """
     return Iterator(self, path,
         cursor=cursor, limit=limit, batch_size=batch_size)
+
+  def feed(self, feed_type: FeedType, cursor: str=None):
+    """Returns an iterator for a VirusTotal feed.
+
+    This functions returns an iterator that allows to retrieve a continuous
+    stream of files as they are scanned by VirusTotal. See the documentation
+    for the Feed class for more details.
+
+    Args:
+      feed_type: One of the supported feed types enumerated in FeedType.
+      cursor: An optional cursor indicating where to start. This argument can
+        be a string in the format 'YYYMMDDhhmm' indicating the date and time
+        of the first package that will be retrieved.
+    """
+    return Feed(self, feed_type, cursor=cursor)

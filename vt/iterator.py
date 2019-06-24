@@ -12,9 +12,6 @@
 # limitations under the License.
 
 
-import trio
-import asks
-
 from .object import Object
 
 
@@ -50,8 +47,7 @@ class Iterator:
 
     # Run the print_comments using asyncio
     import asyncio
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(print_comments())
+    asyncio.get_event_loop().run_until_complete(print_comments)
   """
 
   def __init__(self, client, path: str, cursor: str=None,

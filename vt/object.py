@@ -66,6 +66,7 @@ class Object:
 
     self._type = obj_type
     self._id = obj_id
+    self._attributes = obj_attributes.copy()
     self.context_attributes = context_attributes
 
   @property
@@ -75,3 +76,10 @@ class Object:
   @property
   def type(self):
     return self._type
+
+  def to_dict(self):
+    return {
+      'type': self._type,
+      'id': self._id,
+      'attributes': self._attributes,
+      'context_attributes': self.context_attributes}

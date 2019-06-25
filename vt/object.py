@@ -45,29 +45,32 @@ class Object:
       if field not in obj_dict:
         raise ValueError('Object {} not found'.format(field))
 
-    return cls(
+    obj = cls(
         obj_dict['type'],
         obj_dict['id'],
-        obj_dict['attributes'],
-        obj_dict.get('context_attributes'))
+        obj_dict['attributes'])
 
-  def __init__(self, obj_type: str, obj_id: str,
-               obj_attributes: dict, context_attributes: dict=None):
+    if 'context_attributes' in obj_dict:
+      obj._context_attributes = obj_dict['context_attributes']
+
+    return obj
+
+  def __init__(self, obj_type: str, obj_id: str=None,
+               obj_attributes: dict=None):
     """Initializes a VirusTotal API object."""
 
-    if not isinstance(obj_attributes, dict):
+    if not isinstance(obj_attributes, (dict, type(None))):
       raise ValueError('Object attributes must be a dictionary')
 
-    # Initialize object attributes with the ones coming in the obj_attributes,
-    # this way if obj_attributes contains {'foo': 'somevalue'} you can access
-    # the attribute as obj.foo and it will return 'somevalue'. This must be
-    # done before initializing any other attribute for the object.
-    self.__dict__ = obj_attributes
+    if obj_attributes:
+      # Initialize object attributes with the ones coming in the obj_attributes,
+      # this way if obj_attributes contains {'foo': 'somevalue'} you can access
+      # the attribute as obj.foo and it will return 'somevalue'. This must be
+      # done before initializing any other attribute for the object.
+      self.__dict__ = obj_attributes
 
     self._type = obj_type
     self._id = obj_id
-    self._attributes = obj_attributes.copy()
-    self.context_attributes = context_attributes
 
   @property
   def id(self):
@@ -77,9 +80,28 @@ class Object:
   def type(self):
     return self._type
 
+  @property
+  def context_attributes(self):
+    if hasattr(self, '_context_attributes'):
+      return self._context_attributes
+    return {}
+
   def to_dict(self):
-    return {
-      'type': self._type,
-      'id': self._id,
-      'attributes': self._attributes,
-      'context_attributes': self.context_attributes}
+
+    result = {'type': self._type}
+
+    if self._id:
+      result['id'] = self._id
+
+    attributes = {}
+    for name, value in self.__dict__.items():
+      if not name.startswith('_'):
+        attributes[name] = value
+
+    if attributes:
+      result['attributes'] = attributes
+
+    if self.context_attributes:
+      result['context_attributes'] = self.context_attributes
+
+    return result

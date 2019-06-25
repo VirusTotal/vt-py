@@ -11,11 +11,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import pytest
 import pytest_httpserver
 
 from vt import Client
 from vt import Object
+
+
+def new_client(httpserver):
+  return Client('dummy_api_key',
+      host='http://' + httpserver.host + ':' + str(httpserver.port))
 
 
 def test_object_from_dict():
@@ -54,16 +60,13 @@ def test_get_data(httpserver):
   httpserver.expect_request(
       '/api/v3/foo',
       method='GET',
-      headers={
-          'X-Apikey': 'dummy_api_key'
-  }).respond_with_json({
+      headers={'X-Apikey': 'dummy_api_key'}
+  ).respond_with_json({
       'data': 'dummy_data'
   })
 
-  client = Client('dummy_api_key',
-      host='http://' + httpserver.host + ':' + str(httpserver.port))
-
-  data = client.get_data('/foo')
+  with new_client(httpserver) as client:
+    data = client.get_data('/foo')
 
   assert data == 'dummy_data'
 
@@ -73,26 +76,46 @@ def test_get_object(httpserver):
   httpserver.expect_request(
       '/api/v3/dummy_types/dummy_id',
       method='GET',
-      headers={
-          'X-Apikey': 'dummy_api_key'
-  }).respond_with_json({
+      headers={'X-Apikey': 'dummy_api_key'}
+  ).respond_with_json({
       'data': {
-        'id': 'dummy_id',
-        'type': 'dummy_type',
-        'attributes': {
-            'foo': 'foo',
-            'bar': 'bar'}
+          'id': 'dummy_id',
+          'type': 'dummy_type',
+          'attributes': {
+              'foo': 'foo',
+              'bar': 'bar'}
   }})
 
-  client = Client('dummy_api_key',
-      host='http://' + httpserver.host + ':' + str(httpserver.port))
-
-  obj = client.get_object('/dummy_types/dummy_id')
+  with new_client(httpserver) as client:
+    obj = client.get_object('/dummy_types/dummy_id')
 
   assert obj.id == 'dummy_id'
   assert obj.type == 'dummy_type'
   assert obj.foo == 'foo'
   assert obj.bar == 'bar'
+
+
+def test_patch_object(httpserver):
+
+  httpserver.expect_oneshot_request(
+      '/api/v3/dummy_types/dummy_id',
+      method='PATCH',
+      headers={'X-Apikey': 'dummy_api_key'},
+      data='{"data": {"type": "dummy_type", "id": "dummy_id", "attributes": {"foo": "foo"}}}',
+  ).respond_with_json({
+      'data': {
+          'id': 'dummy_id',
+          'type': 'dummy_type',
+          'attributes': {
+              'foo': 'foo',
+          }
+      }
+  })
+
+  with new_client(httpserver) as client:
+    obj = Object('dummy_type', 'dummy_id')
+    obj.foo = 'foo'
+    data = client.patch_object('/dummy_types/dummy_id', obj)
 
 
 def test_iterator(httpserver):
@@ -109,10 +132,8 @@ def test_iterator(httpserver):
           }]
   })
 
-  client = Client('dummy_api_key',
-      host='http://' + httpserver.host + ':' + str(httpserver.port))
-
-  it = client.iterator('/dummy_collection')
-  for i, obj in enumerate(it):
-    print(obj.id)
-    assert 0 == i
+  with new_client(httpserver) as client:
+    it = client.iterator('/dummy_collection')
+    for i, obj in enumerate(it):
+      print(obj.id)
+      assert 0 == i

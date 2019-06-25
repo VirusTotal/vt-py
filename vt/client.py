@@ -14,6 +14,11 @@
 import aiohttp
 import asyncio
 import enum
+import json
+
+from typing import Any
+from typing import Dict
+
 
 from .feed import Feed
 from .object import Object
@@ -72,30 +77,57 @@ class Client:
     self._host = host or _API_HOST
     self._apikey = apikey
     self._agent = agent
-    self._session = aiohttp.ClientSession(
-        connector=aiohttp.TCPConnector(ssl=False),
-        headers={
-            'X-Apikey': apikey,
-            'Accept-Encoding': 'gzip',
-            'User-Agent': _USER_AGENT_FMT.format_map({
-                'agent': agent, 'version': __version__})})
+    self._session = None
 
   def _full_url(self, path):
     if path.startswith('http'):
       return path
     return self._host + _ENDPOINT_PREFIX + path
 
+  def _get_session(self):
+    if not self._session:
+      self._session = aiohttp.ClientSession(
+        connector=aiohttp.TCPConnector(ssl=False),
+        headers={
+            'X-Apikey': self._apikey,
+            'Accept-Encoding': 'gzip',
+            'User-Agent': _USER_AGENT_FMT.format_map({
+                'agent': self._agent, 'version': __version__})})
+    return self._session
+
   async def __aenter__(self):
     return self
 
-  async def __aexit__(self, exc_type, exc, tb):
+  async def __aexit__(self, type, value, traceback):
     await self.close_async()
 
   def __enter__(self):
     return self
 
-  def __exit__(self):
+  def __exit__(self, type, value, traceback):
     self.close()
+
+  def _sync(self, future):
+    return asyncio.get_event_loop().run_until_complete(future)
+
+  def _extract_data_from_json(self, json_resp):
+    if not 'data' in json_resp:
+      raise ValueError('{} does not returns a data field'.format(path))
+    return json_resp['data']
+
+  async def _json_response(self, http_resp):
+    error = await self.get_error(http_resp)
+    if error:
+      raise error
+    return await http_resp.json()
+
+  async def close_async(self):
+    if self._session:
+      await self._session.close()
+      self._session = None
+
+  def close(self, *args, **kwargs):
+    return self._sync(self.close_async(*args, **kwargs))
 
   async def get_error(self, response):
     if response.status == 200:
@@ -108,28 +140,25 @@ class Client:
       return APIError('ClientError', await response.text())
     return APIError('ServerError', await response.text())
 
-  async def get_async(self, path: str, params: dict=None):
+  async def get_async(self, path: str, params: Dict=None):
     """Sends a GET request to the given path.
 
     This is a low-level function that returns a raw HTTP response, no error
-    checking nor response parsing is performed. See get_json_response_async,
+    checking nor response parsing is performed. See get_json_async,
     get_data_async and get_object_async for higher-level functions.
     """
-    return await self._session.get(self._full_url(path), params=params)
+    return await self._get_session().get(self._full_url(path), params=params)
 
-  async def get_json_response_async(self, path: str, params: dict=None):
+  async def get_json_async(self, path: str, params: Dict=None):
     """Sends a GET request to the given path and parses the response.
 
     Most VirusTotal API responses are JSON-encoded. This function parses the
     JSON, check for errors, and return the server response as a dictionary.
     """
     http_resp = await self.get_async(path, params=params)
-    error = await self.get_error(http_resp)
-    if error:
-      raise error
-    return await http_resp.json()
+    return await self._json_response(http_resp)
 
-  async def get_data_async(self, path: str, params: dict=None):
+  async def get_data_async(self, path: str, params: Dict=None):
     """Sends a GET request to the given path and returns response's data.
 
     Most VirusTotal API responses are JSON-encoded with the following format:
@@ -149,12 +178,10 @@ class Client:
       Whatever the server returned in the response's data field, it may be a
       dict, list, string or other Python type, depending on the endpoint called.
     """
-    json_resp = await self.get_json_response_async(path, params=params)
-    if not 'data' in json_resp:
-      raise ValueError('{} does not returns a data field'.format(path))
-    return json_resp['data']
+    json_resp = await self.get_json_async(path, params=params)
+    return self._extract_data_from_json(json_resp)
 
-  async def get_object_async(self, path: str, params: dict=None):
+  async def get_object_async(self, path: str, params: Dict=None):
     """Send a GET request to the given path and return an object.
 
     The endpoint specified by path must return an object, not a collection. This
@@ -168,28 +195,59 @@ class Client:
       raise ValueError(
           '{} did not return an object: {}'.format(path, err))
 
-  async def close_async(self):
-    await self._session.close()
+  async def patch_async(self, path: str, data: Any=None):
+    return await self._get_session().patch(self._full_url(path), data=data)
+
+  async def patch_object_async(self, path: str, obj: Object):
+    data = json.dumps({'data': obj.to_dict()})
+    http_resp = await self.patch_async(path, data)
+    json_resp = await self._json_response(http_resp)
+    return self._extract_data_from_json(json_resp)
+
+  async def post_async(self, path: str, data: Any=None):
+    return await self._get_session().post(self._full_url(path), data=data)
+
+  async def put_async(self, path: str, data: Any=None):
+    return await self._get_session.put(self._full_url(path), data=data)
 
   def get(self, *args, **kwargs):
-    return asyncio.get_event_loop().run_until_complete(
-        self.get_async(*args, **kwargs))
+    return self._sync(self.get_async(*args, **kwargs))
 
-  def get_json_response(self, *args, **kwargs):
-    return asyncio.get_event_loop().run_until_complete(
-        self.get_json_response_async(*args, **kwargs))
+  def get_json(self, *args, **kwargs):
+    return self._sync(self.get_json_async(*args, **kwargs))
 
   def get_data(self, *args, **kwargs):
-    return asyncio.get_event_loop().run_until_complete(
-        self.get_data_async(*args, **kwargs))
+    return self._sync(self.get_data_async(*args, **kwargs))
 
   def get_object(self, *args, **kwargs):
-    return asyncio.get_event_loop().run_until_complete(
-        self.get_object_async(*args, **kwargs))
+    return self._sync(self.get_object_async(*args, **kwargs))
 
-  def close(self, *args, **kwargs):
-    return asyncio.get_event_loop().run_until_complete(
-        self.close(*args, **kwargs))
+  def patch(self, *args, **kwargs):
+    return self._sync(self.patch_async(*args, **kwargs))
+
+  def patch_object(self, *args, **kwargs):
+    return self._sync(self.patch_object_async(*args, **kwargs))
+
+  def post(self, *args, **kwargs):
+    return self._sync(self.post_async(*args, **kwargs))
+
+  def put(self, *args, **kwargs):
+    return self._sync(self.put_async(*args, **kwargs))
+
+  def feed(self, feed_type: FeedType, cursor: str=None):
+    """Returns an iterator for a VirusTotal feed.
+
+    This functions returns an iterator that allows to retrieve a continuous
+    stream of files as they are scanned by VirusTotal. See the documentation
+    for the Feed class for more details.
+
+    Args:
+      feed_type: One of the supported feed types enumerated in FeedType.
+      cursor: An optional cursor indicating where to start. This argument can
+        be a string in the format 'YYYMMDDhhmm' indicating the date and time
+        of the first package that will be retrieved.
+    """
+    return Feed(self, feed_type, cursor=cursor)
 
   def iterator(self, path: str, cursor: str=None,
                limit: int=None, batch_size: int=None):
@@ -211,18 +269,3 @@ class Client:
     """
     return Iterator(self, path,
         cursor=cursor, limit=limit, batch_size=batch_size)
-
-  def feed(self, feed_type: FeedType, cursor: str=None):
-    """Returns an iterator for a VirusTotal feed.
-
-    This functions returns an iterator that allows to retrieve a continuous
-    stream of files as they are scanned by VirusTotal. See the documentation
-    for the Feed class for more details.
-
-    Args:
-      feed_type: One of the supported feed types enumerated in FeedType.
-      cursor: An optional cursor indicating where to start. This argument can
-        be a string in the format 'YYYMMDDhhmm' indicating the date and time
-        of the first package that will be retrieved.
-    """
-    return Feed(self, feed_type, cursor=cursor)

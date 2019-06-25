@@ -92,12 +92,12 @@ class Iterator:
     return items, meta.get('cursor')
 
   async def _get_batch_async(self, batch_cursor: int=0):
-    json_resp = await self._client.get_json_response_async(
+    json_resp = await self._client.get_json_async(
         self._path, params=self._build_params())
     return self._parse_response(json_resp, batch_cursor)
 
   def _get_batch(self, batch_cursor: int=0):
-    json_resp = self._client.get_json_response(
+    json_resp = self._client.get_json(
         self._path, params=self._build_params())
     return self._parse_response(json_resp, batch_cursor)
 

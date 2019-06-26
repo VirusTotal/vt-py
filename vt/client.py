@@ -335,7 +335,7 @@ class Client:
     """
     response = await self.get_async('/files/{}/download'.format(hash))
     while True:
-      chunk = await response.content.read(1024*1024)
+      chunk = await response.content.read_async(1024*1024)
       if not chunk:
         break
       file.write(chunk)

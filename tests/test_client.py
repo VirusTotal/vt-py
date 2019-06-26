@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import io
 import json
 import pytest
 import pytest_httpserver
@@ -194,3 +195,18 @@ def test_iterator(httpserver):
     for i, obj in enumerate(it):
       print(obj.id)
       assert 0 == i
+
+
+def test_download_file(httpserver):
+
+  httpserver.expect_request(
+      '/api/v3/files/01020304050607080900a0b0c0d0e0f/download',
+      method='GET',
+      headers={'X-Apikey': 'dummy_api_key'}
+  ).respond_with_data('filecontent')
+
+  with new_client(httpserver) as client:
+    with io.BytesIO() as f:
+      client.download_file('01020304050607080900a0b0c0d0e0f', f)
+      f.seek(0)
+      assert f.read() == b'filecontent'

@@ -114,11 +114,14 @@ def test_get_object(httpserver):
 
 def test_patch_object(httpserver):
 
-  httpserver.expect_oneshot_request(
+  obj = Object('dummy_type', 'dummy_id')
+  obj.foo = 'foo'
+
+  httpserver.expect_request(
       '/api/v3/dummy_types/dummy_id',
       method='PATCH',
       headers={'X-Apikey': 'dummy_api_key'},
-      data='{"data": {"type": "dummy_type", "id": "dummy_id", "attributes": {"foo": "foo"}}}',
+      data=json.dumps({'data': obj.to_dict()}),
   ).respond_with_json({
       'data': {
           'id': 'dummy_id',
@@ -130,18 +133,19 @@ def test_patch_object(httpserver):
   })
 
   with new_client(httpserver) as client:
-    obj = Object('dummy_type', 'dummy_id')
-    obj.foo = 'foo'
-    data = client.patch_object('/dummy_types/dummy_id', obj)
+    client.patch_object('/dummy_types/dummy_id', obj)
 
 
 def test_post_object(httpserver):
 
-  httpserver.expect_oneshot_request(
+  obj = Object('dummy_type')
+  obj.foo = 'foo'
+
+  httpserver.expect_request(
       '/api/v3/dummy_types',
       method='POST',
       headers={'X-Apikey': 'dummy_api_key'},
-      data='{"data": {"type": "dummy_type", "attributes": {"foo": "foo"}}}',
+      data=json.dumps({'data': obj.to_dict()}),
   ).respond_with_json({
       'data': {
           'id': 'dummy_id',
@@ -153,8 +157,6 @@ def test_post_object(httpserver):
   })
 
   with new_client(httpserver) as client:
-    obj = Object('dummy_type')
-    obj.foo = 'foo'
     obj = client.post_object('/dummy_types', obj)
 
   assert obj.id == 'dummy_id'

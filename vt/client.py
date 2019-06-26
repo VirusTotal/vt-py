@@ -385,7 +385,7 @@ class Client:
     """
     return Feed(self, feed_type, cursor=cursor)
 
-  def iterator(self, path: str, cursor: str=None,
+  def iterator(self, path: str, params: Dict=None, cursor: str=None,
                limit: int=None, batch_size: int=None):
     """Returns an iterator for the collection specified by the given path.
 
@@ -394,14 +394,19 @@ class Client:
 
     Args:
       path: The path for an endpoint returning a collection.
+      params: Additional arguments passed to the endpoint as URI parameters.
       cursor: Cursor for resuming the iteration at the point it was left
-          previously. A cursor can be obtained with Iterator.cursor(). This
-         cursor is not the same one returned by the VirusTotal API.
+        previously. A cursor can be obtained with Iterator.cursor(). This
+        cursor is not the same one returned by the VirusTotal API.
       limit: Maximum number of objects that will be returned by the iterator.
-         If a limit is not provided the iterator continues until it reaches the
-         last object in the collection.
-      batch_size: Maximum number objects retrieved on each call to the API. If
-         not provided the server will decide how many objects to return.
+        If a limit is not provided the iterator continues until it reaches the
+        last object in the collection.
+      batch_size: Maximum number of objects retrieved on each call to the
+        endpoint. If not provided the server will decide how many objects to
+        return.
     """
     return Iterator(self, path,
-        cursor=cursor, limit=limit, batch_size=batch_size)
+        params=params,
+        cursor=cursor,
+        limit=limit,
+        batch_size=batch_size)

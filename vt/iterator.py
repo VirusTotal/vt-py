@@ -14,6 +14,8 @@
 
 from .object import Object
 
+from typing import Dict
+
 
 __all__ = ['Iterator']
 
@@ -50,7 +52,7 @@ class Iterator:
     asyncio.get_event_loop().run_until_complete(print_comments)
   """
 
-  def __init__(self, client, path: str, cursor: str=None,
+  def __init__(self, client, path: str, params: Dict=None, cursor: str=None,
                limit: int=None, batch_size: int=None):
     """Initializes an iterator.
 
@@ -59,6 +61,7 @@ class Iterator:
     """
     self._client = client
     self._path = path
+    self._params = params or {}
     self._limit = limit
     self._batch_size = batch_size
     self._limit = limit
@@ -66,6 +69,12 @@ class Iterator:
     self._count = 0
     self._server_cursor = None
     self._batch_cursor = 0
+
+    if 'cursor' in self._params:
+      raise ValueError('Do not pass "cursor" as a path param')
+
+    if 'limit' in self._params:
+      raise ValueError('Do not pass "limit" as a path param')
 
     if cursor:
       self._server_cursor, _, batch_cursor = cursor.rpartition('-')
@@ -77,7 +86,7 @@ class Iterator:
         raise ValueError('invalid cursor')
 
   def _build_params(self):
-    params = {}
+    params = self._params.copy()
     if self._server_cursor:
       params['cursor'] = self._server_cursor
     if self._batch_size:

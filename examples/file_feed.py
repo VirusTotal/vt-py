@@ -23,12 +23,8 @@ privileges for using the VirusTotal Feed API.
 """
 
 import argparse
-import asyncio
-import aiohttp
-import functools
 import json
 import os
-import signal
 import vt
 
 
@@ -38,10 +34,10 @@ def main():
       description='Get files from the VirusTotal feed.')
 
   parser.add_argument('--apikey',
-      required=True, help='Your VirusTotal API key')
+      required=True, help='your VirusTotal API key')
 
   parser.add_argument('--output',
-      default='./file-feed', help='Path to output dir')
+      default='./file-feed', help='path to output directory')
 
   args = parser.parse_args()
 

@@ -109,19 +109,25 @@ class FeedReader:
 def main():
 
   parser = argparse.ArgumentParser(
-      description='Get files from the VirusTotal feed.')
+      description='get files from the VirusTotal feed.')
 
   parser.add_argument('--apikey',
-      required=True, help='Your VirusTotal API key')
+      required=True,
+      help='your VirusTotal API key')
 
   parser.add_argument('--cursor',
-      required=False, help='Cursor indicating where to start', default=None)
+      required=False,
+      help='cursor indicating where to start')
 
   parser.add_argument('--output',
-      default='./file-feed', help='Path to output dir')
+      default='./file-feed',
+      help='path to output directory')
 
-  parser.add_argument('--num_workers', type=int,
-      required=False, help='Number of workers', default=4)
+  parser.add_argument('--num_workers',
+      type=int,
+      required=False,
+      help='number of concurrent workers',
+      default=4)
 
   args = parser.parse_args()
 

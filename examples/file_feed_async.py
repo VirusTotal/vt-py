@@ -15,8 +15,12 @@
 
 """
 This example program shows how to use the vt-py asynchronous API for getting
-the VirusTotal file feed in an efficient manner. For using this program you
-need an API key with privileges for using the feed API.
+the VirusTotal file feed in an efficient manner. This is a more elaborate
+example than file_feed.py, it will run faster by leveraging the asynchronous
+API for making concurrent calls to the VirusTotal backend.
+
+NOTICE: In order to use this program you will need an API key that has
+privileges for using the VirusTotal Feed API.
 """
 
 import argparse
@@ -58,18 +62,17 @@ class FeedReader:
     async with vt.Client(self._apikey) as client:
       while not self._aborted or not self._queue.empty():
         file_obj = await self._queue.get()
-        # The URL for downloading the file comes as a context attribute named
-        # 'download_url'.
-        download_url = file_obj.context_attributes['download_url']
         file_path = os.path.join(self._output_dir, file_obj.id)
-        response = await client.get_async(download_url)
-        data = await response.read()
         # Write a file <sha256>.json with file's metadata and another file
         # named <sha256> with the file's content.
         with open(file_path + '.json', mode='w') as f:
           f.write(json.dumps(file_obj.to_dict()))
+        # The URL for downloading the file comes as a context attribute named
+        # 'download_url'.
+        download_url = file_obj.context_attributes['download_url']
+        response = await client.get_async(download_url)
         with open(file_path, mode='wb') as f:
-          f.write(data)
+          f.write(await response.read_async())
         self._queue.task_done()
         print(file_obj.id)
 

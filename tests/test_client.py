@@ -55,6 +55,22 @@ def test_object_from_dict():
     Object.from_dict({'type': 'dummy_type', 'id': 'dummy_id', 'attributes': 1})
 
 
+def test_get(httpserver):
+
+  httpserver.expect_request(
+      '/api/v3/foo',
+      method='GET',
+      headers={'X-Apikey': 'dummy_api_key'}
+  ).respond_with_json({
+      'data': 'dummy_data'
+  })
+
+  with new_client(httpserver) as client:
+    response = client.get('/foo')
+
+  assert response.status == 200
+
+
 def test_get_data(httpserver):
 
   httpserver.expect_request(
@@ -116,6 +132,47 @@ def test_patch_object(httpserver):
     obj = Object('dummy_type', 'dummy_id')
     obj.foo = 'foo'
     data = client.patch_object('/dummy_types/dummy_id', obj)
+
+
+def test_post_object(httpserver):
+
+  httpserver.expect_oneshot_request(
+      '/api/v3/dummy_types',
+      method='POST',
+      headers={'X-Apikey': 'dummy_api_key'},
+      data='{"data": {"type": "dummy_type", "attributes": {"foo": "foo"}}}',
+  ).respond_with_json({
+      'data': {
+          'id': 'dummy_id',
+          'type': 'dummy_type',
+          'attributes': {
+              'foo': 'foo',
+          }
+      }
+  })
+
+  with new_client(httpserver) as client:
+    obj = Object('dummy_type')
+    obj.foo = 'foo'
+    obj = client.post_object('/dummy_types', obj)
+
+  assert obj.id == 'dummy_id'
+
+
+def test_delete(httpserver):
+
+  httpserver.expect_request(
+      '/api/v3/foo',
+      method='DELETE',
+      headers={'X-Apikey': 'dummy_api_key'}
+  ).respond_with_json({
+      'data': 'dummy_data'
+  })
+
+  with new_client(httpserver) as client:
+    response = client.delete('/foo')
+
+  assert response.status == 200
 
 
 def test_iterator(httpserver):

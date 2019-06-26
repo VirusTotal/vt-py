@@ -79,7 +79,7 @@ class Feed:
         await asyncio.sleep(60)
       else:
         raise error
-    return io.BytesIO(bz2.decompress(await response.content.read()))
+    return io.BytesIO(bz2.decompress(await response.content.read_async()))
 
   def _get_batch(self, *args, **kwargs):
     return asyncio.get_event_loop().run_until_complete(

@@ -9,7 +9,7 @@
 
     <link rel="icon" href="/images/favicon.png" type="image/png">
 
-    <title>vt-py :: Documentation for Hugo Learn Theme</title>
+    <title>Getting started :: Documentation for Hugo Learn Theme</title>
 
     
     <link href="/css/nucleus.css?1561626655" rel="stylesheet">
@@ -35,7 +35,7 @@
     </style>
     
   </head>
-  <body class="" data-url="/">
+  <body class="" data-url="/getting-started/">
     <nav id="sidebar" class="">
 
 
@@ -114,8 +114,8 @@
   
     
     <li data-nav-id="/getting-started/" title="Getting started" class="dd-item 
-        
-        
+        parent
+        active
         
         ">
       <a href="/getting-started/">
@@ -177,35 +177,105 @@
         <div id="overlay"></div>
         <div class="padding highlightable">
               
+              <div>
+                <div id="top-bar">
+                
+                  
+                  
+                  
+                  <div id="top-github-link">
+                    <a class="github-link" title='Edit this page' href="https://github.com/matcornic/hugo-theme-learn/edit/master/exampleSite/content/getting-started/_index.en.md" target="blank">
+                      <i class="fas fa-code-branch"></i>
+                      <span id="top-github-link-text">Edit this page</span>
+                    </a>
+                  </div>
+                  
+                
+                
+                <div id="breadcrumbs" itemscope="" itemtype="http://data-vocabulary.org/Breadcrumb">
+                    <span id="sidebar-toggle-span">
+                        <a href="#" id="sidebar-toggle" data-sidebar-toggle="">
+                          <i class="fas fa-bars"></i>
+                        </a>
+                    </span>
+                  
+                  <span id="toc-menu"><i class="fas fa-list-alt"></i></span>
+                  
+                  <span class="links">
+                 
+                 
+                    
+          
+          
+            
+            
+          
+          
+            <a href='/'>vt-py</a> > Getting started
+          
+         
+          
+        
+                 
+                  </span>
+                </div>
+                
+                    <div class="progress">
+    <div class="wrapper">
+<nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#requirements">Requirements</a></li>
+<li><a href="#how-to-install">How to install</a></li>
+</ul></li>
+</ul>
+</nav>
+    </div>
+</div>
+
+                
+              </div>
+            </div>
+            
         <div id="head-tags">
         
         </div>
         
         <div id="body-inner">
           
+            <h1>
+              
+              Getting started
+            </h1>
+          
 
         
 
 
-<span id="sidebar-toggle-span">
-<a href="#" id="sidebar-toggle" data-sidebar-toggle=""><i class="fas fa-bars"></i> navigation</a>
-</span>
-
- 
 
 
-<h1 id="welcome-to-vt-py">Welcome to vt-py</h1>
-
-<p><a href="https://github.com/VirusTotal/vt-py">vt-py</a> is the official Python client library
-for the <a href="https://developers.virustotal.com/v3.0/reference">VirusTotal API v3</a>. It was designed to leverage Python 3.5+</p>
-
-<h2 id="main-features">Main features</h2>
-
-<ul>
-<li>Both synchronous and asynchronous API</li>
-</ul>
 	
-  
+
+<h2 id="requirements">Requirements</h2>
+
+<p><strong>vt-py</strong> requires Python 3.5.6+, Python 2.x is not supported. This is because <strong>vt-py</strong> makes use of the new <a href="https://snarky.ca/how-the-heck-does-async-await-work-in-python-3-5/"><strong>async/await</strong></a> syntax for implementing asynchronous coroutines. Not supporting Python 2.x was a difficult decission to make, as we are aware that Python 2.x is still popular among VirusTotal users, but in the long run we think it&rsquo;s the right one. Python 2.7 has its days numbered, and the new concurrency features in included in Python 3.5+ are perfect for creating highly performant code without having to deal with multithreading or multiprocessing.</p>
+
+<h2 id="how-to-install">How to install</h2>
+
+<p>The easiest way of installing <strong>vt-py</strong> is using <strong>pip</strong>:</p>
+
+<pre><code class="language-shell">pip install vt-py
+</code></pre>
+
+
+
+
+
+<footer class=" footline" >
+	
+</footer>
+
         
         </div> 
         
@@ -237,8 +307,6 @@ for the <a href="https://developers.virustotal.com/v3.0/reference">VirusTotal AP
             
                 
                     
-                        
-                        
                     
                 
                 
@@ -260,8 +328,8 @@ for the <a href="https://developers.virustotal.com/v3.0/reference">VirusTotal AP
 	 
 	 
 		
+			<a class="nav nav-prev" href="/" title="vt-py"> <i class="fa fa-chevron-left"></i></a>
 		
-			<a class="nav nav-next" href="/getting-started/" title="Getting started" style="margin-right: 0px;"><i class="fa fa-chevron-right"></i></a>
 		
 	
     </div>
@@ -293,4 +361,3 @@ for the <a href="https://developers.virustotal.com/v3.0/reference">VirusTotal AP
 
   </body>
 </html>
-

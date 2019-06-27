@@ -1,0 +1,38 @@
+baseURL = "/"
+languageCode = "en-US"
+defaultContentLanguage = "en"
+publishDir = "../"
+
+title = "Hugo Learn Documentation"
+theme = "hugo-theme-learn"
+metaDataFormat = "yaml"
+defaultContentLanguageInSubdir= true
+
+[params]
+  editURL = "https://github.com/matcornic/hugo-theme-learn/edit/master/exampleSite/content/"
+  description = "Documentation for Hugo Learn Theme"
+  author = "Mathieu Cornic"
+  showVisitedLinks = false
+  disableBreadcrumb = false
+  disableNextPrev = false
+  themeVariant = "blue"
+
+[outputs]
+home = [ "HTML", "RSS", "JSON"]
+
+[Languages]
+[Languages.en]
+title = "Documentation for Hugo Learn Theme"
+weight = 1
+languageName = "English"
+
+[[Languages.en.menu.shortcuts]]
+name = "<i class='fab fa-fw fa-github'></i> GitHub repo"
+identifier = "ds"
+url = "https://github.com/VirusTotal/vt-py"
+weight = 10
+
+[[Languages.en.menu.shortcuts]]
+name = "<i class='fas fa-fw fa-book'></i> VirusTotal API v3"
+url = "https://developers.virustotal.com/v3.0/reference"
+weight = 11

@@ -1,4 +1,4 @@
-baseURL = "/"
+baseURL = "https://virustotal.github.io/vt-py"
 languageCode = "en-US"
 defaultContentLanguage = "en"
 publishDir = "../"

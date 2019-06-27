@@ -1,27 +1,27 @@
 [
 {
-	"uri": "/getting-started/",
+	"uri": "https://virustotal.github.io/vt-py/getting-started/",
 	"title": "Getting started",
 	"tags": [],
 	"description": "",
 	"content": " Requirements vt-py requires Python 3.5.6+, Python 2.x is not supported. This is because vt-py makes use of the new async/await syntax for implementing asynchronous coroutines. Not supporting Python 2.x was a difficult decission to make, as we are aware that Python 2.x is still popular among VirusTotal users, but in the long run we think it\u0026rsquo;s the right one. Python 2.7 has its days numbered, and the new concurrency features in included in Python 3.5+ are perfect for creating highly performant code without having to deal with multithreading or multiprocessing.\nHow to install The easiest way of installing vt-py is using pip:\npip install vt-py  "
 },
 {
-	"uri": "/categories/",
+	"uri": "https://virustotal.github.io/vt-py/categories/",
 	"title": "Categories",
 	"tags": [],
 	"description": "",
 	"content": ""
 },
 {
-	"uri": "/tags/",
+	"uri": "https://virustotal.github.io/vt-py/tags/",
 	"title": "Tags",
 	"tags": [],
 	"description": "",
 	"content": ""
 },
 {
-	"uri": "/",
+	"uri": "https://virustotal.github.io/vt-py/",
 	"title": "vt-py",
 	"tags": [],
 	"description": "",

@@ -14,5 +14,7 @@
 # limitations under the License.
 
 from .client import *
+from .feed import *
+from .iterator import *
 from .object import *
 from .version import __version__

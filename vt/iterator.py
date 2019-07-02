@@ -23,18 +23,23 @@ __all__ = ['Iterator']
 class Iterator:
   """Iterator allows iterating over object collections.
 
-  Some endpoints in the VirusTotal API represent a collection of objects,
-  (for example: /comments and /intelligence/search). These collections can
-  be iterated using an instance of this class.
+  Some endpoints in the VirusTotal API represent a collection of objects, for
+  example:
+
+  `/files/{id}/comments <https://developers.virustotal.com/v3.0/reference#files-comments-get>`_
+
+  `/intelligence/search <https://developers.virustotal.com/v3.0/reference#intelligence-search>`_
+
+  These collections can be iterated using an instance of this class.
 
   The following example iterates over the most recent 200 comments, retrieving
   them in batches of 20:
 
-    client = vt.Client(<apikey>)
-    it = client.iterator('/comments', batch_size=20, limit=200)
-    for comment in it:
-      print(comment.text)
-    print(it.cursor)
+  >>> client = vt.Client(<apikey>)
+  >>> it = client.iterator('/comments', batch_size=20, limit=200)
+  >>> for comment in it:
+  >>>   print(comment.text)
+  >>> print(it.cursor)
 
   When the iteration is done, it print the iterator's cursor. The cursor can be
   used for creating another iterator that continues at the point where the
@@ -42,14 +47,13 @@ class Iterator:
 
   The Iterator class also exposes an async iterator:
 
-    # Define an async function that iterates over the comments.
-    async def print_comments():
-      async for comment in client.iterator('/comments', limit=200):
-        print(comment.id)
-
-    # Run the print_comments using asyncio
-    import asyncio
-    asyncio.get_event_loop().run_until_complete(print_comments)
+  >>>  # Define an async coroutine that iterates over the comments.
+  >>>  async def print_comments():
+  >>>    async for comment in client.iterator('/comments', limit=200):
+  >>>      print(comment.id)
+  >>>  # Run the print_comments coroutine using asyncio
+  >>>  import asyncio
+  >>>  asyncio.get_event_loop().run_until_complete(print_comments)
   """
 
   def __init__(self, client, path: str, params: Dict=None, cursor: str=None,
@@ -152,6 +156,11 @@ class Iterator:
 
   @property
   def cursor(self):
+    """Cursor indicating the last returned object.
+
+    This cursor can be used for creating a new iterator that continues where
+    the current one left.
+    """
     if not self._server_cursor:
       return None
     return self._server_cursor + '-' + str(self._batch_cursor)

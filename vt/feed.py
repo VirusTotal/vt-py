@@ -33,18 +33,20 @@ __all__ = ['Feed']
 class Feed:
   """Feed represents a stream of objects received from VirusTotal in real-time.
 
-  This class allows you to get information about objects as they are processed
+  This class allows you to get information about objects that are being processed
   by VirusTotal. Your API key must have special privileges for using the feed
   API. See: https://developers.virustotal.com/v3.0/reference#feeds
 
-  Example:
-    with vt.Client(<apikey>) as client:
-      for file_obj in client.Feed(vt.FeedType.FILES):
-        print(file_obj.id)
-
-  In the example above the loop iterates forever, retrieving file objects as
+  In the example below the loop iterates forever, retrieving file objects as
   they are processed by VirusTotal. For a more elaborate example see the file
   examples/file_feed.py in this repository.
+
+  >>> with vt.Client(<apikey>) as client:
+  >>> for file_obj in client.feed(vt.FeedType.FILES):
+  >>>   print(file_obj.id)
+
+  Instances of this class are not created directly, you should use the
+  :func:`vt.Client.feed` method instead.
   """
 
   def __init__(self, client, feed_type, cursor: str=None):
@@ -132,7 +134,7 @@ class Feed:
 
   @property
   def cursor(self):
-    """Returns a cursor indicating the last item retrievied from the feed.
+    """Returns a cursor indicating the last item retrieved from the feed.
 
     This cursor can be used for creating a new Feed object that continues where
     a previous one left.

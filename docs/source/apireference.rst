@@ -7,4 +7,6 @@ API reference
 
    Client <api/client>
    Feed <api/feed>
+   Object <api/object>
    Iterator <api/iterator>
+   Utility functions <api/utils>

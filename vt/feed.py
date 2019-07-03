@@ -17,6 +17,7 @@
 from datetime import datetime
 from datetime import timedelta
 
+import enum
 import io
 import json
 import time
@@ -27,7 +28,14 @@ from .error import APIError
 from .object import Object
 
 
-__all__ = ['Feed']
+__all__ = [
+    'Feed',
+    'FeedType']
+
+
+class FeedType(enum.Enum):
+  """Feed types."""
+  FILES = 'files'
 
 
 class Feed:

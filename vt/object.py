@@ -22,7 +22,7 @@ class Object:
     """Creates an object from its dictionary representation.
 
     The dictionary representation of a VirusTotal API object has the following
-    structure:
+    structure::
 
       {
         "type": <object type>,
@@ -30,11 +30,12 @@ class Object:
         "links": {
           "self": "https://www.virustotal.com/api/v3/<collection name>/<object id>"
         },
-        "attributes" : {
+        "attributes": {
           ...
         }
+      }
 
-    At least "type", "id" and "attributes" are required to be present in the
+    At least `type`, `id` and `attributes` are required to be present in the
     dictionary, if not, an exception is raised.
     """
     if not isinstance(obj_dict, dict):

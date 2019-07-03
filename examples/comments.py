@@ -1,5 +1,3 @@
-#!/usr/local/bin/python
-# -*- coding: utf-8 -*-
 # Copyright © 2019 The vt-py authors. All Rights Reserved.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,9 +11,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .client import *
-from .error import *
-from .feed import *
-from .iterator import *
-from .object import *
-from .version import __version__
+import trio
+import vt
+
+
+c = vt.Client('744adb7d697fea35d98019aa66bb5693aa84fae0a0b842e9a900892a760047cc')
+
+async def print_comments():
+  async for comment in c.iterator('/comments', batch_size=5, limit=2):
+    print(comment.id)
+
+
+async def print_files():
+  async for f in c.feed('files',  cursor='201906061401'):
+    print(f.id)
+
+trio.run(print_comments)

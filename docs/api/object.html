@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Feed &mdash; vt-py  documentation</title>
+  <title>Object &mdash; vt-py  documentation</title>
   
 
   
@@ -35,8 +35,8 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Object" href="object.html" />
-    <link rel="prev" title="Client" href="client.html" /> 
+    <link rel="next" title="Iterator" href="iterator.html" />
+    <link rel="prev" title="Feed" href="feed.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -86,8 +86,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../apireference.html">API reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="client.html">Client</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Feed</a></li>
-<li class="toctree-l2"><a class="reference internal" href="object.html">Object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="feed.html">Feed</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Object</a></li>
 <li class="toctree-l2"><a class="reference internal" href="iterator.html">Iterator</a></li>
 <li class="toctree-l2"><a class="reference internal" href="utils.html">Utility functions</a></li>
 </ul>
@@ -139,13 +139,13 @@
         
           <li><a href="../apireference.html">API reference</a> &raquo;</li>
         
-      <li>Feed</li>
+      <li>Object</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/api/feed.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/api/object.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -159,38 +159,33 @@
            <div itemprop="articleBody">
             
   <div class="section" id="module-vt">
-<span id="feed"></span><h1>Feed<a class="headerlink" href="#module-vt" title="Permalink to this headline">¶</a></h1>
+<span id="object"></span><h1>Object<a class="headerlink" href="#module-vt" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
-<dt id="vt.Feed">
-<em class="property">class </em><code class="sig-prename descclassname">vt.</code><code class="sig-name descname">Feed</code><span class="sig-paren">(</span><em class="sig-param">client</em>, <em class="sig-param">feed_type</em>, <em class="sig-param">cursor: str = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/feed.html#Feed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Feed" title="Permalink to this definition">¶</a></dt>
-<dd><p>Feed represents a stream of objects received from VirusTotal in real-time.</p>
-<p>This class allows you to get information about objects that are being processed
-by VirusTotal. Your API key must have special privileges for using the feed
-API. See: <a class="reference external" href="https://developers.virustotal.com/v3.0/reference#feeds">https://developers.virustotal.com/v3.0/reference#feeds</a></p>
-<p>In the example below the loop iterates forever, retrieving file objects as
-they are processed by VirusTotal. For a more elaborate example see the file
-examples/file_feed.py in this repository.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">vt</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span><span class="o">&lt;</span><span class="n">apikey</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">file_obj</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">vt</span><span class="o">.</span><span class="n">FeedType</span><span class="o">.</span><span class="n">FILES</span><span class="p">):</span>
-<span class="gp">&gt;&gt;&gt; </span>  <span class="nb">print</span><span class="p">(</span><span class="n">file_obj</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+<dt id="vt.Object">
+<em class="property">class </em><code class="sig-prename descclassname">vt.</code><code class="sig-name descname">Object</code><span class="sig-paren">(</span><em class="sig-param">obj_type: str</em>, <em class="sig-param">obj_id: str = None</em>, <em class="sig-param">obj_attributes: dict = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/object.html#Object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Object describes any type of object returned by the VirusTotal API.</p>
+<dl class="method">
+<dt id="vt.Object.from_dict">
+<em class="property">classmethod </em><code class="sig-name descname">from_dict</code><span class="sig-paren">(</span><em class="sig-param">obj_dict: dict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/object.html#Object.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Object.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates an object from its dictionary representation.</p>
+<p>The dictionary representation of a VirusTotal API object has the following
+structure:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="nb">object</span> <span class="nb">type</span><span class="o">&gt;</span><span class="p">,</span>
+  <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="nb">object</span> <span class="nb">id</span><span class="o">&gt;</span><span class="p">,</span>
+  <span class="s2">&quot;links&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;self&quot;</span><span class="p">:</span> <span class="s2">&quot;https://www.virustotal.com/api/v3/&lt;collection name&gt;/&lt;object id&gt;&quot;</span>
+  <span class="p">},</span>
+  <span class="s2">&quot;attributes&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="o">...</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
-<p>Instances of this class are not created directly, you should use the
-<a class="reference internal" href="client.html#vt.Client.feed" title="vt.Client.feed"><code class="xref py py-func docutils literal notranslate"><span class="pre">vt.Client.feed()</span></code></a> method instead.</p>
-<dl class="method">
-<dt id="vt.Feed.cursor">
-<em class="property">property </em><code class="sig-name descname">cursor</code><a class="headerlink" href="#vt.Feed.cursor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a cursor indicating the last item retrieved from the feed.</p>
-<p>This cursor can be used for creating a new Feed object that continues where
-a previous one left.</p>
+<p>At least <cite>type</cite>, <cite>id</cite> and <cite>attributes</cite> are required to be present in the
+dictionary, if not, an exception is raised.</p>
 </dd></dl>
 
-</dd></dl>
-
-<dl class="class">
-<dt id="vt.FeedType">
-<em class="property">class </em><code class="sig-prename descclassname">vt.</code><code class="sig-name descname">FeedType</code><a class="reference internal" href="../_modules/vt/feed.html#FeedType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.FeedType" title="Permalink to this definition">¶</a></dt>
-<dd><p>Feed types.</p>
 </dd></dl>
 
 </div>
@@ -203,10 +198,10 @@ a previous one left.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="object.html" class="btn btn-neutral float-right" title="Object" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="iterator.html" class="btn btn-neutral float-right" title="Iterator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="client.html" class="btn btn-neutral float-left" title="Client" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="feed.html" class="btn btn-neutral float-left" title="Feed" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

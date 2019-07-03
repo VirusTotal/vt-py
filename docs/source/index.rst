@@ -18,7 +18,7 @@ Python 2.x is still popular among VirusTotal users, but in the long run we think
 it's the right one.
 
 Python 2.7 `has its days numbered <https://pythonclock.org/>`_, and the new
-concurrency features in included in Python 3.5+ are perfect for creating highly
+concurrency features included in Python 3.5+ are perfect for creating highly
 performant code without having to deal with multithreading or multiprocessing.
 
 .. toctree::
@@ -26,4 +26,5 @@ performant code without having to deal with multithreading or multiprocessing.
    :caption: Contents:
 
    howtoinstall
+   quickstart
    apireference

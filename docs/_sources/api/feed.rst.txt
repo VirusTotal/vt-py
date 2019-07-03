@@ -3,4 +3,4 @@ Feed
 ****
 
 .. automodule:: vt
-    :members: Feed
+    :members: Feed, FeedType

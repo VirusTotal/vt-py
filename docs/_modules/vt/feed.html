@@ -81,6 +81,7 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../howtoinstall.html">How to install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../apireference.html">API reference</a></li>
 </ul>
 
@@ -164,6 +165,7 @@
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">timedelta</span>
 
+<span class="kn">import</span> <span class="nn">enum</span>
 <span class="kn">import</span> <span class="nn">io</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">time</span>
@@ -174,7 +176,14 @@
 <span class="kn">from</span> <span class="nn">.object</span> <span class="k">import</span> <span class="n">Object</span>
 
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Feed&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;Feed&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;FeedType&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="FeedType"><a class="viewcode-back" href="../../api/feed.html#vt.FeedType">[docs]</a><span class="k">class</span> <span class="nc">FeedType</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Feed types.&quot;&quot;&quot;</span>
+  <span class="n">FILES</span> <span class="o">=</span> <span class="s1">&#39;files&#39;</span></div>
 
 
 <div class="viewcode-block" id="Feed"><a class="viewcode-back" href="../../api/feed.html#vt.Feed">[docs]</a><span class="k">class</span> <span class="nc">Feed</span><span class="p">:</span>

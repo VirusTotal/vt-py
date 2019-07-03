@@ -3,4 +3,4 @@ Client
 ******
 
 .. automodule:: vt
-    :members: Client, ClientResponse, APIError
+   :members: Client, ClientResponse, APIError

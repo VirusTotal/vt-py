@@ -444,17 +444,43 @@ class Client:
     response = await self.patch_async(path, data)
     return await self._response_to_object(response)
 
-  def post(self, *args, **kwargs):
+  def post(self, path: str, data: Any=None):
+    """Sends a POST request to a given API endpoint.
+
+    This is a low-level function that returns a raw HTTP response, no error
+    checking nor response parsing is performed. See :func:`post_object` for
+    a higher-level function.
+
+    :param path: Path to API endpoint.
+    :param data: Data sent in the request body.
+    :type path: str
+    :type data: A string or bytes
+    :returns: An instance of :class:`ClientResponse`.
+    """
     return _make_sync(self.post_async(*args, **kwargs))
 
   async def post_async(self, path: str, data: Any=None):
+    """Like :func:`post` but returns a coroutine."""
     return ClientResponse(
         await self._get_session().post(self._full_url(path), data=data))
 
-  def post_object(self, *args, **kwargs):
+  def post_object(self, path: str, obj: Object):
+    """Sends a POST request for creating an object.
+
+    This function create a new object. The endpoint must be one that identifies
+    a collection, like /intelligence/hunting_rulesets.
+
+    :param path: Path to API endpoint.
+    :param obj: Instance :class:`Object` whith the type expected by the API
+      endpoint.
+    :type path: str
+    :type obj: :class:`Object`
+    :returns: An instance of :class:`Object` representing the new object.
+    """
     return _make_sync(self.post_object_async(*args, **kwargs))
 
   async def post_object_async(self, path: str, obj: Object):
+    """Like :func:`post_object` but returns a coroutine."""
     data = json.dumps({'data': obj.to_dict()})
     response = await self.post_async(path, data)
     return await self._response_to_object(response)

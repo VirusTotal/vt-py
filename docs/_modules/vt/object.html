@@ -159,10 +159,37 @@
 <span class="c1"># See the License for the specific language governing permissions and</span>
 <span class="c1"># limitations under the License.</span>
 
+<span class="kn">import</span> <span class="nn">functools</span>
+
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Object&#39;</span><span class="p">]</span>
 
-<div class="viewcode-block" id="Object"><a class="viewcode-back" href="../../api/object.html#vt.Object">[docs]</a><span class="k">class</span> <span class="nc">Object</span><span class="p">:</span>
+
+<span class="k">class</span> <span class="nc">WhistleBlowerDict</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Helper class for detecting changes in a dictionary.</span>
+
+<span class="sd">  This class wraps a standard Python dictionary and calls the provided callback</span>
+<span class="sd">  whenever a change occurs in the dictionary.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initial_dict</span><span class="p">,</span> <span class="n">on_change_callback</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_on_change_callback</span> <span class="o">=</span> <span class="n">on_change_callback</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">initial_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">initial_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">WhistleBlowerDict</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">on_change_callback</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">initial_dict</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+      <span class="n">value</span> <span class="o">=</span> <span class="n">WhistleBlowerDict</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_change_callback</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_on_change_callback</span><span class="p">()</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">__delitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_on_change_callback</span><span class="p">()</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__delitem__</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Object"><a class="viewcode-back" href="../../api/object.html#vt.Object">[docs]</a><span class="k">class</span> <span class="nc">Object</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Object describes any type of object returned by the VirusTotal API.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Object.from_dict"><a class="viewcode-back" href="../../api/object.html#vt.Object.from_dict">[docs]</a>  <span class="nd">@classmethod</span>
@@ -211,15 +238,29 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj_attributes</span><span class="p">,</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))):</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Object attributes must be a dictionary&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">obj_attributes</span><span class="p">:</span>
-      <span class="c1"># Initialize object attributes with the ones coming in the obj_attributes,</span>
-      <span class="c1"># this way if obj_attributes contains {&#39;foo&#39;: &#39;somevalue&#39;} you can access</span>
-      <span class="c1"># the attribute as obj.foo and it will return &#39;somevalue&#39;. This must be</span>
-      <span class="c1"># done before initializing any other attribute for the object.</span>
-      <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span> <span class="o">=</span> <span class="n">obj_attributes</span>
-
     <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">=</span> <span class="n">obj_type</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="n">obj_id</span>
+
+    <span class="c1"># Initialize object attributes with the ones coming in the obj_attributes,</span>
+    <span class="c1"># this way if obj_attributes contains {&#39;foo&#39;: &#39;somevalue&#39;} you can access</span>
+    <span class="c1"># the attribute as obj.foo and it will return &#39;somevalue&#39;.</span>
+    <span class="k">if</span> <span class="n">obj_attributes</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">obj_attributes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="bp">self</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_modified_attrs</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">def</span> <span class="nf">__on_attr_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_modified_attrs&#39;</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_modified_attrs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+      <span class="n">value</span> <span class="o">=</span> <span class="n">WhistleBlowerDict</span><span class="p">(</span>
+          <span class="n">value</span><span class="p">,</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__on_attr_change</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">attr</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span> <span class="ow">or</span> <span class="n">value</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">attr</span><span class="p">]:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">__on_attr_change</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -235,7 +276,7 @@
       <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_context_attributes</span>
     <span class="k">return</span> <span class="p">{}</span>
 
-  <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">modified_attributes_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="p">}</span>
 
@@ -245,7 +286,8 @@
     <span class="n">attributes</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
       <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">):</span>
-        <span class="n">attributes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">modified_attributes_only</span> <span class="ow">or</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modified_attrs</span><span class="p">:</span>
+          <span class="n">attributes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="k">if</span> <span class="n">attributes</span><span class="p">:</span>
       <span class="n">result</span><span class="p">[</span><span class="s1">&#39;attributes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">attributes</span>

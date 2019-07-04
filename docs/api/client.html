@@ -454,6 +454,58 @@ the changes has been applied.</p>
 <dd><p>Like <a class="reference internal" href="#vt.Client.patch_object" title="vt.Client.patch_object"><code class="xref py py-func docutils literal notranslate"><span class="pre">patch_object()</span></code></a> but returns a coroutine.</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="vt.Client.post">
+<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">data: Any = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends a POST request to a given API endpoint.</p>
+<p>This is a low-level function that returns a raw HTTP response, no error
+checking nor response parsing is performed. See <a class="reference internal" href="#vt.Client.post_object" title="vt.Client.post_object"><code class="xref py py-func docutils literal notranslate"><span class="pre">post_object()</span></code></a> for
+a higher-level function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – Path to API endpoint.</p></li>
+<li><p><strong>data</strong> (<em>A string</em><em> or </em><em>bytes</em>) – Data sent in the request body.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An instance of <a class="reference internal" href="#vt.ClientResponse" title="vt.ClientResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClientResponse</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="vt.Client.post_async">
+<em class="property">async </em><code class="sig-name descname">post_async</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">data: Any = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.post_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.post_async" title="Permalink to this definition">¶</a></dt>
+<dd><p>Like <a class="reference internal" href="#vt.Client.post" title="vt.Client.post"><code class="xref py py-func docutils literal notranslate"><span class="pre">post()</span></code></a> but returns a coroutine.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vt.Client.post_object">
+<code class="sig-name descname">post_object</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">obj: vt.object.Object</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.post_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.post_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends a POST request for creating an object.</p>
+<p>This function create a new object. The endpoint must be one that identifies
+a collection, like /intelligence/hunting_rulesets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – Path to API endpoint.</p></li>
+<li><p><strong>obj</strong> (<a class="reference internal" href="object.html#vt.Object" title="vt.Object"><code class="xref py py-class docutils literal notranslate"><span class="pre">Object</span></code></a>) – Instance <a class="reference internal" href="object.html#vt.Object" title="vt.Object"><code class="xref py py-class docutils literal notranslate"><span class="pre">Object</span></code></a> whith the type expected by the API
+endpoint.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An instance of <a class="reference internal" href="object.html#vt.Object" title="vt.Object"><code class="xref py py-class docutils literal notranslate"><span class="pre">Object</span></code></a> representing the new object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="vt.Client.post_object_async">
+<em class="property">async </em><code class="sig-name descname">post_object_async</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">obj: vt.object.Object</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.post_object_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.post_object_async" title="Permalink to this definition">¶</a></dt>
+<dd><p>Like <a class="reference internal" href="#vt.Client.post_object" title="vt.Client.post_object"><code class="xref py py-func docutils literal notranslate"><span class="pre">post_object()</span></code></a> but returns a coroutine.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="class">

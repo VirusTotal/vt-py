@@ -86,6 +86,9 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Quickstart</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#get-information-about-a-file">Get information about a file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#get-information-about-an-url">Get information about an URL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#download-a-file">Download a file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#start-and-abort-a-retrohunt-job">Start and abort a Retrohunt job</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#create-a-livehunt-ruleset">Create a LiveHunt ruleset</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="apireference.html">API reference</a></li>
@@ -167,25 +170,25 @@
 </div>
 <p>Ask for the file you are interested in, you can replace the hash in the example
 with some other SHA-256, SHA-1 or MD5:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">file_obj</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_object</span><span class="p">(</span><span class="s2">&quot;/files/44d88612fea8a8f36de82e1278abb02f&quot;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">file</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_object</span><span class="p">(</span><span class="s2">&quot;/files/44d88612fea8a8f36de82e1278abb02f&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Now <cite>file_obj</cite> is an instance of <a class="reference internal" href="api/object.html#vt.Object" title="vt.Object"><code class="xref py py-class docutils literal notranslate"><span class="pre">vt.Object</span></code></a> that contains information
+<p>Now <cite>file</cite> is an instance of <a class="reference internal" href="api/object.html#vt.Object" title="vt.Object"><code class="xref py py-class docutils literal notranslate"><span class="pre">vt.Object</span></code></a> that contains information
 about the requested file. This object have all the attributes returned in the
 API response which are listed in the <a class="reference external" href="https://developers.virustotal.com/v3.0/reference#files">VirusTotal API v3 documentation</a>. Some examples:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">file_obj</span><span class="o">.</span><span class="n">size</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">file</span><span class="o">.</span><span class="n">size</span>
 <span class="go">68</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">file_obj</span><span class="o">.</span><span class="n">sha256</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">file</span><span class="o">.</span><span class="n">sha256</span>
 <span class="go">&#39;275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f&#39;</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">file_obj</span><span class="o">.</span><span class="n">type_tag</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">file</span><span class="o">.</span><span class="n">type_tag</span>
 <span class="go">&#39;text&#39;</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">file_obj</span><span class="o">.</span><span class="n">last_analysis_stats</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">file</span><span class="o">.</span><span class="n">last_analysis_stats</span>
 <span class="go">{&#39;failure&#39;: 0, &#39;harmless&#39;: 0, &#39;malicious&#39;: 62, &#39;suspicious&#39;: 0, &#39;timeout&#39;: 0, &#39;type-unsupported&#39;: 9, &#39;undetected&#39;: 2}</span>
 </pre></div>
 </div>
@@ -195,21 +198,120 @@ API response which are listed in the <a class="reference external" href="https:/
 <p>Create a client as explained in the previous section and ask for the desired URL
 as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">url_id</span> <span class="o">=</span> <span class="n">vt</span><span class="o">.</span><span class="n">url_id</span><span class="p">(</span><span class="s2">&quot;http://www.virustotal.com&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">url_obj</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_object</span><span class="p">(</span><span class="s2">&quot;/urls/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">url_id</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">url</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_object</span><span class="p">(</span><span class="s2">&quot;/urls/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">url_id</span><span class="p">))</span>
 </pre></div>
 </div>
-<p>Notice that in this case the code is not as straightforward as it was for getting
-a file. In the case of files the hash can be used as a file identifier, but with
-URLs is a bit more complicated. You must use <a class="reference internal" href="api/utils.html#vt.url_id" title="vt.url_id"><code class="xref py py-func docutils literal notranslate"><span class="pre">vt.url_id()</span></code></a> for generating the
-appropriate identifier. You can find more information about why this is necessary
-in: <a class="reference external" href="https://developers.virustotal.com/v3.0/reference#section-url-identifiers">https://developers.virustotal.com/v3.0/reference#section-url-identifiers</a></p>
+<p>In this case the code is not as straightforward as it was for getting a file.
+While retrieving a file any of its hashes can be used as the file identifier,
+but with URLs is a bit more complicated. You must use <a class="reference internal" href="api/utils.html#vt.url_id" title="vt.url_id"><code class="xref py py-func docutils literal notranslate"><span class="pre">vt.url_id()</span></code></a> for
+generating the appropriate identifier. You can find more information about why
+this is necessary in:
+<a class="reference external" href="https://developers.virustotal.com/v3.0/reference#section-url-identifiers">https://developers.virustotal.com/v3.0/reference#section-url-identifiers</a>.</p>
 <p>The returned object contains the URL attributes. Some examples:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">url_obj</span><span class="o">.</span><span class="n">times_submitted</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">url</span><span class="o">.</span><span class="n">times_submitted</span>
 <span class="go">213730</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">url_obj</span><span class="o">.</span><span class="n">last_analysis_stats</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">url</span><span class="o">.</span><span class="n">last_analysis_stats</span>
 <span class="go">{&#39;harmless&#39;: 61, &#39;malicious&#39;: 0, &#39;suspicious&#39;: 1, &#39;timeout&#39;: 0, &#39;undetected&#39;: 8}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="download-a-file">
+<h2>Download a file<a class="headerlink" href="#download-a-file" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This feature is available only for premium users.</p>
+</div>
+<p>Downloading a file it’s very simple, you only need to provide the hash and a
+file-like object where the file’s content will be written to. The target file
+must be opened in <cite>“wb”</cite> mode:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;/path/to/target_file&quot;</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>  <span class="n">client</span><span class="o">.</span><span class="n">download_file</span><span class="p">(</span><span class="s2">&quot;44d88612fea8a8f36de82e1278abb02f&quot;</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="start-and-abort-a-retrohunt-job">
+<h2>Start and abort a Retrohunt job<a class="headerlink" href="#start-and-abort-a-retrohunt-job" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This feature is available only for premium users.</p>
+</div>
+<p>Create an empty object of type <cite>retrohunt_job</cite> and set its <cite>rules</cite> attribute:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">job</span> <span class="o">=</span> <span class="n">vt</span><span class="o">.</span><span class="n">Object</span><span class="p">(</span><span class="s2">&quot;retrohunt_job&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">job</span><span class="o">.</span><span class="n">rules</span> <span class="o">=</span> <span class="s2">&quot;rule test { condition:false }&quot;</span>
+</pre></div>
+</div>
+<p>Post the object to the <cite>/intelligence/retrohunt_jobs</cite> collection:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">post_object</span><span class="p">(</span><span class="s2">&quot;/intelligence/retrohunt_jobs&quot;</span><span class="p">,</span> <span class="n">job</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Notice thas <cite>job</cite> has been replaced with the value returned by
+<a class="reference internal" href="api/client.html#vt.Client.post_object" title="vt.Client.post_object"><code class="xref py py-func docutils literal notranslate"><span class="pre">vt.Client.post_object()</span></code></a>, so now <cite>job</cite> has additional attributes and
+an object ID.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">job</span><span class="o">.</span><span class="n">status</span>
+<span class="go">&#39;starting&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">job</span><span class="o">.</span><span class="n">id</span>
+<span class="go">&#39;username-123456789&#39;</span>
+</pre></div>
+</div>
+<p>With the object identifier you can ask for the job again a see how it progress.
+Wait for a few seconds and do:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_object</span><span class="p">(</span><span class="s2">&quot;/intelligence/retrohunt_jobs/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>The job status should have changed to <cite>running</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">job</span><span class="o">.</span><span class="n">status</span>
+<span class="go">&#39;running&#39;</span>
+</pre></div>
+</div>
+<p>And the progress attribute should show the completion percentage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">job</span><span class="o">.</span><span class="n">progress</span>
+<span class="go">1.4145595</span>
+</pre></div>
+</div>
+<p>Let’s abort the job:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/intelligence/retrohunt_jobs/</span><span class="si">{}</span><span class="s2">/abort&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">response</span><span class="o">.</span><span class="n">status</span>
+<span class="go">200</span>
+</pre></div>
+</div>
+<p>As you can see we are using <a class="reference internal" href="api/client.html#vt.Client.post" title="vt.Client.post"><code class="xref py py-meth docutils literal notranslate"><span class="pre">vt.Client.post()</span></code></a> instead of
+<a class="reference internal" href="api/client.html#vt.Client.post_object" title="vt.Client.post_object"><code class="xref py py-meth docutils literal notranslate"><span class="pre">vt.Client.post_object()</span></code></a>, this is because the
+<a class="reference external" href="https://developers.virustotal.com/v3.0/reference#abort-retrohunt-job">/intelligence/retrohunt_jobs/{id}/abort</a>
+endpoint doesn’t expect an object, just a POST request with an empty body. The
+result from <a class="reference internal" href="api/client.html#vt.Client.post" title="vt.Client.post"><code class="xref py py-meth docutils literal notranslate"><span class="pre">vt.Client.post()</span></code></a> is a <a class="reference internal" href="api/client.html#vt.ClientResponse" title="vt.ClientResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">vt.ClientResponse</span></code></a> instance.</p>
+</div>
+<div class="section" id="create-a-livehunt-ruleset">
+<h2>Create a LiveHunt ruleset<a class="headerlink" href="#create-a-livehunt-ruleset" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This feature is available only for premium users.</p>
+</div>
+<p>Create an empty object of type <cite>hunting_ruleset</cite> and set its <cite>name</cite> and
+<cite>rules</cite> attribute:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rs</span> <span class="o">=</span> <span class="n">vt</span><span class="o">.</span><span class="n">Object</span><span class="p">(</span><span class="s2">&quot;hunting_ruleset&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rs</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;My test ruleset&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rs</span><span class="o">.</span><span class="n">rules</span> <span class="o">=</span> <span class="s2">&quot;rule test { condition:false }&quot;</span>
+</pre></div>
+</div>
+<p>Post the object to the <cite>/intelligence/hunting_rulesets</cite> collection:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">post_object</span><span class="p">(</span><span class="s2">&quot;/intelligence/hunting_rulesets&quot;</span><span class="p">,</span> <span class="n">rs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Because we didn’t set the <cite>enabled</cite> attribute while creating the ruleset, it
+was created with <cite>enabled=False</cite> by default:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rs</span><span class="o">.</span><span class="n">enabled</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+<p>Let’s enable the ruleset:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rs</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">patch_object</span><span class="p">(</span><span class="s2">&quot;/intelligence/hunting_rulesets/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rs</span><span class="o">.</span><span class="n">id</span><span class="p">),</span> <span class="n">rs</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rs</span><span class="o">.</span><span class="n">enabled</span>
+<span class="go">True</span>
 </pre></div>
 </div>
 </div>

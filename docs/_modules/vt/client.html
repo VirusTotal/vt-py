@@ -374,8 +374,7 @@
     <span class="k">try</span><span class="p">:</span>
       <span class="k">return</span> <span class="n">Object</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_extract_data_from_json</span><span class="p">(</span><span class="n">json_response</span><span class="p">))</span>
     <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-          <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> did not return an object: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;response is not an object: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
 
 <div class="viewcode-block" id="Client.close_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.close_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">close_async</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Like :func:`close` but returns a coroutine.&quot;&quot;&quot;</span>
@@ -589,24 +588,50 @@
 
 <div class="viewcode-block" id="Client.patch_object_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.patch_object_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">patch_object_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Like :func:`patch_object` but returns a coroutine.&quot;&quot;&quot;</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()})</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">modified_attributes_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)})</span>
     <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">patch_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
     <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_to_object</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
 
-  <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">post_async</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+<div class="viewcode-block" id="Client.post"><a class="viewcode-back" href="../../api/client.html#vt.Client.post">[docs]</a>  <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Sends a POST request to a given API endpoint.</span>
 
-  <span class="k">async</span> <span class="k">def</span> <span class="nf">post_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="sd">    This is a low-level function that returns a raw HTTP response, no error</span>
+<span class="sd">    checking nor response parsing is performed. See :func:`post_object` for</span>
+<span class="sd">    a higher-level function.</span>
+
+<span class="sd">    :param path: Path to API endpoint.</span>
+<span class="sd">    :param data: Data sent in the request body.</span>
+<span class="sd">    :type path: str</span>
+<span class="sd">    :type data: A string or bytes</span>
+<span class="sd">    :returns: An instance of :class:`ClientResponse`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">post_async</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Client.post_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.post_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">post_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Like :func:`post` but returns a coroutine.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">ClientResponse</span><span class="p">(</span>
-        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_session</span><span class="p">()</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_full_url</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">))</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_session</span><span class="p">()</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_full_url</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">))</span></div>
 
-  <span class="k">def</span> <span class="nf">post_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">post_object_async</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+<div class="viewcode-block" id="Client.post_object"><a class="viewcode-back" href="../../api/client.html#vt.Client.post_object">[docs]</a>  <span class="k">def</span> <span class="nf">post_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Sends a POST request for creating an object.</span>
 
-  <span class="k">async</span> <span class="k">def</span> <span class="nf">post_object_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Object</span><span class="p">):</span>
+<span class="sd">    This function create a new object. The endpoint must be one that identifies</span>
+<span class="sd">    a collection, like /intelligence/hunting_rulesets.</span>
+
+<span class="sd">    :param path: Path to API endpoint.</span>
+<span class="sd">    :param obj: Instance :class:`Object` whith the type expected by the API</span>
+<span class="sd">      endpoint.</span>
+<span class="sd">    :type path: str</span>
+<span class="sd">    :type obj: :class:`Object`</span>
+<span class="sd">    :returns: An instance of :class:`Object` representing the new object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">post_object_async</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Client.post_object_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.post_object_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">post_object_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Like :func:`post_object` but returns a coroutine.&quot;&quot;&quot;</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()})</span>
     <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">post_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
-    <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_to_object</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+    <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_to_object</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Client.iterator"><a class="viewcode-back" href="../../api/client.html#vt.Client.iterator">[docs]</a>  <span class="k">def</span> <span class="nf">iterator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cursor</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>

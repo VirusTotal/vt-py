@@ -416,7 +416,7 @@ class Client:
     :type data: A string or bytes
     :returns: An instance of :class:`ClientResponse`.
     """
-    return _make_sync(self.patch_async(*args, **kwargs))
+    return _make_sync(self.patch_async(path, data))
 
   async def patch_async(self, path: str, data: Any=None):
     """Like :func:`patch` but returns a coroutine."""
@@ -457,7 +457,7 @@ class Client:
     :type data: A string or bytes
     :returns: An instance of :class:`ClientResponse`.
     """
-    return _make_sync(self.post_async(*args, **kwargs))
+    return _make_sync(self.post_async(path, data))
 
   async def post_async(self, path: str, data: Any=None):
     """Like :func:`post` but returns a coroutine."""
@@ -477,7 +477,7 @@ class Client:
     :type obj: :class:`Object`
     :returns: An instance of :class:`Object` representing the new object.
     """
-    return _make_sync(self.post_object_async(*args, **kwargs))
+    return _make_sync(self.post_object_async(path, obj))
 
   async def post_object_async(self, path: str, obj: Object):
     """Like :func:`post_object` but returns a coroutine."""

@@ -11,10 +11,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import functools
+
 
 __all__ = ['Object']
 
-class Object:
+
+class WhistleBlowerDict(dict):
+  """Helper class for detecting changes in a dictionary.
+
+  This class wraps a standard Python dictionary and calls the provided callback
+  whenever a change occurs in the dictionary.
+  """
+  def __init__(self, initial_dict, on_change_callback):
+    self._on_change_callback = on_change_callback
+    for k,v in initial_dict.items():
+      if isinstance(v, dict):
+        initial_dict[k] = WhistleBlowerDict(v, on_change_callback)
+    super().__init__(initial_dict)
+
+  def __setitem__(self, item, value):
+    if isinstance(value, dict):
+      value = WhistleBlowerDict(value, self._on_change_callback)
+    self._on_change_callback()
+    super().__setitem__(item, value)
+
+  def __delitem__(self, item):
+    self._on_change_callback()
+    super().__delitem__(item)
+
+
+class Object(object):
   """Object describes any type of object returned by the VirusTotal API."""
 
   @classmethod
@@ -63,15 +90,29 @@ class Object:
     if not isinstance(obj_attributes, (dict, type(None))):
       raise ValueError('Object attributes must be a dictionary')
 
-    if obj_attributes:
-      # Initialize object attributes with the ones coming in the obj_attributes,
-      # this way if obj_attributes contains {'foo': 'somevalue'} you can access
-      # the attribute as obj.foo and it will return 'somevalue'. This must be
-      # done before initializing any other attribute for the object.
-      self.__dict__ = obj_attributes
-
     self._type = obj_type
     self._id = obj_id
+
+    # Initialize object attributes with the ones coming in the obj_attributes,
+    # this way if obj_attributes contains {'foo': 'somevalue'} you can access
+    # the attribute as obj.foo and it will return 'somevalue'.
+    if obj_attributes:
+      for attr, value in obj_attributes.items():
+        self.__setattr__(attr, value)
+
+    self._modified_attrs = []
+
+  def __on_attr_change(self, attr):
+    if hasattr(self, '_modified_attrs'):
+      self._modified_attrs.append(attr)
+
+  def __setattr__(self, attr, value):
+    if isinstance(value, dict):
+      value = WhistleBlowerDict(
+          value, functools.partial(self.__on_attr_change, attr))
+    if attr not in self.__dict__ or value != self.__dict__[attr]:
+      self.__on_attr_change(attr)
+    super().__setattr__(attr, value)
 
   @property
   def id(self):
@@ -87,7 +128,7 @@ class Object:
       return self._context_attributes
     return {}
 
-  def to_dict(self):
+  def to_dict(self, modified_attributes_only=False):
 
     result = {'type': self._type}
 
@@ -97,7 +138,8 @@ class Object:
     attributes = {}
     for name, value in self.__dict__.items():
       if not name.startswith('_'):
-        attributes[name] = value
+        if not modified_attributes_only or name in self._modified_attrs:
+          attributes[name] = value
 
     if attributes:
       result['attributes'] = attributes

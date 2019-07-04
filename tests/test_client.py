@@ -56,6 +56,51 @@ def test_object_from_dict():
     Object.from_dict({'type': 'dummy_type', 'id': 'dummy_id', 'attributes': 1})
 
 
+def test_object_modified_attrs():
+
+  obj = Object.from_dict({
+      'type': 'dummy_type',
+      'id': 'dummy_id',
+      'attributes': {
+          'attr1': 'foo',
+          'attr2': 1,
+          'attr3': {
+              'subattr1': 'bar'
+          },
+          'attr4': {
+              'subattr1': 'baz'
+          }
+      }})
+
+  # No changes, attributes shouldn't appear in the dictionary.
+  obj_dict = obj.to_dict(modified_attributes_only=True)
+  assert 'attributes' not in obj_dict
+
+  # attr1 set to its previous value, no changes yet.
+  obj.attr1 = 'foo'
+  obj_dict = obj.to_dict(modified_attributes_only=True)
+  assert 'attributes' not in obj_dict
+
+  # attr1 changed to 'bar', this should be the only attribute in the dictionary.
+  obj.attr1 = 'bar'
+  obj_dict = obj.to_dict(modified_attributes_only=True)
+  assert len(obj_dict['attributes']) == 1
+  assert obj_dict['attributes']['attr1'] == 'bar'
+
+  obj.attr3['subattr1'] = 'foo'
+  obj_dict = obj.to_dict(modified_attributes_only=True)
+  assert len(obj_dict['attributes']) == 2
+  assert obj_dict['attributes']['attr1'] == 'bar'
+  assert obj_dict['attributes']['attr3'] == {'subattr1': 'foo'}
+
+  del obj.attr4['subattr1']
+  obj_dict = obj.to_dict(modified_attributes_only=True)
+  assert len(obj_dict['attributes']) == 3
+  assert obj_dict['attributes']['attr1'] == 'bar'
+  assert obj_dict['attributes']['attr3'] == {'subattr1': 'foo'}
+  assert obj_dict['attributes']['attr4'] == {}
+
+
 def test_get(httpserver):
 
   httpserver.expect_request(
@@ -114,20 +159,20 @@ def test_get_object(httpserver):
 
 def test_patch_object(httpserver):
 
-  obj = Object('dummy_type', 'dummy_id')
-  obj.foo = 'foo'
+  obj = Object('dummy_type', 'dummy_id', {'foo': 1, 'bar': 2})
+  obj.foo = 2
 
   httpserver.expect_request(
       '/api/v3/dummy_types/dummy_id',
       method='PATCH',
       headers={'X-Apikey': 'dummy_api_key'},
-      data=json.dumps({'data': obj.to_dict()}),
+      data=json.dumps({'data': obj.to_dict(modified_attributes_only=True)}),
   ).respond_with_json({
       'data': {
           'id': 'dummy_id',
           'type': 'dummy_type',
           'attributes': {
-              'foo': 'foo',
+              'foo': 2,
           }
       }
   })

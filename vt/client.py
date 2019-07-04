@@ -226,8 +226,7 @@ class Client:
     try:
       return Object.from_dict(self._extract_data_from_json(json_response))
     except ValueError as err:
-      raise ValueError(
-          '{} did not return an object: {}'.format(path, err))
+      raise ValueError('response is not an object: {}'.format(err))
 
   async def close_async(self):
     """Like :func:`close` but returns a coroutine."""
@@ -441,7 +440,7 @@ class Client:
 
   async def patch_object_async(self, path: str, obj: Object):
     """Like :func:`patch_object` but returns a coroutine."""
-    data = json.dumps({'data': obj.to_dict()})
+    data = json.dumps({'data': obj.to_dict(modified_attributes_only=True)})
     response = await self.patch_async(path, data)
     return await self._response_to_object(response)
 

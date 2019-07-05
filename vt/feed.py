@@ -57,7 +57,7 @@ class Feed:
   :func:`vt.Client.feed` method instead.
   """
 
-  def __init__(self, client, feed_type, cursor: str=None):
+  def __init__(self, client, feed_type, cursor=None):
     """Initializes a Feed object.
 
     This function is not intended to be called directly. Client.feed() is

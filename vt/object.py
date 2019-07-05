@@ -45,7 +45,7 @@ class Object(object):
   """Object describes any type of object returned by the VirusTotal API."""
 
   @classmethod
-  def from_dict(cls, obj_dict: dict):
+  def from_dict(cls, obj_dict):
     """Creates an object from its dictionary representation.
 
     The dictionary representation of a VirusTotal API object has the following

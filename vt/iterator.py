@@ -14,8 +14,6 @@
 
 from .object import Object
 
-from typing import Dict
-
 
 __all__ = ['Iterator']
 
@@ -56,8 +54,8 @@ class Iterator:
   >>>  asyncio.get_event_loop().run_until_complete(print_comments)
   """
 
-  def __init__(self, client, path: str, params: Dict=None, cursor: str=None,
-               limit: int=None, batch_size: int=None):
+  def __init__(self, client, path, params=None, cursor=None,
+               limit=None, batch_size=None):
     """Initializes an iterator.
 
     This function is not intended to be called directly. Client.iterator() is
@@ -104,12 +102,12 @@ class Iterator:
     items = json_resp['data'][batch_cursor:]
     return items, meta.get('cursor')
 
-  async def _get_batch_async(self, batch_cursor: int=0):
+  async def _get_batch_async(self, batch_cursor=0):
     json_resp = await self._client.get_json_async(
         self._path, params=self._build_params())
     return self._parse_response(json_resp, batch_cursor)
 
-  def _get_batch(self, batch_cursor: int=0):
+  def _get_batch(self, batch_cursor=0):
     json_resp = self._client.get_json(
         self._path, params=self._build_params())
     return self._parse_response(json_resp, batch_cursor)

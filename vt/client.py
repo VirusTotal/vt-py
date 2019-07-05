@@ -16,10 +16,6 @@ import asyncio
 import base64
 import json
 
-from typing import Any
-from typing import Dict
-
-
 from .error import APIError
 from .feed import Feed
 from .feed import FeedType
@@ -172,7 +168,7 @@ class Client:
   :type host: str
   """
 
-  def __init__(self, apikey: str, agent: str="unknown", host: str=None):
+  def __init__(self, apikey, agent="unknown", host=None):
     """Intialize the client with the provided API key."""
     if not apikey:
       raise ValueError('Expecting API key, got: %s' % str(apikey))
@@ -246,7 +242,7 @@ class Client:
     """
     return _make_sync(self.close_async( ))
 
-  def delete(self, path: str, *fmt_args):
+  def delete(self, path, *fmt_args):
     """Sends a DELETE request to a given API endpoint.
 
     :param path: Path to API endpoint, can contain format placeholders {}.
@@ -256,7 +252,7 @@ class Client:
     """
     return _make_sync(self.delete_async(path, *fmt_args))
 
-  async def delete_async(self, path: str, *fmt_args):
+  async def delete_async(self, path, *fmt_args):
     """Like :func:`delete` but returns a coroutine."""
     return ClientResponse(
         await self._get_session().delete(self._full_url(path, *fmt_args)))
@@ -283,7 +279,7 @@ class Client:
         break
       file.write(chunk)
 
-  def feed(self, feed_type: FeedType, cursor: str=None):
+  def feed(self, feed_type, cursor=None):
     """Returns an iterator for a VirusTotal feed.
 
     This functions returns an iterator that allows to retrieve a continuous
@@ -300,7 +296,7 @@ class Client:
     """
     return Feed(self, feed_type, cursor=cursor)
 
-  def get(self, path: str, *fmt_args, params: Dict=None):
+  def get(self, path, *fmt_args, params=None):
     """Sends a GET request to a given API endpoint.
 
     This is a low-level function that returns a raw HTTP response, no error
@@ -317,14 +313,14 @@ class Client:
     """
     return _make_sync(self.get_async(path, *fmt_args, params=params))
 
-  async def get_async(self, path: str, *fmt_args, params: Dict=None):
+  async def get_async(self, path, *fmt_args, params=None):
     """Like :func:`get` but returns a coroutine."""
     return ClientResponse(
         await self._get_session().get(
             self._full_url(path, *fmt_args),
             params=params))
 
-  def get_data(self, path: str, *fmt_args, params: Dict=None):
+  def get_data(self, path, *fmt_args, params=None):
     """Sends a GET request to a given API endpoint and returns response's data.
 
     Most VirusTotal API responses are JSON-encoded with the following format::
@@ -348,7 +344,7 @@ class Client:
     """
     return _make_sync(self.get_data_async(path, *fmt_args, params=params))
 
-  async def get_data_async(self, path: str, *fmt_args, params: Dict=None):
+  async def get_data_async(self, path, *fmt_args, params=None):
     """Like :func:`get_data` but returns a coroutine."""
     json_response = await self.get_json_async(path, *fmt_args, params=params)
     return self._extract_data_from_json(json_response)
@@ -374,7 +370,7 @@ class Client:
       return APIError('ClientError', await response.text_async())
     return APIError('ServerError', await response.text_async())
 
-  def get_json(self, path: str, *fmt_args, params: Dict=None):
+  def get_json(self, path, *fmt_args, params=None):
     """Sends a GET request to a given API endpoint and parses the response.
 
     Most VirusTotal API responses are JSON-encoded. This function parses the
@@ -391,12 +387,12 @@ class Client:
     """
     return _make_sync(self.get_json_async(path, *fmt_args, params=params))
 
-  async def get_json_async(self, path: str, *fmt_args, params: Dict=None):
+  async def get_json_async(self, path, *fmt_args, params=None):
     """Like :func:`get_json` but returns a coroutine."""
     response = await self.get_async(path, *fmt_args, params=params)
     return await self._response_to_json(response)
 
-  def get_object(self, path: str, *fmt_args, params: Dict=None):
+  def get_object(self, path, *fmt_args, params=None):
     """Sends a GET request to a given API endpoint and returns an object.
 
     The endpoint specified must return an object, not a collection. This
@@ -415,12 +411,12 @@ class Client:
     """
     return _make_sync(self.get_object_async(path, *fmt_args, params=params))
 
-  async def get_object_async(self, path: str, *fmt_args, params: Dict=None):
+  async def get_object_async(self, path, *fmt_args, params=None):
     """Like :func:`get_object` but returns a coroutine."""
     response = await self.get_async(path, *fmt_args, params=params)
     return await self._response_to_object(response)
 
-  def patch(self, path: str, *fmt_args, data: Any=None):
+  def patch(self, path, *fmt_args, data=None):
     """Sends a PATCH request to a given API endpoint.
 
     This is a low-level function that returns a raw HTTP response, no error
@@ -437,14 +433,14 @@ class Client:
     """
     return _make_sync(self.patch_async(path, *fmt_args, data))
 
-  async def patch_async(self, path: str, *fmt_args, data: Any=None):
+  async def patch_async(self, path, *fmt_args, data=None):
     """Like :func:`patch` but returns a coroutine."""
     return ClientResponse(
         await self._get_session().patch(
             self._full_url(path, *fmt_args),
             data=data))
 
-  def patch_object(self, path: str, *fmt_args, obj: Object):
+  def patch_object(self, path, *fmt_args, obj):
     """Sends a PATCH request for modifying an object.
 
     This function modifies an object. The endpoint must be one that identifies
@@ -461,13 +457,13 @@ class Client:
     """
     return _make_sync(self.patch_object_async(path, *fmt_args, obj=obj))
 
-  async def patch_object_async(self, path: str, *fmt_args, obj: Object):
+  async def patch_object_async(self, path, *fmt_args, obj):
     """Like :func:`patch_object` but returns a coroutine."""
     data = json.dumps({'data': obj.to_dict(modified_attributes_only=True)})
     response = await self.patch_async(path, *fmt_args, data=data)
     return await self._response_to_object(response)
 
-  def post(self, path: str, *fmt_args, data: Any=None):
+  def post(self, path, *fmt_args, data=None):
     """Sends a POST request to a given API endpoint.
 
     This is a low-level function that returns a raw HTTP response, no error
@@ -484,14 +480,14 @@ class Client:
     """
     return _make_sync(self.post_async(path, *fmt_args, data=data))
 
-  async def post_async(self, path: str, *fmt_args, data: Any=None):
+  async def post_async(self, path, *fmt_args, data=None):
     """Like :func:`post` but returns a coroutine."""
     return ClientResponse(
         await self._get_session().post(
             self._full_url(path, *fmt_args),
             data=data))
 
-  def post_object(self, path: str, *fmt_args, obj: Object):
+  def post_object(self, path, *fmt_args, obj):
     """Sends a POST request for creating an object.
 
     This function create a new object. The endpoint must be one that identifies
@@ -506,14 +502,14 @@ class Client:
     """
     return _make_sync(self.post_object_async(path, *fmt_args, obj=obj))
 
-  async def post_object_async(self, path: str, *fmt_args, obj: Object):
+  async def post_object_async(self, path, *fmt_args, obj):
     """Like :func:`post_object` but returns a coroutine."""
     data = json.dumps({'data': obj.to_dict()})
     response = await self.post_async(path, *fmt_args, data=data)
     return await self._response_to_object(response)
 
-  def iterator(self, path: str, params: Dict=None, cursor: str=None,
-               limit: int=None, batch_size: int=None):
+  def iterator(self, path, params=None, cursor=None,
+               limit=None, batch_size=None):
     """Returns an iterator for the collection specified by the given path.
 
     The endpoint specified by path must return a collection of objects. An

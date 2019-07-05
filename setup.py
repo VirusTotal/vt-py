@@ -30,7 +30,6 @@ install_requires = [
     'aiohttp',
     'pytest',
     'pytest_httpserver',
-    'trio>=0.11.00',
 ]
 
 setuptools.setup(

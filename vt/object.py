@@ -83,8 +83,7 @@ class Object(object):
 
     return obj
 
-  def __init__(self, obj_type: str, obj_id: str=None,
-               obj_attributes: dict=None):
+  def __init__(self, obj_type, obj_id=None, obj_attributes=None):
     """Initializes a VirusTotal API object."""
 
     if not isinstance(obj_attributes, (dict, type(None))):

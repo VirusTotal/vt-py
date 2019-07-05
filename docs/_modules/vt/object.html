@@ -190,7 +190,16 @@
 
 
 <div class="viewcode-block" id="Object"><a class="viewcode-back" href="../../api/object.html#vt.Object">[docs]</a><span class="k">class</span> <span class="nc">Object</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Object describes any type of object returned by the VirusTotal API.&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;This class encapsulates any type of object in the VirusTotal API.</span>
+
+<span class="sd">  Instances of this class are usually obtained from calls to</span>
+<span class="sd">  :meth:`vt.Client.get_object`, however, you need to instantiante this class</span>
+<span class="sd">  yourself for creating new objects that will be sent to the backend in a call</span>
+<span class="sd">  to :meth:`vt.Client.post_object`.</span>
+
+<span class="sd">  Learn more about objects in the VirusTotal API in:</span>
+<span class="sd">  https://developers.virustotal.com/v3.0/reference#objects</span>
+<span class="sd">  &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Object.from_dict"><a class="viewcode-back" href="../../api/object.html#vt.Object.from_dict">[docs]</a>  <span class="nd">@classmethod</span>
   <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj_dict</span><span class="p">):</span>
@@ -231,8 +240,7 @@
 
     <span class="k">return</span> <span class="n">obj</span></div>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">obj_id</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">obj_attributes</span><span class="p">:</span> <span class="nb">dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj_type</span><span class="p">,</span> <span class="n">obj_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">obj_attributes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Initializes a VirusTotal API object.&quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj_attributes</span><span class="p">,</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))):</span>

@@ -58,7 +58,7 @@ will be replaced with the value of `url_id`. This works exactly like Python's
 `new-style string formatting <https://pyformat.info/>`_ using the `.format()`
 function. This other code is equivalent:
 
->>> client.get_object("/urls/{}".format(url_id))
+>>> url = client.get_object("/urls/{}".format(url_id))
 
 The returned object contains the URL attributes. Some examples:
 
@@ -108,8 +108,8 @@ an object ID.
 >>> job.id
 'username-123456789'
 
-With the object identifier you can ask for the job again a see how it progress.
-Wait for a few seconds and do:
+With the object identifier you can ask for the job again a see it making
+progress. Wait for a few seconds and do:
 
 >>> job = client.get_object("/intelligence/retrohunt_jobs/{}", job.id)
 
@@ -129,9 +129,8 @@ Let's abort the job:
 >>> response.status
 200
 
-As you can see we are using :meth:`vt.Client.post` instead of
-:meth:`vt.Client.post_object`, this is because the
-`/intelligence/retrohunt_jobs/{id}/abort
+Here we are using :meth:`vt.Client.post` instead of :meth:`vt.Client.post_object`,
+this is because the `/intelligence/retrohunt_jobs/{id}/abort
 <https://developers.virustotal.com/v3.0/reference#abort-retrohunt-job>`_
 endpoint doesn't expect an object, just a POST request with an empty body. The
 result from :meth:`vt.Client.post` is a :class:`vt.ClientResponse` instance.

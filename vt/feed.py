@@ -41,9 +41,8 @@ class FeedType(enum.Enum):
 class Feed:
   """Feed represents a stream of objects received from VirusTotal in real-time.
 
-  This class allows you to get information about objects that are being processed
-  by VirusTotal. Your API key must have special privileges for using the feed
-  API. See: https://developers.virustotal.com/v3.0/reference#feeds
+  For more information about VirusTotal Feeds see:
+  https://developers.virustotal.com/v3.0/reference#feeds
 
   In the example below the loop iterates forever, retrieving file objects as
   they are processed by VirusTotal. For a more elaborate example see the file

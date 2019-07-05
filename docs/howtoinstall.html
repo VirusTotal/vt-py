@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="API reference" href="apireference.html" />
+    <link rel="next" title="Quickstart" href="quickstart.html" />
     <link rel="prev" title="Welcome to vt-py’s documentation!" href="index.html" /> 
 </head>
 
@@ -83,6 +83,7 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">How to install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apireference.html">API reference</a></li>
 </ul>
 
@@ -150,6 +151,21 @@
             
   <div class="section" id="how-to-install">
 <h1>How to install<a class="headerlink" href="#how-to-install" title="Permalink to this headline">¶</a></h1>
+<p>You can either clone the public repository:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ git clone git://github.com/VirusTotal/vt-py.git
+$ <span class="nb">cd</span> vt-py
+</pre></div>
+</div>
+<p>Or, download the tarball for the <a class="reference external" href="https://github.com/VirusTotal/vt-py/releases">latest release</a>
+and uncompress it:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ tar -zxvf vt-py-X.Y.Z.tar.gz
+$ <span class="nb">cd</span> vt-py-X.Y.Z
+</pre></div>
+</div>
+<p>From the directory containing the code run:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ sudo python3 setup.py install
+</pre></div>
+</div>
 </div>
 
 
@@ -160,7 +176,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="apireference.html" class="btn btn-neutral float-right" title="API reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="quickstart.html" class="btn btn-neutral float-right" title="Quickstart" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="index.html" class="btn btn-neutral float-left" title="Welcome to vt-py’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

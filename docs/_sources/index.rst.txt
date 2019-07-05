@@ -19,7 +19,8 @@ think it's the right one.
 
 Python 2.7 `has its days numbered <https://pythonclock.org/>`_, and the new
 concurrency features included in Python 3.5+ are perfect for creating highly
-performant code without having to deal with multithreading or multiprocessing.
+performant code without having to deal with multi-threading or
+multi-processing.
 
 .. toctree::
    :maxdepth: 2

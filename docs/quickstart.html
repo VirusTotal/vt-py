@@ -211,7 +211,7 @@ this is necessary in:
 will be replaced with the value of <cite>url_id</cite>. This works exactly like Python’s
 <a class="reference external" href="https://pyformat.info/">new-style string formatting</a> using the <cite>.format()</cite>
 function. This other code is equivalent:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">get_object</span><span class="p">(</span><span class="s2">&quot;/urls/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">url_id</span><span class="p">))</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">url</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_object</span><span class="p">(</span><span class="s2">&quot;/urls/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">url_id</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>The returned object contains the URL attributes. Some examples:</p>
@@ -264,8 +264,8 @@ an object ID.</p>
 <span class="go">&#39;username-123456789&#39;</span>
 </pre></div>
 </div>
-<p>With the object identifier you can ask for the job again a see how it progress.
-Wait for a few seconds and do:</p>
+<p>With the object identifier you can ask for the job again a see it making
+progress. Wait for a few seconds and do:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_object</span><span class="p">(</span><span class="s2">&quot;/intelligence/retrohunt_jobs/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -285,9 +285,8 @@ Wait for a few seconds and do:</p>
 <span class="go">200</span>
 </pre></div>
 </div>
-<p>As you can see we are using <a class="reference internal" href="api/client.html#vt.Client.post" title="vt.Client.post"><code class="xref py py-meth docutils literal notranslate"><span class="pre">vt.Client.post()</span></code></a> instead of
-<a class="reference internal" href="api/client.html#vt.Client.post_object" title="vt.Client.post_object"><code class="xref py py-meth docutils literal notranslate"><span class="pre">vt.Client.post_object()</span></code></a>, this is because the
-<a class="reference external" href="https://developers.virustotal.com/v3.0/reference#abort-retrohunt-job">/intelligence/retrohunt_jobs/{id}/abort</a>
+<p>Here we are using <a class="reference internal" href="api/client.html#vt.Client.post" title="vt.Client.post"><code class="xref py py-meth docutils literal notranslate"><span class="pre">vt.Client.post()</span></code></a> instead of <a class="reference internal" href="api/client.html#vt.Client.post_object" title="vt.Client.post_object"><code class="xref py py-meth docutils literal notranslate"><span class="pre">vt.Client.post_object()</span></code></a>,
+this is because the <a class="reference external" href="https://developers.virustotal.com/v3.0/reference#abort-retrohunt-job">/intelligence/retrohunt_jobs/{id}/abort</a>
 endpoint doesn’t expect an object, just a POST request with an empty body. The
 result from <a class="reference internal" href="api/client.html#vt.Client.post" title="vt.Client.post"><code class="xref py py-meth docutils literal notranslate"><span class="pre">vt.Client.post()</span></code></a> is a <a class="reference internal" href="api/client.html#vt.ClientResponse" title="vt.ClientResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">vt.ClientResponse</span></code></a> instance.</p>
 </div>

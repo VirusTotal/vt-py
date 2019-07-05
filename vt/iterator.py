@@ -30,6 +30,9 @@ class Iterator:
 
   These collections can be iterated using an instance of this class.
 
+  Learn more about collections in the VirusTotal API in:
+  https://developers.virustotal.com/v3.0/reference#collections
+
   The following example iterates over the most recent 200 comments, retrieving
   them in batches of 20:
 

@@ -42,7 +42,16 @@ class WhistleBlowerDict(dict):
 
 
 class Object(object):
-  """Object describes any type of object returned by the VirusTotal API."""
+  """This class encapsulates any type of object in the VirusTotal API.
+
+  Instances of this class are usually obtained from calls to
+  :meth:`vt.Client.get_object`, however, you need to instantiante this class
+  yourself for creating new objects that will be sent to the backend in a call
+  to :meth:`vt.Client.post_object`.
+
+  Learn more about objects in the VirusTotal API in:
+  https://developers.virustotal.com/v3.0/reference#objects
+  """
 
   @classmethod
   def from_dict(cls, obj_dict):

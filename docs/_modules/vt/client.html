@@ -330,7 +330,11 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_agent</span> <span class="o">=</span> <span class="n">agent</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_session</span> <span class="o">=</span> <span class="kc">None</span>
 
-  <span class="k">def</span> <span class="nf">_full_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_full_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Not enough arguments to fill all placeholders in path&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;http&#39;</span><span class="p">):</span>
       <span class="k">return</span> <span class="n">path</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_host</span> <span class="o">+</span> <span class="n">_ENDPOINT_PREFIX</span> <span class="o">+</span> <span class="n">path</span>
@@ -390,18 +394,20 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">close_async</span><span class="p">(</span> <span class="p">))</span></div>
 
-<div class="viewcode-block" id="Client.delete"><a class="viewcode-back" href="../../api/client.html#vt.Client.delete">[docs]</a>  <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.delete"><a class="viewcode-back" href="../../api/client.html#vt.Client.delete">[docs]</a>  <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Sends a DELETE request to a given API endpoint.</span>
 
-<span class="sd">    :param path: Path to API endpoint.</span>
+<span class="sd">    :param path: Path to API endpoint, can contain format placeholders {}.</span>
+<span class="sd">    :param fmt_args: A variable number of arguments that are put into any</span>
+<span class="sd">      placeholders used in path.</span>
 <span class="sd">    :type path: str</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">delete_async</span><span class="p">(</span><span class="n">path</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">delete_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Client.delete_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.delete_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">delete_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.delete_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.delete_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">delete_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Like :func:`delete` but returns a coroutine.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">ClientResponse</span><span class="p">(</span>
-        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_session</span><span class="p">()</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_full_url</span><span class="p">(</span><span class="n">path</span><span class="p">)))</span></div>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_session</span><span class="p">()</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_full_url</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">)))</span></div>
 
 <div class="viewcode-block" id="Client.download_file"><a class="viewcode-back" href="../../api/client.html#vt.Client.download_file">[docs]</a>  <span class="k">def</span> <span class="nf">download_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">hash</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Downloads a file given its hash (SHA-256, SHA-1 or MD5).</span>
@@ -442,27 +448,31 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">Feed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feed_type</span><span class="p">,</span> <span class="n">cursor</span><span class="o">=</span><span class="n">cursor</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Client.get"><a class="viewcode-back" href="../../api/client.html#vt.Client.get">[docs]</a>  <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.get"><a class="viewcode-back" href="../../api/client.html#vt.Client.get">[docs]</a>  <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Sends a GET request to a given API endpoint.</span>
 
 <span class="sd">    This is a low-level function that returns a raw HTTP response, no error</span>
 <span class="sd">    checking nor response parsing is performed. See :func:`get_json`,</span>
 <span class="sd">    :func:`get_data` and :func:`get_object` for higher-level functions.</span>
 
-<span class="sd">    :param path: Path to API endpoint.</span>
+<span class="sd">    :param path: Path to API endpoint, can contain format placeholders {}.</span>
+<span class="sd">    :param fmt_args: A variable number of arguments that are put into any</span>
+<span class="sd">      placeholders used in path.</span>
 <span class="sd">    :param params: Parameters sent in the request.</span>
 <span class="sd">    :type path: str</span>
 <span class="sd">    :type params: dict</span>
 <span class="sd">    :returns: An instance of :class:`ClientResponse`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Client.get_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.get_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">get_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.get_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.get_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">get_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Like :func:`get` but returns a coroutine.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">ClientResponse</span><span class="p">(</span>
-        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_session</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_full_url</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">))</span></div>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_session</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_full_url</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">),</span>
+            <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Client.get_data"><a class="viewcode-back" href="../../api/client.html#vt.Client.get_data">[docs]</a>  <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.get_data"><a class="viewcode-back" href="../../api/client.html#vt.Client.get_data">[docs]</a>  <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Sends a GET request to a given API endpoint and returns response&#39;s data.</span>
 
 <span class="sd">    Most VirusTotal API responses are JSON-encoded with the following format::</span>
@@ -473,7 +483,9 @@
 <span class="sd">    response is not in the expected format an exception is raised. For endpoints</span>
 <span class="sd">    where the data is a VirusTotal object you can use get_object_async instead.</span>
 
-<span class="sd">    :param path: Path to API endpoint.</span>
+<span class="sd">    :param path: Path to API endpoint, can contain format placeholders {}.</span>
+<span class="sd">    :param fmt_args: A variable number of arguments that are put into any</span>
+<span class="sd">      placeholders used in path.</span>
 <span class="sd">    :param params: Parameters sent in the request.</span>
 <span class="sd">    :type path: str</span>
 <span class="sd">    :type params: dict</span>
@@ -482,11 +494,11 @@
 <span class="sd">      dict, list, string or some other Python type, depending on the endpoint</span>
 <span class="sd">      called.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_data_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_data_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Client.get_data_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.get_data_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">get_data_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.get_data_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.get_data_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">get_data_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Like :func:`get_data` but returns a coroutine.&quot;&quot;&quot;</span>
-    <span class="n">json_response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_json_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
+    <span class="n">json_response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_json_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_data_from_json</span><span class="p">(</span><span class="n">json_response</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Client.get_error"><a class="viewcode-back" href="../../api/client.html#vt.Client.get_error">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">get_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
@@ -509,27 +521,29 @@
       <span class="k">return</span> <span class="n">APIError</span><span class="p">(</span><span class="s1">&#39;ClientError&#39;</span><span class="p">,</span> <span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">text_async</span><span class="p">())</span>
     <span class="k">return</span> <span class="n">APIError</span><span class="p">(</span><span class="s1">&#39;ServerError&#39;</span><span class="p">,</span> <span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">text_async</span><span class="p">())</span></div>
 
-<div class="viewcode-block" id="Client.get_json"><a class="viewcode-back" href="../../api/client.html#vt.Client.get_json">[docs]</a>  <span class="k">def</span> <span class="nf">get_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.get_json"><a class="viewcode-back" href="../../api/client.html#vt.Client.get_json">[docs]</a>  <span class="k">def</span> <span class="nf">get_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Sends a GET request to a given API endpoint and parses the response.</span>
 
 <span class="sd">    Most VirusTotal API responses are JSON-encoded. This function parses the</span>
 <span class="sd">    JSON, check for errors, and return the server response as a dictionary.</span>
 
-<span class="sd">    :param path: Path to API endpoint.</span>
+<span class="sd">    :param path: Path to API endpoint, can contain format placeholders {}.</span>
+<span class="sd">    :param fmt_args: A variable number of arguments that are put into any</span>
+<span class="sd">      placeholders used in path.</span>
 <span class="sd">    :param params: Parameters sent in the request.</span>
 <span class="sd">    :type path: str</span>
 <span class="sd">    :type params: dict</span>
 <span class="sd">    :returns:</span>
 <span class="sd">      A dictionary with the backend&#39;s response.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_json_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_json_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Client.get_json_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.get_json_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">get_json_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.get_json_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.get_json_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">get_json_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Like :func:`get_json` but returns a coroutine.&quot;&quot;&quot;</span>
-    <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
     <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_to_json</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Client.get_object"><a class="viewcode-back" href="../../api/client.html#vt.Client.get_object">[docs]</a>  <span class="k">def</span> <span class="nf">get_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.get_object"><a class="viewcode-back" href="../../api/client.html#vt.Client.get_object">[docs]</a>  <span class="k">def</span> <span class="nf">get_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Sends a GET request to a given API endpoint and returns an object.</span>
 
 <span class="sd">    The endpoint specified must return an object, not a collection. This</span>
@@ -537,82 +551,94 @@
 <span class="sd">    and /urls/{url_id}, which return an individual object but not with</span>
 <span class="sd">    /comments, which returns a collection of objects.</span>
 
-<span class="sd">    :param path: Path to API endpoint.</span>
+<span class="sd">    :param path: Path to API endpoint, can contain format placeholders {}.</span>
+<span class="sd">    :param fmt_args: A variable number of arguments that are put into any</span>
+<span class="sd">      placeholders used in path.</span>
 <span class="sd">    :param params: Parameters sent in the request.</span>
 <span class="sd">    :type path: str</span>
 <span class="sd">    :type params: dict</span>
 <span class="sd">    :returns:</span>
 <span class="sd">      An instance of :class:`Object`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_object_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_object_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Client.get_object_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.get_object_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">get_object_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.get_object_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.get_object_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">get_object_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Like :func:`get_object` but returns a coroutine.&quot;&quot;&quot;</span>
-    <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
     <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_to_object</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Client.patch"><a class="viewcode-back" href="../../api/client.html#vt.Client.patch">[docs]</a>  <span class="k">def</span> <span class="nf">patch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.patch"><a class="viewcode-back" href="../../api/client.html#vt.Client.patch">[docs]</a>  <span class="k">def</span> <span class="nf">patch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Sends a PATCH request to a given API endpoint.</span>
 
 <span class="sd">    This is a low-level function that returns a raw HTTP response, no error</span>
 <span class="sd">    checking nor response parsing is performed. See :func:`patch_object` for</span>
 <span class="sd">    a higher-level function.</span>
 
-<span class="sd">    :param path: Path to API endpoint.</span>
+<span class="sd">    :param path: Path to API endpoint, can contain format placeholders {}.</span>
+<span class="sd">    :param fmt_args: A variable number of arguments that are put into any</span>
+<span class="sd">      placeholders used in path.</span>
 <span class="sd">    :param data: Data sent in the request body.</span>
 <span class="sd">    :type path: str</span>
 <span class="sd">    :type data: A string or bytes</span>
 <span class="sd">    :returns: An instance of :class:`ClientResponse`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">patch_async</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">patch_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="n">data</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Client.patch_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.patch_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">patch_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.patch_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.patch_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">patch_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Like :func:`patch` but returns a coroutine.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">ClientResponse</span><span class="p">(</span>
-        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_session</span><span class="p">()</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_full_url</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">))</span></div>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_session</span><span class="p">()</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_full_url</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">),</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Client.patch_object"><a class="viewcode-back" href="../../api/client.html#vt.Client.patch_object">[docs]</a>  <span class="k">def</span> <span class="nf">patch_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Object</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.patch_object"><a class="viewcode-back" href="../../api/client.html#vt.Client.patch_object">[docs]</a>  <span class="k">def</span> <span class="nf">patch_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Sends a PATCH request for modifying an object.</span>
 
 <span class="sd">    This function modifies an object. The endpoint must be one that identifies</span>
 <span class="sd">    an object, like /intelligence/hunting_rulesets/{id}.</span>
 
-<span class="sd">    :param path: Path to API endpoint.</span>
+<span class="sd">    :param path: Path to API endpoint, can contain format placeholders {}.</span>
+<span class="sd">    :param fmt_args: A variable number of arguments that are put into any</span>
+<span class="sd">      placeholders used in path.</span>
 <span class="sd">    :param obj: Object that has been modified.</span>
 <span class="sd">    :type path: str</span>
 <span class="sd">    :type obj: :class:`Object`</span>
 <span class="sd">    :returns: An instance of :class:`Object` representing the same object after</span>
 <span class="sd">      the changes has been applied.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">patch_object_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">obj</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">patch_object_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="n">obj</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Client.patch_object_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.patch_object_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">patch_object_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Object</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.patch_object_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.patch_object_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">patch_object_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Like :func:`patch_object` but returns a coroutine.&quot;&quot;&quot;</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">modified_attributes_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)})</span>
-    <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">patch_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">patch_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
     <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_to_object</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Client.post"><a class="viewcode-back" href="../../api/client.html#vt.Client.post">[docs]</a>  <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.post"><a class="viewcode-back" href="../../api/client.html#vt.Client.post">[docs]</a>  <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Sends a POST request to a given API endpoint.</span>
 
 <span class="sd">    This is a low-level function that returns a raw HTTP response, no error</span>
 <span class="sd">    checking nor response parsing is performed. See :func:`post_object` for</span>
 <span class="sd">    a higher-level function.</span>
 
-<span class="sd">    :param path: Path to API endpoint.</span>
+<span class="sd">    :param path: Path to API endpoint, can contain format placeholders {}.</span>
+<span class="sd">    :param fmt_args: A variable number of arguments that are put into any</span>
+<span class="sd">      placeholders used in path.</span>
 <span class="sd">    :param data: Data sent in the request body.</span>
 <span class="sd">    :type path: str</span>
 <span class="sd">    :type data: A string or bytes</span>
 <span class="sd">    :returns: An instance of :class:`ClientResponse`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">post_async</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">post_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Client.post_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.post_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">post_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.post_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.post_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">post_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Like :func:`post` but returns a coroutine.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">ClientResponse</span><span class="p">(</span>
-        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_session</span><span class="p">()</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_full_url</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">))</span></div>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_session</span><span class="p">()</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_full_url</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">),</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Client.post_object"><a class="viewcode-back" href="../../api/client.html#vt.Client.post_object">[docs]</a>  <span class="k">def</span> <span class="nf">post_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Object</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.post_object"><a class="viewcode-back" href="../../api/client.html#vt.Client.post_object">[docs]</a>  <span class="k">def</span> <span class="nf">post_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Sends a POST request for creating an object.</span>
 
 <span class="sd">    This function create a new object. The endpoint must be one that identifies</span>
@@ -625,12 +651,12 @@
 <span class="sd">    :type obj: :class:`Object`</span>
 <span class="sd">    :returns: An instance of :class:`Object` representing the new object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">post_object_async</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">post_object_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="n">obj</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Client.post_object_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.post_object_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">post_object_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Object</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.post_object_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.post_object_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">post_object_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Like :func:`post_object` but returns a coroutine.&quot;&quot;&quot;</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()})</span>
-    <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">post_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">post_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
     <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_to_object</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Client.iterator"><a class="viewcode-back" href="../../api/client.html#vt.Client.iterator">[docs]</a>  <span class="k">def</span> <span class="nf">iterator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cursor</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>

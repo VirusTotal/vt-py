@@ -195,10 +195,10 @@ API response which are listed in the <a class="reference external" href="https:/
 </div>
 <div class="section" id="get-information-about-an-url">
 <h2>Get information about an URL<a class="headerlink" href="#get-information-about-an-url" title="Permalink to this headline">¶</a></h2>
-<p>Create a client as explained in the previous section and ask for the desired URL
-as follows:</p>
+<p>Create a client as explained in the previous section and ask for the desired
+URL as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">url_id</span> <span class="o">=</span> <span class="n">vt</span><span class="o">.</span><span class="n">url_id</span><span class="p">(</span><span class="s2">&quot;http://www.virustotal.com&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">url</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_object</span><span class="p">(</span><span class="s2">&quot;/urls/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">url_id</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">url</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_object</span><span class="p">(</span><span class="s2">&quot;/urls/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">url_id</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>In this case the code is not as straightforward as it was for getting a file.
@@ -207,6 +207,13 @@ but with URLs is a bit more complicated. You must use <a class="reference intern
 generating the appropriate identifier. You can find more information about why
 this is necessary in:
 <a class="reference external" href="https://developers.virustotal.com/v3.0/reference#section-url-identifiers">https://developers.virustotal.com/v3.0/reference#section-url-identifiers</a>.</p>
+<p>Also notice how we are using a placeholder <cite>{}</cite> in the path. The placeholder
+will be replaced with the value of <cite>url_id</cite>. This works exactly like Python’s
+<a class="reference external" href="https://pyformat.info/">new-style string formatting</a> using the <cite>.format()</cite>
+function. This other code is equivalent:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">get_object</span><span class="p">(</span><span class="s2">&quot;/urls/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">url_id</span><span class="p">))</span>
+</pre></div>
+</div>
 <p>The returned object contains the URL attributes. Some examples:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">url</span><span class="o">.</span><span class="n">times_submitted</span>
 <span class="go">213730</span>
@@ -243,7 +250,7 @@ must be opened in <cite>“wb”</cite> mode:</p>
 </pre></div>
 </div>
 <p>Post the object to the <cite>/intelligence/retrohunt_jobs</cite> collection:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">post_object</span><span class="p">(</span><span class="s2">&quot;/intelligence/retrohunt_jobs&quot;</span><span class="p">,</span> <span class="n">job</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">post_object</span><span class="p">(</span><span class="s2">&quot;/intelligence/retrohunt_jobs&quot;</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Notice thas <cite>job</cite> has been replaced with the value returned by
@@ -259,7 +266,7 @@ an object ID.</p>
 </div>
 <p>With the object identifier you can ask for the job again a see how it progress.
 Wait for a few seconds and do:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_object</span><span class="p">(</span><span class="s2">&quot;/intelligence/retrohunt_jobs/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_object</span><span class="p">(</span><span class="s2">&quot;/intelligence/retrohunt_jobs/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The job status should have changed to <cite>running</cite>:</p>
@@ -273,7 +280,7 @@ Wait for a few seconds and do:</p>
 </pre></div>
 </div>
 <p>Let’s abort the job:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/intelligence/retrohunt_jobs/</span><span class="si">{}</span><span class="s2">/abort&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/intelligence/retrohunt_jobs/</span><span class="si">{}</span><span class="s2">/abort&quot;</span><span class="p">,</span> <span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">response</span><span class="o">.</span><span class="n">status</span>
 <span class="go">200</span>
 </pre></div>
@@ -298,7 +305,7 @@ result from <a class="reference internal" href="api/client.html#vt.Client.post" 
 </pre></div>
 </div>
 <p>Post the object to the <cite>/intelligence/hunting_rulesets</cite> collection:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">post_object</span><span class="p">(</span><span class="s2">&quot;/intelligence/hunting_rulesets&quot;</span><span class="p">,</span> <span class="n">rs</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">post_object</span><span class="p">(</span><span class="s2">&quot;/intelligence/hunting_rulesets&quot;</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="n">rs</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Because we didn’t set the <cite>enabled</cite> attribute while creating the ruleset, it
@@ -309,7 +316,7 @@ was created with <cite>enabled=False</cite> by default:</p>
 </div>
 <p>Let’s enable the ruleset:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rs</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">patch_object</span><span class="p">(</span><span class="s2">&quot;/intelligence/hunting_rulesets/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rs</span><span class="o">.</span><span class="n">id</span><span class="p">),</span> <span class="n">rs</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">patch_object</span><span class="p">(</span><span class="s2">&quot;/intelligence/hunting_rulesets/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">rs</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="n">rs</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rs</span><span class="o">.</span><span class="n">enabled</span>
 <span class="go">True</span>
 </pre></div>

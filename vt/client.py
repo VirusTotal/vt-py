@@ -182,7 +182,11 @@ class Client:
     self._agent = agent
     self._session = None
 
-  def _full_url(self, path):
+  def _full_url(self, path, *args):
+    try:
+      path = path.format(*args)
+    except IndexError:
+      raise ValueError('Not enough arguments to fill all placeholders in path')
     if path.startswith('http'):
       return path
     return self._host + _ENDPOINT_PREFIX + path
@@ -242,18 +246,20 @@ class Client:
     """
     return _make_sync(self.close_async( ))
 
-  def delete(self, path: str):
+  def delete(self, path: str, *fmt_args):
     """Sends a DELETE request to a given API endpoint.
 
-    :param path: Path to API endpoint.
+    :param path: Path to API endpoint, can contain format placeholders {}.
+    :param fmt_args: A variable number of arguments that are put into any
+      placeholders used in path.
     :type path: str
     """
-    return _make_sync(self.delete_async(path))
+    return _make_sync(self.delete_async(path, *fmt_args))
 
-  async def delete_async(self, path: str):
+  async def delete_async(self, path: str, *fmt_args):
     """Like :func:`delete` but returns a coroutine."""
     return ClientResponse(
-        await self._get_session().delete(self._full_url(path)))
+        await self._get_session().delete(self._full_url(path, *fmt_args)))
 
   def download_file(self, hash, file):
     """Downloads a file given its hash (SHA-256, SHA-1 or MD5).
@@ -294,27 +300,31 @@ class Client:
     """
     return Feed(self, feed_type, cursor=cursor)
 
-  def get(self, path: str, params: Dict=None):
+  def get(self, path: str, *fmt_args, params: Dict=None):
     """Sends a GET request to a given API endpoint.
 
     This is a low-level function that returns a raw HTTP response, no error
     checking nor response parsing is performed. See :func:`get_json`,
     :func:`get_data` and :func:`get_object` for higher-level functions.
 
-    :param path: Path to API endpoint.
+    :param path: Path to API endpoint, can contain format placeholders {}.
+    :param fmt_args: A variable number of arguments that are put into any
+      placeholders used in path.
     :param params: Parameters sent in the request.
     :type path: str
     :type params: dict
     :returns: An instance of :class:`ClientResponse`.
     """
-    return _make_sync(self.get_async(path, params=params))
+    return _make_sync(self.get_async(path, *fmt_args, params=params))
 
-  async def get_async(self, path: str, params: Dict=None):
+  async def get_async(self, path: str, *fmt_args, params: Dict=None):
     """Like :func:`get` but returns a coroutine."""
     return ClientResponse(
-        await self._get_session().get(self._full_url(path), params=params))
+        await self._get_session().get(
+            self._full_url(path, *fmt_args),
+            params=params))
 
-  def get_data(self, path: str, params: Dict=None):
+  def get_data(self, path: str, *fmt_args, params: Dict=None):
     """Sends a GET request to a given API endpoint and returns response's data.
 
     Most VirusTotal API responses are JSON-encoded with the following format::
@@ -325,7 +335,9 @@ class Client:
     response is not in the expected format an exception is raised. For endpoints
     where the data is a VirusTotal object you can use get_object_async instead.
 
-    :param path: Path to API endpoint.
+    :param path: Path to API endpoint, can contain format placeholders {}.
+    :param fmt_args: A variable number of arguments that are put into any
+      placeholders used in path.
     :param params: Parameters sent in the request.
     :type path: str
     :type params: dict
@@ -334,11 +346,11 @@ class Client:
       dict, list, string or some other Python type, depending on the endpoint
       called.
     """
-    return _make_sync(self.get_data_async(path, params=params))
+    return _make_sync(self.get_data_async(path, *fmt_args, params=params))
 
-  async def get_data_async(self, path: str, params: Dict=None):
+  async def get_data_async(self, path: str, *fmt_args, params: Dict=None):
     """Like :func:`get_data` but returns a coroutine."""
-    json_response = await self.get_json_async(path, params=params)
+    json_response = await self.get_json_async(path, *fmt_args, params=params)
     return self._extract_data_from_json(json_response)
 
   async def get_error(self, response):
@@ -354,34 +366,37 @@ class Client:
     if response.status == 200:
       return None
     if response.status >= 400 and response.status <= 499:
-      json_response = await response.json_async()
-      error = json_response.get('error')
-      if error:
-        return APIError.from_dict(error)
+      if response.content_type == 'application/json':
+        json_response = await response.json_async()
+        error = json_response.get('error')
+        if error:
+          return APIError.from_dict(error)
       return APIError('ClientError', await response.text_async())
     return APIError('ServerError', await response.text_async())
 
-  def get_json(self, path: str, params: Dict=None):
+  def get_json(self, path: str, *fmt_args, params: Dict=None):
     """Sends a GET request to a given API endpoint and parses the response.
 
     Most VirusTotal API responses are JSON-encoded. This function parses the
     JSON, check for errors, and return the server response as a dictionary.
 
-    :param path: Path to API endpoint.
+    :param path: Path to API endpoint, can contain format placeholders {}.
+    :param fmt_args: A variable number of arguments that are put into any
+      placeholders used in path.
     :param params: Parameters sent in the request.
     :type path: str
     :type params: dict
     :returns:
       A dictionary with the backend's response.
     """
-    return _make_sync(self.get_json_async(path, params=params))
+    return _make_sync(self.get_json_async(path, *fmt_args, params=params))
 
-  async def get_json_async(self, path: str, params: Dict=None):
+  async def get_json_async(self, path: str, *fmt_args, params: Dict=None):
     """Like :func:`get_json` but returns a coroutine."""
-    response = await self.get_async(path, params=params)
+    response = await self.get_async(path, *fmt_args, params=params)
     return await self._response_to_json(response)
 
-  def get_object(self, path: str, params: Dict=None):
+  def get_object(self, path: str, *fmt_args, params: Dict=None):
     """Sends a GET request to a given API endpoint and returns an object.
 
     The endpoint specified must return an object, not a collection. This
@@ -389,82 +404,94 @@ class Client:
     and /urls/{url_id}, which return an individual object but not with
     /comments, which returns a collection of objects.
 
-    :param path: Path to API endpoint.
+    :param path: Path to API endpoint, can contain format placeholders {}.
+    :param fmt_args: A variable number of arguments that are put into any
+      placeholders used in path.
     :param params: Parameters sent in the request.
     :type path: str
     :type params: dict
     :returns:
       An instance of :class:`Object`.
     """
-    return _make_sync(self.get_object_async(path, params=params))
+    return _make_sync(self.get_object_async(path, *fmt_args, params=params))
 
-  async def get_object_async(self, path: str, params: Dict=None):
+  async def get_object_async(self, path: str, *fmt_args, params: Dict=None):
     """Like :func:`get_object` but returns a coroutine."""
-    response = await self.get_async(path, params=params)
+    response = await self.get_async(path, *fmt_args, params=params)
     return await self._response_to_object(response)
 
-  def patch(self, path: str, data: Any=None):
+  def patch(self, path: str, *fmt_args, data: Any=None):
     """Sends a PATCH request to a given API endpoint.
 
     This is a low-level function that returns a raw HTTP response, no error
     checking nor response parsing is performed. See :func:`patch_object` for
     a higher-level function.
 
-    :param path: Path to API endpoint.
+    :param path: Path to API endpoint, can contain format placeholders {}.
+    :param fmt_args: A variable number of arguments that are put into any
+      placeholders used in path.
     :param data: Data sent in the request body.
     :type path: str
     :type data: A string or bytes
     :returns: An instance of :class:`ClientResponse`.
     """
-    return _make_sync(self.patch_async(path, data))
+    return _make_sync(self.patch_async(path, *fmt_args, data))
 
-  async def patch_async(self, path: str, data: Any=None):
+  async def patch_async(self, path: str, *fmt_args, data: Any=None):
     """Like :func:`patch` but returns a coroutine."""
     return ClientResponse(
-        await self._get_session().patch(self._full_url(path), data=data))
+        await self._get_session().patch(
+            self._full_url(path, *fmt_args),
+            data=data))
 
-  def patch_object(self, path: str, obj: Object):
+  def patch_object(self, path: str, *fmt_args, obj: Object):
     """Sends a PATCH request for modifying an object.
 
     This function modifies an object. The endpoint must be one that identifies
     an object, like /intelligence/hunting_rulesets/{id}.
 
-    :param path: Path to API endpoint.
+    :param path: Path to API endpoint, can contain format placeholders {}.
+    :param fmt_args: A variable number of arguments that are put into any
+      placeholders used in path.
     :param obj: Object that has been modified.
     :type path: str
     :type obj: :class:`Object`
     :returns: An instance of :class:`Object` representing the same object after
       the changes has been applied.
     """
-    return _make_sync(self.patch_object_async(path, obj))
+    return _make_sync(self.patch_object_async(path, *fmt_args, obj=obj))
 
-  async def patch_object_async(self, path: str, obj: Object):
+  async def patch_object_async(self, path: str, *fmt_args, obj: Object):
     """Like :func:`patch_object` but returns a coroutine."""
     data = json.dumps({'data': obj.to_dict(modified_attributes_only=True)})
-    response = await self.patch_async(path, data)
+    response = await self.patch_async(path, *fmt_args, data=data)
     return await self._response_to_object(response)
 
-  def post(self, path: str, data: Any=None):
+  def post(self, path: str, *fmt_args, data: Any=None):
     """Sends a POST request to a given API endpoint.
 
     This is a low-level function that returns a raw HTTP response, no error
     checking nor response parsing is performed. See :func:`post_object` for
     a higher-level function.
 
-    :param path: Path to API endpoint.
+    :param path: Path to API endpoint, can contain format placeholders {}.
+    :param fmt_args: A variable number of arguments that are put into any
+      placeholders used in path.
     :param data: Data sent in the request body.
     :type path: str
     :type data: A string or bytes
     :returns: An instance of :class:`ClientResponse`.
     """
-    return _make_sync(self.post_async(path, data))
+    return _make_sync(self.post_async(path, *fmt_args, data=data))
 
-  async def post_async(self, path: str, data: Any=None):
+  async def post_async(self, path: str, *fmt_args, data: Any=None):
     """Like :func:`post` but returns a coroutine."""
     return ClientResponse(
-        await self._get_session().post(self._full_url(path), data=data))
+        await self._get_session().post(
+            self._full_url(path, *fmt_args),
+            data=data))
 
-  def post_object(self, path: str, obj: Object):
+  def post_object(self, path: str, *fmt_args, obj: Object):
     """Sends a POST request for creating an object.
 
     This function create a new object. The endpoint must be one that identifies
@@ -477,12 +504,12 @@ class Client:
     :type obj: :class:`Object`
     :returns: An instance of :class:`Object` representing the new object.
     """
-    return _make_sync(self.post_object_async(path, obj))
+    return _make_sync(self.post_object_async(path, *fmt_args, obj=obj))
 
-  async def post_object_async(self, path: str, obj: Object):
+  async def post_object_async(self, path: str, *fmt_args, obj: Object):
     """Like :func:`post_object` but returns a coroutine."""
     data = json.dumps({'data': obj.to_dict()})
-    response = await self.post_async(path, data)
+    response = await self.post_async(path, *fmt_args, data=data)
     return await self._response_to_object(response)
 
   def iterator(self, path: str, params: Dict=None, cursor: str=None,

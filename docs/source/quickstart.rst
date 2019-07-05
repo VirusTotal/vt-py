@@ -40,11 +40,11 @@ API response which are listed in the `VirusTotal API v3 documentation
 Get information about an URL
 ----------------------------
 
-Create a client as explained in the previous section and ask for the desired URL
-as follows:
+Create a client as explained in the previous section and ask for the desired
+URL as follows:
 
 >>> url_id = vt.url_id("http://www.virustotal.com")
->>> url = client.get_object("/urls/{}".format(url_id))
+>>> url = client.get_object("/urls/{}", url_id)
 
 In this case the code is not as straightforward as it was for getting a file.
 While retrieving a file any of its hashes can be used as the file identifier,
@@ -52,6 +52,13 @@ but with URLs is a bit more complicated. You must use :func:`vt.url_id` for
 generating the appropriate identifier. You can find more information about why
 this is necessary in:
 `<https://developers.virustotal.com/v3.0/reference#section-url-identifiers>`_.
+
+Also notice how we are using a placeholder `{}` in the path. The placeholder
+will be replaced with the value of `url_id`. This works exactly like Python's
+`new-style string formatting <https://pyformat.info/>`_ using the `.format()`
+function. This other code is equivalent:
+
+>>> client.get_object("/urls/{}".format(url_id))
 
 The returned object contains the URL attributes. Some examples:
 
@@ -89,7 +96,7 @@ Create an empty object of type `retrohunt_job` and set its `rules` attribute:
 
 Post the object to the `/intelligence/retrohunt_jobs` collection:
 
->>> job = client.post_object("/intelligence/retrohunt_jobs", job)
+>>> job = client.post_object("/intelligence/retrohunt_jobs", obj=job)
 
 Notice thas `job` has been replaced with the value returned by
 :func:`vt.Client.post_object`, so now `job` has additional attributes and
@@ -104,7 +111,7 @@ an object ID.
 With the object identifier you can ask for the job again a see how it progress.
 Wait for a few seconds and do:
 
->>> job = client.get_object("/intelligence/retrohunt_jobs/{}".format(job.id))
+>>> job = client.get_object("/intelligence/retrohunt_jobs/{}", job.id)
 
 The job status should have changed to `running`:
 
@@ -118,7 +125,7 @@ And the progress attribute should show the completion percentage:
 
 Let's abort the job:
 
->>> response = client.post("/intelligence/retrohunt_jobs/{}/abort".format(job.id))
+>>> response = client.post("/intelligence/retrohunt_jobs/{}/abort", job.id)
 >>> response.status
 200
 
@@ -145,7 +152,7 @@ Create an empty object of type `hunting_ruleset` and set its `name` and
 
 Post the object to the `/intelligence/hunting_rulesets` collection:
 
->>> rs = client.post_object("/intelligence/hunting_rulesets", rs)
+>>> rs = client.post_object("/intelligence/hunting_rulesets", obj=rs)
 
 Because we didn't set the `enabled` attribute while creating the ruleset, it
 was created with `enabled=False` by default:
@@ -156,6 +163,6 @@ False
 Let's enable the ruleset:
 
 >>> rs.enabled = True
->>> rs = client.patch_object("/intelligence/hunting_rulesets/{}".format(rs.id), rs)
+>>> rs = client.patch_object("/intelligence/hunting_rulesets/{}", rs.id, obj=rs)
 >>> rs.enabled
 True

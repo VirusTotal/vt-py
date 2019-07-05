@@ -178,7 +178,7 @@ def test_patch_object(httpserver):
   })
 
   with new_client(httpserver) as client:
-    client.patch_object('/dummy_types/dummy_id', obj)
+    client.patch_object('/dummy_types/dummy_id', obj=obj)
 
 
 def test_post_object(httpserver):
@@ -202,7 +202,7 @@ def test_post_object(httpserver):
   })
 
   with new_client(httpserver) as client:
-    obj = client.post_object('/dummy_types', obj)
+    obj = client.post_object('/dummy_types', obj=obj)
 
   assert obj.id == 'dummy_id'
 

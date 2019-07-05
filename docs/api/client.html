@@ -190,18 +190,22 @@ resources like TCP connections.</p>
 
 <dl class="method">
 <dt id="vt.Client.delete">
-<code class="sig-name descname">delete</code><span class="sig-paren">(</span><em class="sig-param">path: str</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.delete" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">delete</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">*fmt_args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.delete" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sends a DELETE request to a given API endpoint.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – Path to API endpoint.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – Path to API endpoint, can contain format placeholders {}.</p></li>
+<li><p><strong>fmt_args</strong> – A variable number of arguments that are put into any
+placeholders used in path.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="vt.Client.delete_async">
-<em class="property">async </em><code class="sig-name descname">delete_async</code><span class="sig-paren">(</span><em class="sig-param">path: str</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.delete_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.delete_async" title="Permalink to this definition">¶</a></dt>
+<em class="property">async </em><code class="sig-name descname">delete_async</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">*fmt_args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.delete_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.delete_async" title="Permalink to this definition">¶</a></dt>
 <dd><p>Like <a class="reference internal" href="#vt.Client.delete" title="vt.Client.delete"><code class="xref py py-func docutils literal notranslate"><span class="pre">delete()</span></code></a> but returns a coroutine.</p>
 </dd></dl>
 
@@ -249,7 +253,7 @@ of the first package that will be retrieved.</p></li>
 
 <dl class="method">
 <dt id="vt.Client.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">params: Dict = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.get" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">*fmt_args</em>, <em class="sig-param">params: Dict = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sends a GET request to a given API endpoint.</p>
 <p>This is a low-level function that returns a raw HTTP response, no error
 checking nor response parsing is performed. See <a class="reference internal" href="#vt.Client.get_json" title="vt.Client.get_json"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_json()</span></code></a>,
@@ -257,7 +261,9 @@ checking nor response parsing is performed. See <a class="reference internal" hr
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>path</strong> (<em>str</em>) – Path to API endpoint.</p></li>
+<li><p><strong>path</strong> (<em>str</em>) – Path to API endpoint, can contain format placeholders {}.</p></li>
+<li><p><strong>fmt_args</strong> – A variable number of arguments that are put into any
+placeholders used in path.</p></li>
 <li><p><strong>params</strong> (<em>dict</em>) – Parameters sent in the request.</p></li>
 </ul>
 </dd>
@@ -269,13 +275,13 @@ checking nor response parsing is performed. See <a class="reference internal" hr
 
 <dl class="method">
 <dt id="vt.Client.get_async">
-<em class="property">async </em><code class="sig-name descname">get_async</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">params: Dict = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.get_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.get_async" title="Permalink to this definition">¶</a></dt>
+<em class="property">async </em><code class="sig-name descname">get_async</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">*fmt_args</em>, <em class="sig-param">params: Dict = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.get_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.get_async" title="Permalink to this definition">¶</a></dt>
 <dd><p>Like <a class="reference internal" href="#vt.Client.get" title="vt.Client.get"><code class="xref py py-func docutils literal notranslate"><span class="pre">get()</span></code></a> but returns a coroutine.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="vt.Client.get_data">
-<code class="sig-name descname">get_data</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">params: Dict = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.get_data" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_data</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">*fmt_args</em>, <em class="sig-param">params: Dict = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.get_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sends a GET request to a given API endpoint and returns response’s data.</p>
 <p>Most VirusTotal API responses are JSON-encoded with the following format:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">response</span> <span class="n">data</span><span class="o">&gt;</span><span class="p">}</span>
@@ -287,7 +293,9 @@ where the data is a VirusTotal object you can use get_object_async instead.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>path</strong> (<em>str</em>) – Path to API endpoint.</p></li>
+<li><p><strong>path</strong> (<em>str</em>) – Path to API endpoint, can contain format placeholders {}.</p></li>
+<li><p><strong>fmt_args</strong> – A variable number of arguments that are put into any
+placeholders used in path.</p></li>
 <li><p><strong>params</strong> (<em>dict</em>) – Parameters sent in the request.</p></li>
 </ul>
 </dd>
@@ -301,7 +309,7 @@ called.</p>
 
 <dl class="method">
 <dt id="vt.Client.get_data_async">
-<em class="property">async </em><code class="sig-name descname">get_data_async</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">params: Dict = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.get_data_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.get_data_async" title="Permalink to this definition">¶</a></dt>
+<em class="property">async </em><code class="sig-name descname">get_data_async</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">*fmt_args</em>, <em class="sig-param">params: Dict = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.get_data_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.get_data_async" title="Permalink to this definition">¶</a></dt>
 <dd><p>Like <a class="reference internal" href="#vt.Client.get_data" title="vt.Client.get_data"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_data()</span></code></a> but returns a coroutine.</p>
 </dd></dl>
 
@@ -324,14 +332,16 @@ occurred.</p>
 
 <dl class="method">
 <dt id="vt.Client.get_json">
-<code class="sig-name descname">get_json</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">params: Dict = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.get_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.get_json" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_json</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">*fmt_args</em>, <em class="sig-param">params: Dict = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.get_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.get_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sends a GET request to a given API endpoint and parses the response.</p>
 <p>Most VirusTotal API responses are JSON-encoded. This function parses the
 JSON, check for errors, and return the server response as a dictionary.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>path</strong> (<em>str</em>) – Path to API endpoint.</p></li>
+<li><p><strong>path</strong> (<em>str</em>) – Path to API endpoint, can contain format placeholders {}.</p></li>
+<li><p><strong>fmt_args</strong> – A variable number of arguments that are put into any
+placeholders used in path.</p></li>
 <li><p><strong>params</strong> (<em>dict</em>) – Parameters sent in the request.</p></li>
 </ul>
 </dd>
@@ -343,13 +353,13 @@ JSON, check for errors, and return the server response as a dictionary.</p>
 
 <dl class="method">
 <dt id="vt.Client.get_json_async">
-<em class="property">async </em><code class="sig-name descname">get_json_async</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">params: Dict = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.get_json_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.get_json_async" title="Permalink to this definition">¶</a></dt>
+<em class="property">async </em><code class="sig-name descname">get_json_async</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">*fmt_args</em>, <em class="sig-param">params: Dict = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.get_json_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.get_json_async" title="Permalink to this definition">¶</a></dt>
 <dd><p>Like <a class="reference internal" href="#vt.Client.get_json" title="vt.Client.get_json"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_json()</span></code></a> but returns a coroutine.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="vt.Client.get_object">
-<code class="sig-name descname">get_object</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">params: Dict = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.get_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.get_object" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_object</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">*fmt_args</em>, <em class="sig-param">params: Dict = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.get_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.get_object" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sends a GET request to a given API endpoint and returns an object.</p>
 <p>The endpoint specified must return an object, not a collection. This
 means that get_object can be used with endpoints like /files/{file_id}
@@ -358,7 +368,9 @@ and /urls/{url_id}, which return an individual object but not with
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>path</strong> (<em>str</em>) – Path to API endpoint.</p></li>
+<li><p><strong>path</strong> (<em>str</em>) – Path to API endpoint, can contain format placeholders {}.</p></li>
+<li><p><strong>fmt_args</strong> – A variable number of arguments that are put into any
+placeholders used in path.</p></li>
 <li><p><strong>params</strong> (<em>dict</em>) – Parameters sent in the request.</p></li>
 </ul>
 </dd>
@@ -370,7 +382,7 @@ and /urls/{url_id}, which return an individual object but not with
 
 <dl class="method">
 <dt id="vt.Client.get_object_async">
-<em class="property">async </em><code class="sig-name descname">get_object_async</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">params: Dict = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.get_object_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.get_object_async" title="Permalink to this definition">¶</a></dt>
+<em class="property">async </em><code class="sig-name descname">get_object_async</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">*fmt_args</em>, <em class="sig-param">params: Dict = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.get_object_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.get_object_async" title="Permalink to this definition">¶</a></dt>
 <dd><p>Like <a class="reference internal" href="#vt.Client.get_object" title="vt.Client.get_object"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_object()</span></code></a> but returns a coroutine.</p>
 </dd></dl>
 
@@ -404,7 +416,7 @@ return.</p></li>
 
 <dl class="method">
 <dt id="vt.Client.patch">
-<code class="sig-name descname">patch</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">data: Any = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.patch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.patch" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">patch</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">*fmt_args</em>, <em class="sig-param">data: Any = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.patch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.patch" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sends a PATCH request to a given API endpoint.</p>
 <p>This is a low-level function that returns a raw HTTP response, no error
 checking nor response parsing is performed. See <a class="reference internal" href="#vt.Client.patch_object" title="vt.Client.patch_object"><code class="xref py py-func docutils literal notranslate"><span class="pre">patch_object()</span></code></a> for
@@ -412,7 +424,9 @@ a higher-level function.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>path</strong> (<em>str</em>) – Path to API endpoint.</p></li>
+<li><p><strong>path</strong> (<em>str</em>) – Path to API endpoint, can contain format placeholders {}.</p></li>
+<li><p><strong>fmt_args</strong> – A variable number of arguments that are put into any
+placeholders used in path.</p></li>
 <li><p><strong>data</strong> (<em>A string</em><em> or </em><em>bytes</em>) – Data sent in the request body.</p></li>
 </ul>
 </dd>
@@ -424,20 +438,22 @@ a higher-level function.</p>
 
 <dl class="method">
 <dt id="vt.Client.patch_async">
-<em class="property">async </em><code class="sig-name descname">patch_async</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">data: Any = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.patch_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.patch_async" title="Permalink to this definition">¶</a></dt>
+<em class="property">async </em><code class="sig-name descname">patch_async</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">*fmt_args</em>, <em class="sig-param">data: Any = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.patch_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.patch_async" title="Permalink to this definition">¶</a></dt>
 <dd><p>Like <a class="reference internal" href="#vt.Client.patch" title="vt.Client.patch"><code class="xref py py-func docutils literal notranslate"><span class="pre">patch()</span></code></a> but returns a coroutine.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="vt.Client.patch_object">
-<code class="sig-name descname">patch_object</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">obj: vt.object.Object</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.patch_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.patch_object" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">patch_object</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">*fmt_args</em>, <em class="sig-param">obj: vt.object.Object</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.patch_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.patch_object" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sends a PATCH request for modifying an object.</p>
 <p>This function modifies an object. The endpoint must be one that identifies
 an object, like /intelligence/hunting_rulesets/{id}.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>path</strong> (<em>str</em>) – Path to API endpoint.</p></li>
+<li><p><strong>path</strong> (<em>str</em>) – Path to API endpoint, can contain format placeholders {}.</p></li>
+<li><p><strong>fmt_args</strong> – A variable number of arguments that are put into any
+placeholders used in path.</p></li>
 <li><p><strong>obj</strong> (<a class="reference internal" href="object.html#vt.Object" title="vt.Object"><code class="xref py py-class docutils literal notranslate"><span class="pre">Object</span></code></a>) – Object that has been modified.</p></li>
 </ul>
 </dd>
@@ -450,13 +466,13 @@ the changes has been applied.</p>
 
 <dl class="method">
 <dt id="vt.Client.patch_object_async">
-<em class="property">async </em><code class="sig-name descname">patch_object_async</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">obj: vt.object.Object</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.patch_object_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.patch_object_async" title="Permalink to this definition">¶</a></dt>
+<em class="property">async </em><code class="sig-name descname">patch_object_async</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">*fmt_args</em>, <em class="sig-param">obj: vt.object.Object</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.patch_object_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.patch_object_async" title="Permalink to this definition">¶</a></dt>
 <dd><p>Like <a class="reference internal" href="#vt.Client.patch_object" title="vt.Client.patch_object"><code class="xref py py-func docutils literal notranslate"><span class="pre">patch_object()</span></code></a> but returns a coroutine.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="vt.Client.post">
-<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">data: Any = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.post" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">post</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">*fmt_args</em>, <em class="sig-param">data: Any = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.post" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sends a POST request to a given API endpoint.</p>
 <p>This is a low-level function that returns a raw HTTP response, no error
 checking nor response parsing is performed. See <a class="reference internal" href="#vt.Client.post_object" title="vt.Client.post_object"><code class="xref py py-func docutils literal notranslate"><span class="pre">post_object()</span></code></a> for
@@ -464,7 +480,9 @@ a higher-level function.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>path</strong> (<em>str</em>) – Path to API endpoint.</p></li>
+<li><p><strong>path</strong> (<em>str</em>) – Path to API endpoint, can contain format placeholders {}.</p></li>
+<li><p><strong>fmt_args</strong> – A variable number of arguments that are put into any
+placeholders used in path.</p></li>
 <li><p><strong>data</strong> (<em>A string</em><em> or </em><em>bytes</em>) – Data sent in the request body.</p></li>
 </ul>
 </dd>
@@ -476,13 +494,13 @@ a higher-level function.</p>
 
 <dl class="method">
 <dt id="vt.Client.post_async">
-<em class="property">async </em><code class="sig-name descname">post_async</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">data: Any = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.post_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.post_async" title="Permalink to this definition">¶</a></dt>
+<em class="property">async </em><code class="sig-name descname">post_async</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">*fmt_args</em>, <em class="sig-param">data: Any = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.post_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.post_async" title="Permalink to this definition">¶</a></dt>
 <dd><p>Like <a class="reference internal" href="#vt.Client.post" title="vt.Client.post"><code class="xref py py-func docutils literal notranslate"><span class="pre">post()</span></code></a> but returns a coroutine.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="vt.Client.post_object">
-<code class="sig-name descname">post_object</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">obj: vt.object.Object</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.post_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.post_object" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">post_object</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">*fmt_args</em>, <em class="sig-param">obj: vt.object.Object</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.post_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.post_object" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sends a POST request for creating an object.</p>
 <p>This function create a new object. The endpoint must be one that identifies
 a collection, like /intelligence/hunting_rulesets.</p>
@@ -502,7 +520,7 @@ endpoint.</p></li>
 
 <dl class="method">
 <dt id="vt.Client.post_object_async">
-<em class="property">async </em><code class="sig-name descname">post_object_async</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">obj: vt.object.Object</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.post_object_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.post_object_async" title="Permalink to this definition">¶</a></dt>
+<em class="property">async </em><code class="sig-name descname">post_object_async</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">*fmt_args</em>, <em class="sig-param">obj: vt.object.Object</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.post_object_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.post_object_async" title="Permalink to this definition">¶</a></dt>
 <dd><p>Like <a class="reference internal" href="#vt.Client.post_object" title="vt.Client.post_object"><code class="xref py py-func docutils literal notranslate"><span class="pre">post_object()</span></code></a> but returns a coroutine.</p>
 </dd></dl>
 

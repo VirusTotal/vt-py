@@ -81,7 +81,7 @@ class Feed:
     while True:
       response = await self._client.get_async('/feeds/{}/{}'.format(
           self._type.value, batch_time.strftime('%Y%m%d%H%M')))
-      error = await self._client.get_error(response)
+      error = await self._client.get_error_async(response)
       if not error:
         break
       if error.code == 'NotAvailableYet':

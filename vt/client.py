@@ -216,7 +216,7 @@ class Client:
     return json_response['data']
 
   async def _response_to_json(self, response):
-    error = await self.get_error(response)
+    error = await self.get_error_async(response)
     if error:
       raise error
     return await response.json_async()
@@ -349,7 +349,7 @@ class Client:
     json_response = await self.get_json_async(path, *fmt_args, params=params)
     return self._extract_data_from_json(json_response)
 
-  async def get_error(self, response):
+  async def get_error_async(self, response):
     """Given a :class:`ClientResponse` returns a :class:`APIError`
 
     This function checks if the response from the VirusTotal backend was an

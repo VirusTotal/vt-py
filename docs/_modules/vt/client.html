@@ -364,7 +364,7 @@
     <span class="k">return</span> <span class="n">json_response</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
 
   <span class="k">async</span> <span class="k">def</span> <span class="nf">_response_to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
-    <span class="n">error</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_error</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+    <span class="n">error</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_error_async</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">error</span><span class="p">:</span>
       <span class="k">raise</span> <span class="n">error</span>
     <span class="k">return</span> <span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">json_async</span><span class="p">()</span>
@@ -497,7 +497,7 @@
     <span class="n">json_response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_json_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_data_from_json</span><span class="p">(</span><span class="n">json_response</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Client.get_error"><a class="viewcode-back" href="../../api/client.html#vt.Client.get_error">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">get_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.get_error_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.get_error_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">get_error_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Given a :class:`ClientResponse` returns a :class:`APIError`</span>
 
 <span class="sd">    This function checks if the response from the VirusTotal backend was an</span>

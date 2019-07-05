@@ -162,8 +162,6 @@
 
 <span class="kn">from</span> <span class="nn">.object</span> <span class="k">import</span> <span class="n">Object</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Dict</span>
-
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Iterator&#39;</span><span class="p">]</span>
 
@@ -204,8 +202,8 @@
 <span class="sd">  &gt;&gt;&gt;  asyncio.get_event_loop().run_until_complete(print_comments)</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cursor</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cursor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Initializes an iterator.</span>
 
 <span class="sd">    This function is not intended to be called directly. Client.iterator() is</span>
@@ -252,12 +250,12 @@
     <span class="n">items</span> <span class="o">=</span> <span class="n">json_resp</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="n">batch_cursor</span><span class="p">:]</span>
     <span class="k">return</span> <span class="n">items</span><span class="p">,</span> <span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cursor&#39;</span><span class="p">)</span>
 
-  <span class="k">async</span> <span class="k">def</span> <span class="nf">_get_batch_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_cursor</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+  <span class="k">async</span> <span class="k">def</span> <span class="nf">_get_batch_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_cursor</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
     <span class="n">json_resp</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">get_json_async</span><span class="p">(</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_build_params</span><span class="p">())</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_response</span><span class="p">(</span><span class="n">json_resp</span><span class="p">,</span> <span class="n">batch_cursor</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">_get_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_cursor</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_get_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_cursor</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
     <span class="n">json_resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">get_json</span><span class="p">(</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_build_params</span><span class="p">())</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_response</span><span class="p">(</span><span class="n">json_resp</span><span class="p">,</span> <span class="n">batch_cursor</span><span class="p">)</span>

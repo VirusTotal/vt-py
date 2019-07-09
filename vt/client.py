@@ -16,6 +16,8 @@ import asyncio
 import base64
 import json
 
+from multidict import MultiDict
+
 from .error import APIError
 from .feed import Feed
 from .feed import FeedType
@@ -249,6 +251,7 @@ class Client:
     :param fmt_args: A variable number of arguments that are put into any
       placeholders used in path.
     :type path: str
+    :returns: An instance of :class:`ClientResponse`.
     """
     return _make_sync(self.delete_async(path, *fmt_args))
 
@@ -538,3 +541,60 @@ class Client:
         cursor=cursor,
         limit=limit,
         batch_size=batch_size)
+
+  def scan_file(self, file):
+    """Scans a file.
+
+    :param file: File to be scanned.
+    :type file: File-like object.
+    :returns: An instance of :class:`Object` of analysis type.
+    """
+    return _make_sync(self.scan_file_async(file))
+
+  async def scan_file_async(self, file):
+    """Like :func:`scan_file` but returns a coroutine."""
+
+    # The snippet below could be replaced with this simpler code:
+    #
+    # form_data = aiohttp.FormData()
+    # form_data.add_field('file', file)
+    #
+    # However, aiohttp.FormData assumes that the server supports RFC 5987 and
+    # send a Content-Disposition like:
+    #
+    # 'form-data; name="file"; filename="foobar"; filename*=UTF-8''foobar
+    #
+    # AppEngine's upload handler doesn't like the filename*=UTF-8''foobar field
+    # and fails with this Content-Disposition header.
+
+    part = aiohttp.get_payload(file)
+    filename = file.name if hasattr(file, 'name') else 'unknown'
+    disposition = 'form-data; name="file"; filename="{}"'.format(filename)
+    part.headers['Content-Disposition'] = disposition
+    form_data = aiohttp.MultipartWriter('form-data')
+    form_data.append_payload(part)
+
+    upload_url = await self.get_data_async('/files/upload_url')
+    response = ClientResponse(
+        await self._get_session().post(upload_url, data=form_data))
+
+    return await self._response_to_object(response)
+
+  def scan_url(self, url):
+    """Scans a URL.
+
+    :param url: The URL to be scanned.
+    :type url: str
+    :returns: An instance of :class:`Object` of analysis type.
+    """
+    return _make_sync(self.scan_url_async(url))
+
+  async def scan_url_async(self, url):
+    """Like :func:`scan_url` but returns a coroutine."""
+    form_data = aiohttp.FormData()
+    form_data.add_field('url', url)
+
+    response = ClientResponse(
+        await self._get_session().post(self._full_url('/urls'), data=form_data))
+
+    return await self._response_to_object(response)

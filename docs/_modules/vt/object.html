@@ -219,21 +219,21 @@
 <span class="sd">        }</span>
 <span class="sd">      }</span>
 
-<span class="sd">    At least `type`, `id` and `attributes` are required to be present in the</span>
-<span class="sd">    dictionary, if not, an exception is raised.</span>
+<span class="sd">    At least `type` and `id` are required to be present in the dictionary, if</span>
+<span class="sd">    not, an exception is raised.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj_dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
           <span class="s1">&#39;Expecting dictionary, got: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">obj_dict</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
 
-    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;attributes&#39;</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;id&#39;</span><span class="p">):</span>
       <span class="k">if</span> <span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">obj_dict</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Object </span><span class="si">{}</span><span class="s1"> not found&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">field</span><span class="p">))</span>
 
     <span class="n">obj</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span>
-        <span class="n">obj_dict</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">],</span>
-        <span class="n">obj_dict</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">],</span>
-        <span class="n">obj_dict</span><span class="p">[</span><span class="s1">&#39;attributes&#39;</span><span class="p">])</span>
+        <span class="n">obj_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">),</span>
+        <span class="n">obj_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">),</span>
+        <span class="n">obj_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;attributes&#39;</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="s1">&#39;context_attributes&#39;</span> <span class="ow">in</span> <span class="n">obj_dict</span><span class="p">:</span>
       <span class="n">obj</span><span class="o">.</span><span class="n">_context_attributes</span> <span class="o">=</span> <span class="n">obj_dict</span><span class="p">[</span><span class="s1">&#39;context_attributes&#39;</span><span class="p">]</span>

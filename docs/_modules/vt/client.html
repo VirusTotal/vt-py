@@ -164,6 +164,8 @@
 <span class="kn">import</span> <span class="nn">base64</span>
 <span class="kn">import</span> <span class="nn">json</span>
 
+<span class="kn">from</span> <span class="nn">multidict</span> <span class="k">import</span> <span class="n">MultiDict</span>
+
 <span class="kn">from</span> <span class="nn">.error</span> <span class="k">import</span> <span class="n">APIError</span>
 <span class="kn">from</span> <span class="nn">.feed</span> <span class="k">import</span> <span class="n">Feed</span>
 <span class="kn">from</span> <span class="nn">.feed</span> <span class="k">import</span> <span class="n">FeedType</span>
@@ -397,6 +399,7 @@
 <span class="sd">    :param fmt_args: A variable number of arguments that are put into any</span>
 <span class="sd">      placeholders used in path.</span>
 <span class="sd">    :type path: str</span>
+<span class="sd">    :returns: An instance of :class:`ClientResponse`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">delete_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">fmt_args</span><span class="p">))</span></div>
 
@@ -685,7 +688,64 @@
         <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
         <span class="n">cursor</span><span class="o">=</span><span class="n">cursor</span><span class="p">,</span>
         <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
-        <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">)</span></div></div>
+        <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Client.scan_file"><a class="viewcode-back" href="../../api/client.html#vt.Client.scan_file">[docs]</a>  <span class="k">def</span> <span class="nf">scan_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Scans a file.</span>
+
+<span class="sd">    :param file: File to be scanned.</span>
+<span class="sd">    :type file: File-like object.</span>
+<span class="sd">    :returns: An instance of :class:`Object` of analysis type.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scan_file_async</span><span class="p">(</span><span class="n">file</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Client.scan_file_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.scan_file_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">scan_file_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Like :func:`scan_file` but returns a coroutine.&quot;&quot;&quot;</span>
+
+    <span class="c1"># The snippet below could be replaced with this simpler code:</span>
+    <span class="c1">#</span>
+    <span class="c1"># form_data = aiohttp.FormData()</span>
+    <span class="c1"># form_data.add_field(&#39;file&#39;, file)</span>
+    <span class="c1">#</span>
+    <span class="c1"># However, aiohttp.FormData assumes that the server supports RFC 5987 and</span>
+    <span class="c1"># send a Content-Disposition like:</span>
+    <span class="c1">#</span>
+    <span class="c1"># &#39;form-data; name=&quot;file&quot;; filename=&quot;foobar&quot;; filename*=UTF-8&#39;&#39;foobar</span>
+    <span class="c1">#</span>
+    <span class="c1"># AppEngine&#39;s upload handler doesn&#39;t like the filename*=UTF-8&#39;&#39;foobar field</span>
+    <span class="c1"># and fails with this Content-Disposition header.</span>
+
+    <span class="n">part</span> <span class="o">=</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">get_payload</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;unknown&#39;</span>
+    <span class="n">disposition</span> <span class="o">=</span> <span class="s1">&#39;form-data; name=&quot;file&quot;; filename=&quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">part</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s1">&#39;Content-Disposition&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">disposition</span>
+    <span class="n">form_data</span> <span class="o">=</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">MultipartWriter</span><span class="p">(</span><span class="s1">&#39;form-data&#39;</span><span class="p">)</span>
+    <span class="n">form_data</span><span class="o">.</span><span class="n">append_payload</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
+
+    <span class="n">upload_url</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data_async</span><span class="p">(</span><span class="s1">&#39;/files/upload_url&#39;</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">ClientResponse</span><span class="p">(</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_session</span><span class="p">()</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">upload_url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">form_data</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_to_object</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Client.scan_url"><a class="viewcode-back" href="../../api/client.html#vt.Client.scan_url">[docs]</a>  <span class="k">def</span> <span class="nf">scan_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Scans a URL.</span>
+
+<span class="sd">    :param url: The URL to be scanned.</span>
+<span class="sd">    :type url: str</span>
+<span class="sd">    :returns: An instance of :class:`Object` of analysis type.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scan_url_async</span><span class="p">(</span><span class="n">url</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Client.scan_url_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.scan_url_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">scan_url_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Like :func:`scan_url` but returns a coroutine.&quot;&quot;&quot;</span>
+    <span class="n">form_data</span> <span class="o">=</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">FormData</span><span class="p">()</span>
+    <span class="n">form_data</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s1">&#39;url&#39;</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+
+    <span class="n">response</span> <span class="o">=</span> <span class="n">ClientResponse</span><span class="p">(</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_session</span><span class="p">()</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_full_url</span><span class="p">(</span><span class="s1">&#39;/urls&#39;</span><span class="p">),</span> <span class="n">data</span><span class="o">=</span><span class="n">form_data</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_to_object</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

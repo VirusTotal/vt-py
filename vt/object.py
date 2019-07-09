@@ -71,21 +71,21 @@ class Object(object):
         }
       }
 
-    At least `type`, `id` and `attributes` are required to be present in the
-    dictionary, if not, an exception is raised.
+    At least `type` and `id` are required to be present in the dictionary, if
+    not, an exception is raised.
     """
     if not isinstance(obj_dict, dict):
       raise ValueError(
           'Expecting dictionary, got: {}'.format(type(obj_dict).__name__))
 
-    for field in ('type', 'id', 'attributes'):
+    for field in ('type', 'id'):
       if field not in obj_dict:
         raise ValueError('Object {} not found'.format(field))
 
     obj = cls(
-        obj_dict['type'],
-        obj_dict['id'],
-        obj_dict['attributes'])
+        obj_dict.get('type'),
+        obj_dict.get('id'),
+        obj_dict.get('attributes'))
 
     if 'context_attributes' in obj_dict:
       obj._context_attributes = obj_dict['context_attributes']

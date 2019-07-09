@@ -200,6 +200,9 @@ resources like TCP connections.</p>
 placeholders used in path.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An instance of <a class="reference internal" href="#vt.ClientResponse" title="vt.ClientResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClientResponse</span></code></a>.</p>
+</dd>
 </dl>
 </dd></dl>
 
@@ -522,6 +525,46 @@ endpoint.</p></li>
 <dt id="vt.Client.post_object_async">
 <em class="property">async </em><code class="sig-name descname">post_object_async</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">*fmt_args</em>, <em class="sig-param">obj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.post_object_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.post_object_async" title="Permalink to this definition">¶</a></dt>
 <dd><p>Like <a class="reference internal" href="#vt.Client.post_object" title="vt.Client.post_object"><code class="xref py py-func docutils literal notranslate"><span class="pre">post_object()</span></code></a> but returns a coroutine.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vt.Client.scan_file">
+<code class="sig-name descname">scan_file</code><span class="sig-paren">(</span><em class="sig-param">file</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.scan_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.scan_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scans a file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file</strong> (<em>File-like object.</em>) – File to be scanned.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An instance of <a class="reference internal" href="object.html#vt.Object" title="vt.Object"><code class="xref py py-class docutils literal notranslate"><span class="pre">Object</span></code></a> of analysis type.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="vt.Client.scan_file_async">
+<em class="property">async </em><code class="sig-name descname">scan_file_async</code><span class="sig-paren">(</span><em class="sig-param">file</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.scan_file_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.scan_file_async" title="Permalink to this definition">¶</a></dt>
+<dd><p>Like <a class="reference internal" href="#vt.Client.scan_file" title="vt.Client.scan_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">scan_file()</span></code></a> but returns a coroutine.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vt.Client.scan_url">
+<code class="sig-name descname">scan_url</code><span class="sig-paren">(</span><em class="sig-param">url</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.scan_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.scan_url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scans a URL.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>url</strong> (<em>str</em>) – The URL to be scanned.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An instance of <a class="reference internal" href="object.html#vt.Object" title="vt.Object"><code class="xref py py-class docutils literal notranslate"><span class="pre">Object</span></code></a> of analysis type.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="vt.Client.scan_url_async">
+<em class="property">async </em><code class="sig-name descname">scan_url_async</code><span class="sig-paren">(</span><em class="sig-param">url</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.scan_url_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.scan_url_async" title="Permalink to this definition">¶</a></dt>
+<dd><p>Like <a class="reference internal" href="#vt.Client.scan_url" title="vt.Client.scan_url"><code class="xref py py-func docutils literal notranslate"><span class="pre">scan_url()</span></code></a> but returns a coroutine.</p>
 </dd></dl>
 
 </dd></dl>

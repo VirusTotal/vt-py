@@ -49,9 +49,6 @@ def test_object_from_dict():
   with pytest.raises(ValueError, match=r"Object id not found"):
     Object.from_dict({'type': 'dummy_type'})
 
-  with pytest.raises(ValueError, match=r"Object attributes not found"):
-    Object.from_dict({'type': 'dummy_type', 'id': 'dummy_id'})
-
   with pytest.raises(ValueError, match=r'Object attributes must be a dictionary'):
     Object.from_dict({'type': 'dummy_type', 'id': 'dummy_id', 'attributes': 1})
 
@@ -257,3 +254,59 @@ def test_download_file(httpserver):
       client.download_file('01020304050607080900a0b0c0d0e0f', f)
       f.seek(0)
       assert f.read() == b'filecontent'
+
+
+def test_scan_file(httpserver):
+
+  upload_url = (
+      'http://' + httpserver.host + ':' + str(httpserver.port) + '/upload')
+
+  httpserver.expect_oneshot_request(
+      '/api/v3/files/upload_url',
+      method='GET',
+      headers={'X-Apikey': 'dummy_api_key'}
+  ).respond_with_json({
+      'data': upload_url
+  })
+
+  httpserver.expect_oneshot_request(
+      '/upload',
+      method='POST',
+      headers={'X-Apikey': 'dummy_api_key'}
+  ).respond_with_json({
+      'data': {
+          'id': 'dummy_id',
+          'type': 'analysis',
+          'attributes': {
+              'foo': 'foo',
+          }
+      }
+  })
+
+  with new_client(httpserver) as client:
+    f = io.StringIO("dummy file")
+    analysis = client.scan_file(f)
+
+  assert analysis.type == 'analysis'
+
+
+def test_scan_url(httpserver):
+
+  httpserver.expect_request(
+      '/api/v3/urls',
+      method='POST',
+      headers={'X-Apikey': 'dummy_api_key'}
+  ).respond_with_json({
+      'data': {
+          'id': 'dummy_id',
+          'type': 'analysis',
+          'attributes': {
+              'foo': 'foo',
+          }
+      }
+  })
+
+  with new_client(httpserver) as client:
+    analysis = client.scan_url('https://www.dummy.url')
+
+  assert analysis.type == 'analysis'

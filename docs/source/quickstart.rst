@@ -69,6 +69,39 @@ The returned object contains the URL attributes. Some examples:
 {'harmless': 61, 'malicious': 0, 'suspicious': 1, 'timeout': 0, 'undetected': 8}
 
 
+Scan a file
+-----------
+
+Before scanning a file is highly recommended that you look up for it as
+described in `Get information about a file <#get-information-about-a-file>`_.
+If the file already exists and the lastest analysis is fresh enough, you can
+use that instead of scanning the file again. If not, you can scan it with:
+
+>>> with open("/path/to/file", "rb") as f:
+>>>   analysis = client.scan_file(f)
+
+When :meth:`vt.Client.scan_file` returns the analysis is not completed yet,
+the object returned only has the analysis ID but not attributes. In order to
+track the status of the analysis you must ask for the analysis object until
+it's status is `completed`:
+
+>>> while True:
+>>>   analysis = client.get_object("/analyses/{}", analysis.id)
+>>>   print(analysis.status)
+>>>   if analysis.status == "completed":
+>>>      break
+>>>   time.sleep(30)
+
+
+Scan an URL
+-----------
+
+Scanning a URL is very similar to `scanning a file <scan-a-file>`_, you just
+need to use :meth:`vt.Client.scan_url` instead of :meth:`vt.Client.scan_file`:
+
+>>> analysis = client.scan_url('https://somedomain.com/foo/bar')
+
+
 Download a file
 ---------------
 
@@ -98,15 +131,15 @@ Post the object to the `/intelligence/retrohunt_jobs` collection:
 
 >>> job = client.post_object("/intelligence/retrohunt_jobs", obj=job)
 
-Notice thas `job` has been replaced with the value returned by
-:func:`vt.Client.post_object`, so now `job` has additional attributes and
-an object ID.
-
->>> job.status
-'starting'
+Notice that `job` has been replaced with the value returned by
+:func:`vt.Client.post_object`, so now `job` has an ID and additional
+attributes.
 
 >>> job.id
 'username-123456789'
+
+>>> job.status
+'starting'
 
 With the object identifier you can ask for the job again a see it making
 progress. Wait for a few seconds and do:
@@ -143,7 +176,7 @@ Create a LiveHunt ruleset
     This feature is available only for premium users.
 
 Create an empty object of type `hunting_ruleset` and set its `name` and
-`rules` attribute:
+`rules` attributes:
 
 >>> rs = vt.Object("hunting_ruleset")
 >>> rs.name = "My test ruleset"

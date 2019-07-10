@@ -86,6 +86,8 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Quickstart</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#get-information-about-a-file">Get information about a file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#get-information-about-an-url">Get information about an URL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scan-a-file">Scan a file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scan-an-url">Scan an URL</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#download-a-file">Download a file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#start-and-abort-a-retrohunt-job">Start and abort a Retrohunt job</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#create-a-livehunt-ruleset">Create a LiveHunt ruleset</a></li>
@@ -224,6 +226,37 @@ function. This other code is equivalent:</p>
 </pre></div>
 </div>
 </div>
+<div class="section" id="scan-a-file">
+<h2>Scan a file<a class="headerlink" href="#scan-a-file" title="Permalink to this headline">¶</a></h2>
+<p>Before scanning a file is highly recommended that you look up for it as
+described in <a class="reference external" href="#get-information-about-a-file">Get information about a file</a>.
+If the file already exists and the lastest analysis is fresh enough, you can
+use that instead of scanning the file again. If not, you can scan it with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;/path/to/file&quot;</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>  <span class="n">analysis</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">scan_file</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>When <a class="reference internal" href="api/client.html#vt.Client.scan_file" title="vt.Client.scan_file"><code class="xref py py-meth docutils literal notranslate"><span class="pre">vt.Client.scan_file()</span></code></a> returns the analysis is not completed yet,
+the object returned only has the analysis ID but not attributes. In order to
+track the status of the analysis you must ask for the analysis object until
+it’s status is <cite>completed</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>  <span class="n">analysis</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_object</span><span class="p">(</span><span class="s2">&quot;/analyses/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">analysis</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>  <span class="nb">print</span><span class="p">(</span><span class="n">analysis</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>  <span class="k">if</span> <span class="n">analysis</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;completed&quot;</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>     <span class="k">break</span>
+<span class="gp">&gt;&gt;&gt; </span>  <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="scan-an-url">
+<h2>Scan an URL<a class="headerlink" href="#scan-an-url" title="Permalink to this headline">¶</a></h2>
+<p>Scanning a URL is very similar to <a class="reference external" href="scan-a-file">scanning a file</a>, you just
+need to use <a class="reference internal" href="api/client.html#vt.Client.scan_url" title="vt.Client.scan_url"><code class="xref py py-meth docutils literal notranslate"><span class="pre">vt.Client.scan_url()</span></code></a> instead of <a class="reference internal" href="api/client.html#vt.Client.scan_file" title="vt.Client.scan_file"><code class="xref py py-meth docutils literal notranslate"><span class="pre">vt.Client.scan_file()</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">analysis</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">scan_url</span><span class="p">(</span><span class="s1">&#39;https://somedomain.com/foo/bar&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="download-a-file">
 <h2>Download a file<a class="headerlink" href="#download-a-file" title="Permalink to this headline">¶</a></h2>
 <div class="admonition note">
@@ -253,15 +286,15 @@ must be opened in <cite>“wb”</cite> mode:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">post_object</span><span class="p">(</span><span class="s2">&quot;/intelligence/retrohunt_jobs&quot;</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Notice thas <cite>job</cite> has been replaced with the value returned by
-<a class="reference internal" href="api/client.html#vt.Client.post_object" title="vt.Client.post_object"><code class="xref py py-func docutils literal notranslate"><span class="pre">vt.Client.post_object()</span></code></a>, so now <cite>job</cite> has additional attributes and
-an object ID.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">job</span><span class="o">.</span><span class="n">status</span>
-<span class="go">&#39;starting&#39;</span>
-</pre></div>
-</div>
+<p>Notice that <cite>job</cite> has been replaced with the value returned by
+<a class="reference internal" href="api/client.html#vt.Client.post_object" title="vt.Client.post_object"><code class="xref py py-func docutils literal notranslate"><span class="pre">vt.Client.post_object()</span></code></a>, so now <cite>job</cite> has an ID and additional
+attributes.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">job</span><span class="o">.</span><span class="n">id</span>
 <span class="go">&#39;username-123456789&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">job</span><span class="o">.</span><span class="n">status</span>
+<span class="go">&#39;starting&#39;</span>
 </pre></div>
 </div>
 <p>With the object identifier you can ask for the job again a see it making
@@ -297,7 +330,7 @@ result from <a class="reference internal" href="api/client.html#vt.Client.post" 
 <p>This feature is available only for premium users.</p>
 </div>
 <p>Create an empty object of type <cite>hunting_ruleset</cite> and set its <cite>name</cite> and
-<cite>rules</cite> attribute:</p>
+<cite>rules</cite> attributes:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rs</span> <span class="o">=</span> <span class="n">vt</span><span class="o">.</span><span class="n">Object</span><span class="p">(</span><span class="s2">&quot;hunting_ruleset&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rs</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;My test ruleset&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rs</span><span class="o">.</span><span class="n">rules</span> <span class="o">=</span> <span class="s2">&quot;rule test { condition:false }&quot;</span>

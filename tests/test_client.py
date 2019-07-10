@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import datetime
 import io
 import json
 import pytest
@@ -51,6 +52,14 @@ def test_object_from_dict():
 
   with pytest.raises(ValueError, match=r'Object attributes must be a dictionary'):
     Object.from_dict({'type': 'dummy_type', 'id': 'dummy_id', 'attributes': 1})
+
+
+def test_object_date_attrs():
+
+  obj = Object('dummy_type')
+  obj.foo_date = 0
+
+  assert obj.foo_date == datetime.datetime(1970, 1, 1, 0, 0, 0)
 
 
 def test_object_modified_attrs():

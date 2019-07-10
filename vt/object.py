@@ -11,8 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import datetime
 import functools
-
+import re
 
 __all__ = ['Object']
 
@@ -52,6 +53,17 @@ class Object(object):
   Learn more about objects in the VirusTotal API in:
   https://developers.virustotal.com/v3.0/reference#objects
   """
+
+  # Attributes from all object types that match any of the following names
+  # represent a date as a UNIX timestamp. These attributes are converted to a
+  # Python datetime object transparently.
+
+  DATE_ATTRIBUTES = (
+    re.compile(r'^.+_date$'),
+    re.compile(r'^date$'),
+    re.compile(r'^last_login$'),
+    re.compile(r'^user_since$'),
+  )
 
   @classmethod
   def from_dict(cls, obj_dict):
@@ -106,7 +118,7 @@ class Object(object):
     # the attribute as obj.foo and it will return 'somevalue'.
     if obj_attributes:
       for attr, value in obj_attributes.items():
-        self.__setattr__(attr, value)
+        setattr(self, attr, value)
 
     self._modified_attrs = []
 
@@ -114,10 +126,20 @@ class Object(object):
     if hasattr(self, '_modified_attrs'):
       self._modified_attrs.append(attr)
 
+  def __getattribute__(self, attr):
+    value = super(Object, self).__getattribute__(attr)
+    for re in Object.DATE_ATTRIBUTES:
+      if re.match(attr):
+        value = datetime.datetime.utcfromtimestamp(value)
+        break
+    return value
+
   def __setattr__(self, attr, value):
     if isinstance(value, dict):
       value = WhistleBlowerDict(
           value, functools.partial(self.__on_attr_change, attr))
+    elif isinstance(value, datetime.datetime):
+      value = int(datetime.datetime.timestamp(value))
     if attr not in self.__dict__ or value != self.__dict__[attr]:
       self.__on_attr_change(attr)
     super().__setattr__(attr, value)

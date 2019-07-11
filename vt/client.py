@@ -542,16 +542,20 @@ class Client:
         limit=limit,
         batch_size=batch_size)
 
-  def scan_file(self, file):
+  def scan_file(self, file, wait_for_completion=False):
     """Scans a file.
 
     :param file: File to be scanned.
+    :param wait_for_completion: If True the function doesn't return until the
+       analysis has been completed.
     :type file: File-like object.
+    :type wait_for_completion: bool
     :returns: An instance of :class:`Object` of analysis type.
     """
-    return _make_sync(self.scan_file_async(file))
+    return _make_sync(self.scan_file_async(
+        file, wait_for_completion=wait_for_completion))
 
-  async def scan_file_async(self, file):
+  async def scan_file_async(self, file, wait_for_completion=False):
     """Like :func:`scan_file` but returns a coroutine."""
 
     # The snippet below could be replaced with this simpler code:
@@ -578,18 +582,27 @@ class Client:
     response = ClientResponse(
         await self._get_session().post(upload_url, data=form_data))
 
-    return await self._response_to_object(response)
+    analysis = await self._response_to_object(response)
 
-  def scan_url(self, url):
+    if wait_for_completion:
+      analysis = await self._wait_for_analysis_completion(analysis)
+
+    return analysis
+
+  def scan_url(self, url, wait_for_completion=False):
     """Scans a URL.
 
     :param url: The URL to be scanned.
+    :param wait_for_completion: If True the function doesn't return until the
+       analysis has been completed.
     :type url: str
+    :type wait_for_completion: bool
     :returns: An instance of :class:`Object` of analysis type.
     """
-    return _make_sync(self.scan_url_async(url))
+    return _make_sync(self.scan_url_async(
+        url, wait_for_completion=wait_for_completion))
 
-  async def scan_url_async(self, url):
+  async def scan_url_async(self, url, wait_for_completion=False):
     """Like :func:`scan_url` but returns a coroutine."""
     form_data = aiohttp.FormData()
     form_data.add_field('url', url)
@@ -597,4 +610,19 @@ class Client:
     response = ClientResponse(
         await self._get_session().post(self._full_url('/urls'), data=form_data))
 
-    return await self._response_to_object(response)
+    analysis = await self._response_to_object(response)
+
+    if wait_for_completion:
+      analysis = await self._wait_for_analysis_completion(analysis)
+
+    return analysis
+
+  async def _wait_for_analysis_completion(self, analysis):
+    while True:
+      print(analysis.id)
+      analysis = await self.get_object_async('/analyses/{}', analysis.id)
+      print(analysis.status)
+      if analysis.status == 'completed':
+        break
+      await asyncio.sleep(20)
+    return analysis

@@ -690,16 +690,17 @@
         <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
         <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Client.scan_file"><a class="viewcode-back" href="../../api/client.html#vt.Client.scan_file">[docs]</a>  <span class="k">def</span> <span class="nf">scan_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.scan_file"><a class="viewcode-back" href="../../api/client.html#vt.Client.scan_file">[docs]</a>  <span class="k">def</span> <span class="nf">scan_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">wait_for_completion</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Scans a file.</span>
 
 <span class="sd">    :param file: File to be scanned.</span>
 <span class="sd">    :type file: File-like object.</span>
 <span class="sd">    :returns: An instance of :class:`Object` of analysis type.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scan_file_async</span><span class="p">(</span><span class="n">file</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scan_file_async</span><span class="p">(</span>
+        <span class="n">file</span><span class="p">,</span> <span class="n">wait_for_completion</span><span class="o">=</span><span class="n">wait_for_completion</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Client.scan_file_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.scan_file_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">scan_file_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.scan_file_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.scan_file_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">scan_file_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">wait_for_completion</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Like :func:`scan_file` but returns a coroutine.&quot;&quot;&quot;</span>
 
     <span class="c1"># The snippet below could be replaced with this simpler code:</span>
@@ -726,18 +727,24 @@
     <span class="n">response</span> <span class="o">=</span> <span class="n">ClientResponse</span><span class="p">(</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_session</span><span class="p">()</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">upload_url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">form_data</span><span class="p">))</span>
 
-    <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_to_object</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
+    <span class="n">analysis</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_to_object</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Client.scan_url"><a class="viewcode-back" href="../../api/client.html#vt.Client.scan_url">[docs]</a>  <span class="k">def</span> <span class="nf">scan_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">wait_for_completion</span><span class="p">:</span>
+      <span class="n">analysis</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for_analysis_completion</span><span class="p">(</span><span class="n">analysis</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">analysis</span></div>
+
+<div class="viewcode-block" id="Client.scan_url"><a class="viewcode-back" href="../../api/client.html#vt.Client.scan_url">[docs]</a>  <span class="k">def</span> <span class="nf">scan_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">wait_for_completion</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Scans a URL.</span>
 
 <span class="sd">    :param url: The URL to be scanned.</span>
 <span class="sd">    :type url: str</span>
 <span class="sd">    :returns: An instance of :class:`Object` of analysis type.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scan_url_async</span><span class="p">(</span><span class="n">url</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scan_url_async</span><span class="p">(</span>
+        <span class="n">url</span><span class="p">,</span> <span class="n">wait_for_completion</span><span class="o">=</span><span class="n">wait_for_completion</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Client.scan_url_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.scan_url_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">scan_url_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.scan_url_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.scan_url_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">scan_url_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">wait_for_completion</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Like :func:`scan_url` but returns a coroutine.&quot;&quot;&quot;</span>
     <span class="n">form_data</span> <span class="o">=</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">FormData</span><span class="p">()</span>
     <span class="n">form_data</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s1">&#39;url&#39;</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
@@ -745,7 +752,22 @@
     <span class="n">response</span> <span class="o">=</span> <span class="n">ClientResponse</span><span class="p">(</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_session</span><span class="p">()</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_full_url</span><span class="p">(</span><span class="s1">&#39;/urls&#39;</span><span class="p">),</span> <span class="n">data</span><span class="o">=</span><span class="n">form_data</span><span class="p">))</span>
 
-    <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_to_object</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div></div>
+    <span class="n">analysis</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_to_object</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">wait_for_completion</span><span class="p">:</span>
+      <span class="n">analysis</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for_analysis_completion</span><span class="p">(</span><span class="n">analysis</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">analysis</span></div>
+
+  <span class="k">async</span> <span class="k">def</span> <span class="nf">_wait_for_analysis_completion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis</span><span class="p">):</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+      <span class="nb">print</span><span class="p">(</span><span class="n">analysis</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+      <span class="n">analysis</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object_async</span><span class="p">(</span><span class="s1">&#39;/analyses/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">analysis</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="n">analysis</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">analysis</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s1">&#39;completed&#39;</span><span class="p">:</span>
+        <span class="k">break</span>
+      <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">analysis</span></div>
 </pre></div>
 
            </div>

@@ -92,6 +92,14 @@ it's status is `completed`:
 >>>      break
 >>>   time.sleep(30)
 
+Alternatively you can use the `wait_for_completion` argument:
+
+>>> with open("/path/to/file", "rb") as f:
+>>>   analysis = client.scan_file(f, wait_for_completion=True)
+
+When `wait_for_completion` is True :meth:`vt.Client.scan_file` doesn't return
+until the analysis has been completed.
+
 
 Scan an URL
 -----------

@@ -248,6 +248,13 @@ it’s status is <cite>completed</cite>:</p>
 <span class="gp">&gt;&gt;&gt; </span>  <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>Alternatively you can use the <cite>wait_for_completion</cite> argument:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;/path/to/file&quot;</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>  <span class="n">analysis</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">scan_file</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">wait_for_completion</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>When <cite>wait_for_completion</cite> is True <a class="reference internal" href="api/client.html#vt.Client.scan_file" title="vt.Client.scan_file"><code class="xref py py-meth docutils literal notranslate"><span class="pre">vt.Client.scan_file()</span></code></a> doesn’t return
+until the analysis has been completed.</p>
 </div>
 <div class="section" id="scan-an-url">
 <h2>Scan an URL<a class="headerlink" href="#scan-an-url" title="Permalink to this headline">¶</a></h2>

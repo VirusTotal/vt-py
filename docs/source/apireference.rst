@@ -9,4 +9,4 @@ API reference
    Feed <api/feed>
    Object <api/object>
    Iterator <api/iterator>
-   Utility functions <api/utils>
+   Utilities <api/utils>

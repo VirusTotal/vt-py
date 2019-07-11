@@ -146,7 +146,7 @@
            <div itemprop="articleBody">
             
   <h1>Source code for vt.client</h1><div class="highlight"><pre>
-<span></span><span class="c1"># Copyright © 2019 The vt-py authors. All Rights Reserved.</span>
+<span></span><span class="c1"># Copyright (c) 2019 The vt-py authors. All Rights Reserved.</span>
 <span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
 <span class="c1"># you may not use this file except in compliance with the License.</span>
 <span class="c1"># You may obtain a copy of the License at</span>
@@ -234,8 +234,9 @@
   <span class="k">def</span> <span class="nf">content</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">StreamReader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_aiohttp_resp</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
 
-  <span class="k">async</span> <span class="k">def</span> <span class="nf">read_async</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aiohttp_resp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+  <span class="k">if</span> <span class="kc">False</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">read_async</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aiohttp_resp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 
   <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">read_async</span><span class="p">())</span>
@@ -694,7 +695,10 @@
     <span class="sd">&quot;&quot;&quot;Scans a file.</span>
 
 <span class="sd">    :param file: File to be scanned.</span>
+<span class="sd">    :param wait_for_completion: If True the function doesn&#39;t return until the</span>
+<span class="sd">       analysis has been completed.</span>
 <span class="sd">    :type file: File-like object.</span>
+<span class="sd">    :type wait_for_completion: bool</span>
 <span class="sd">    :returns: An instance of :class:`Object` of analysis type.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scan_file_async</span><span class="p">(</span>
@@ -738,7 +742,10 @@
     <span class="sd">&quot;&quot;&quot;Scans a URL.</span>
 
 <span class="sd">    :param url: The URL to be scanned.</span>
+<span class="sd">    :param wait_for_completion: If True the function doesn&#39;t return until the</span>
+<span class="sd">       analysis has been completed.</span>
 <span class="sd">    :type url: str</span>
+<span class="sd">    :type wait_for_completion: bool</span>
 <span class="sd">    :returns: An instance of :class:`Object` of analysis type.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scan_url_async</span><span class="p">(</span>

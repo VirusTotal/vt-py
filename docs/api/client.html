@@ -89,7 +89,7 @@
 <li class="toctree-l2"><a class="reference internal" href="feed.html">Feed</a></li>
 <li class="toctree-l2"><a class="reference internal" href="object.html">Object</a></li>
 <li class="toctree-l2"><a class="reference internal" href="iterator.html">Iterator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="utils.html">Utility functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html">Utilities</a></li>
 </ul>
 </li>
 </ul>
@@ -533,7 +533,11 @@ endpoint.</p></li>
 <dd><p>Scans a file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>file</strong> (<em>File-like object.</em>) – File to be scanned.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file</strong> (<em>File-like object.</em>) – File to be scanned.</p></li>
+<li><p><strong>wait_for_completion</strong> (<em>bool</em>) – If True the function doesn’t return until the
+analysis has been completed.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>An instance of <a class="reference internal" href="object.html#vt.Object" title="vt.Object"><code class="xref py py-class docutils literal notranslate"><span class="pre">Object</span></code></a> of analysis type.</p>
@@ -553,7 +557,11 @@ endpoint.</p></li>
 <dd><p>Scans a URL.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>url</strong> (<em>str</em>) – The URL to be scanned.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> (<em>str</em>) – The URL to be scanned.</p></li>
+<li><p><strong>wait_for_completion</strong> (<em>bool</em>) – If True the function doesn’t return until the
+analysis has been completed.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>An instance of <a class="reference internal" href="object.html#vt.Object" title="vt.Object"><code class="xref py py-class docutils literal notranslate"><span class="pre">Object</span></code></a> of analysis type.</p>

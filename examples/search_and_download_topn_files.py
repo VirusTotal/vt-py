@@ -5,7 +5,7 @@ This example program shows how to download files from VirusTotal matching a
 VirusTotal Intelligence search.
 
 NOTICE: In order to use this program you will need an API key that has
-privileges for using VirusTotal Intelligence.
+privileges for using VirusTotal Intelligence and for downloading files.
 """
 
 

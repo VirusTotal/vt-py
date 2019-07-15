@@ -13,13 +13,13 @@ import argparse
 import asyncio
 import logging
 import os
-import re
 import sys
 import time
 import vt
 
 
 LOCAL_STORE = 'intelligencefiles'
+STOP_SIGNAL = '__STOP__'
 
 LOGGING_LEVEL = logging.INFO  # Modify if you just want to focus on errors
 logging.basicConfig(level=LOGGING_LEVEL,
@@ -43,46 +43,44 @@ class DownloadTopNFilesHandler:
       download_path: string representing the path where the files will be
       stored.
     """
+    stop = False
+
     async with vt.Client(self.apikey) as client:
-      while not self.queue.empty():
+      while not stop:
         file_hash = await self.queue.get()
-        file_path = os.path.join(download_path, file_hash)
-        with open(file_path, 'wb') as f:
-          await client.download_file_async(file_hash, f)
-        self.queue.task_done()
+        if file_hash == STOP_SIGNAL:
+          stop = True
+          # For stopping the rest of the workers
+          await self.queue.put(STOP_SIGNAL)
+        else:
+          file_path = os.path.join(download_path, file_hash)
+          with open(file_path, 'wb') as f:
+            await client.download_file_async(file_hash, f)
+          self.queue.task_done()
 
   async def queue_file_hashes(self, search):
     """Retrieve files from VT and enqueue them for being downloaded.
 
-    We also allow to download files whose hash is stored in a local file. In
-    that case, `search` argument must be the path to that file.
-
     Args:
       search: VT intelligence search query.
     """
-    if os.path.exists(search):
-      with open(search, 'r') as file_with_hashes:
-        content = file_with_hashes.read()
-        requested_hashes = re.findall(
-            r'([0-9a-fA-F]{64}|[0-9a-fA-F]{40}|[0-9a-fA-F]{32})', content)
-        for hash in set(requested_hashes):
-          await self.queue.put(hash)
-    else:
-      async with vt.Client(self.apikey) as client:
-        it = client.iterator(
-          '/intelligence/search',
-          params={'query': search}, limit=self.num_files)
-        async for file_obj in it:
-          await self.queue.put(file_obj.sha256)
+    async with vt.Client(self.apikey) as client:
+      it = client.iterator(
+        '/intelligence/search',
+        params={'query': search}, limit=self.num_files)
+      async for file_obj in it:
+        await self.queue.put(file_obj.sha256)
+      await self.queue.put(STOP_SIGNAL)
 
   @staticmethod
-  def create_download_folder():
+  def create_download_folder(path=None):
     """Create the folder where the downloaded files will be put."""
+    local_path = path or LOCAL_STORE
     folder_name = time.strftime('%Y%m%dT%H%M%S')
-    folder_path = os.path.join(LOCAL_STORE, folder_name)
+    folder_path = os.path.join(local_path, folder_name)
 
-    if not os.path.exists(LOCAL_STORE):
-      os.mkdir(LOCAL_STORE)
+    if not os.path.exists(local_path):
+      os.mkdir(local_path)
     if not os.path.exists(folder_path):
       os.mkdir(folder_path)
 
@@ -110,6 +108,10 @@ def main():
   parser.add_argument('--apikey', required=True, help='Your VirusTotal API key')
 
   parser.add_argument(
+    '-p', '--path', required=False,
+    help='The path where you want to put the files in')
+
+  parser.add_argument(
       '-w', '--workers', dest='workers', default=4,
       help='Concurrent workers for downloading files')
 
@@ -123,6 +125,7 @@ def main():
 
   search = ' '.join(args.query)
   search = search.strip().strip('\'')
+  storage_path = args.path
   numfiles = int(args.numfiles)
   workers = int(args.workers)
   api_key = args.apikey
@@ -133,10 +136,9 @@ def main():
   logging.info('* VirusTotal Intelligence search: %s', search)
   logging.info('* Number of files to download: %s', numfiles)
 
-  files_path = handler.create_download_folder()
+  files_path = handler.create_download_folder(storage_path)
   task = loop.create_task(handler.queue_file_hashes(search))
-  loop.run_until_complete(asyncio.gather(task))
-  tasks = []
+  tasks = [task]
 
   for i in range(workers):
     tasks.append(loop.create_task(handler.download_files(files_path)))

@@ -43,20 +43,14 @@ class DownloadTopNFilesHandler:
       download_path: string representing the path where the files will be
       stored.
     """
-    stop = False
 
     async with vt.Client(self.apikey) as client:
-      while not stop:
+      while True:
         file_hash = await self.queue.get()
-        if file_hash == STOP_SIGNAL:
-          stop = True
-          # For stopping the rest of the workers
-          await self.queue.put(STOP_SIGNAL)
-        else:
-          file_path = os.path.join(download_path, file_hash)
-          with open(file_path, 'wb') as f:
-            await client.download_file_async(file_hash, f)
-          self.queue.task_done()
+        file_path = os.path.join(download_path, file_hash)
+        with open(file_path, 'wb') as f:
+          await client.download_file_async(file_hash, f)
+        self.queue.task_done()
 
   async def queue_file_hashes(self, search):
     """Retrieve files from VT and enqueue them for being downloaded.
@@ -70,7 +64,6 @@ class DownloadTopNFilesHandler:
         params={'query': search}, limit=self.num_files)
       async for file_obj in it:
         await self.queue.put(file_obj.sha256)
-      await self.queue.put(STOP_SIGNAL)
 
   @staticmethod
   def create_download_folder(path=None):
@@ -87,7 +80,7 @@ class DownloadTopNFilesHandler:
     return folder_path
 
 
-def main():
+async def main():
   """Download the top-n results of a given Intelligence search."""
 
   usage = 'usage: prog [options] <intelligence_query/local_file_with_hashes>'
@@ -137,15 +130,22 @@ def main():
   logging.info('* Number of files to download: %s', numfiles)
 
   files_path = handler.create_download_folder(storage_path)
-  task = loop.create_task(handler.queue_file_hashes(search))
-  tasks = [task]
+  enqueue_files_task = loop.create_task(handler.queue_file_hashes(search))
 
+  download_tasks = []
   for i in range(workers):
-    tasks.append(loop.create_task(handler.download_files(files_path)))
+    download_tasks.append(loop.create_task(handler.download_files(files_path)))
 
-  loop.run_until_complete(asyncio.gather(*tasks))
-  loop.close()
+  await asyncio.gather(enqueue_files_task)
+  # Wait until all the files have been queued and downloaded, then cancel
+  # download tasks that are idle
+  await handler.queue.join()
+
+  for w in download_tasks:
+    w.cancel()
 
 
 if __name__ == '__main__':
-  main()
+  loop = asyncio.get_event_loop()
+  loop.run_until_complete(main())
+  loop.close()

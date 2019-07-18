@@ -172,8 +172,12 @@ class Client:
 
   def __init__(self, apikey, agent="unknown", host=None):
     """Intialize the client with the provided API key."""
+
+    if not isinstance(apikey, str):
+      raise ValueError('API key must be a string')
+
     if not apikey:
-      raise ValueError('Expecting API key, got: %s' % str(apikey))
+      raise ValueError('API key can not be an empty string')
 
     self._host = host or _API_HOST
     self._apikey = apikey
@@ -214,7 +218,7 @@ class Client:
 
   def _extract_data_from_json(self, json_response):
     if not 'data' in json_response:
-      raise ValueError('{} does not returns a data field'.format(path))
+      raise ValueError('response does not returns a data field')
     return json_response['data']
 
   async def _response_to_json(self, response):

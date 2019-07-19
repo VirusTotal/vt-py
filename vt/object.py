@@ -102,6 +102,9 @@ class Object(object):
     if 'context_attributes' in obj_dict:
       obj._context_attributes = obj_dict['context_attributes']
 
+    if 'relationships' in obj_dict:
+      obj._relationships = obj_dict['relationships']
+
     return obj
 
   def __init__(self, obj_type, obj_id=None, obj_attributes=None):
@@ -156,6 +159,12 @@ class Object(object):
   def context_attributes(self):
     if hasattr(self, '_context_attributes'):
       return self._context_attributes
+    return {}
+
+  @property
+  def relationships(self):
+    if hasattr(self, '_relationships'):
+      return self._relationships
     return {}
 
   def to_dict(self, modified_attributes_only=False):

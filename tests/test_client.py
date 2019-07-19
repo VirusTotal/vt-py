@@ -14,6 +14,8 @@
 import datetime
 import io
 import json
+from unittest import mock
+
 import pytest
 import pytest_httpserver
 
@@ -263,6 +265,56 @@ def test_download_file(httpserver):
       client.download_file('01020304050607080900a0b0c0d0e0f', f)
       f.seek(0)
       assert f.read() == b'filecontent'
+
+
+def test_get_file_with_relationships_ok(httpserver):
+
+  httpserver.expect_request(
+      '/api/v3/files/01020304050607080900a0b0c0d0e0f',
+      query_string=b'relationships=graphs,votes',
+      method='GET',
+      headers={'X-Apikey': 'dummy_api_key'}
+  ).respond_with_json({
+      'data': {
+        'id': 'dummy_id',
+        'type': 'file',
+        'relationships': {
+            'graphs': 'r1',
+            'votes': 'r2'
+        }
+      }
+  })
+
+  with new_client(httpserver) as client:
+    file_obj = client.get_file(
+        '01020304050607080900a0b0c0d0e0f', 'graphs,votes')
+    assert file_obj.id == 'dummy_id'
+    assert file_obj.type == 'file'
+    assert file_obj.relationships == {'graphs': 'r1', 'votes': 'r2'}
+
+
+def test_get_file_with_relationships_fail(httpserver):
+
+  httpserver.expect_request(
+      '/api/v3/files/01020304050607080900a0b0c0d0e',
+      query_string=b'relationships=test',
+      method='GET',
+      headers={'X-Apikey': 'dummy_api_key'}
+  ).respond_with_json({
+      'data': {
+        'id': 'dummy_id',
+        'type': 'file',
+        'context_attributes': {
+            'graphs': 'r1',
+            'votes': 'r2'
+        }
+      }
+  })
+
+  with new_client(httpserver) as client:
+    with pytest.raises(
+        ValueError, match=r'Relationship "test" cannot be requested'):
+      client.get_file('01020304050607080900a0b0c0d0e', 'test')
 
 
 def test_scan_file(httpserver):

@@ -170,6 +170,32 @@ class Client:
   :type host: str
   """
 
+  ALLOWED_FILE_RELATIONSHIPS = (
+      'analyses',
+      'behaviours',
+      'bundled_files',
+      'carbonblack_children',
+      'carbonblack_parents',
+      'comments',
+      'compressed_parents',
+      'contacted_domains',
+      'contacted_ips',
+      'contacted_urls',
+      'email_parents',
+      'embedded_domains',
+      'embedded_ips',
+      'execution_parents',
+      'graphs',
+      'itw_urls',
+      'overlay_parents',
+      'pcap_parents',
+      'pe_resource_parents',
+      'similar_files',
+      'submissions',
+      'screenshots',
+      'votes'
+  )
+
   def __init__(self, apikey, agent="unknown", host=None):
     """Intialize the client with the provided API key."""
     if not apikey:
@@ -259,6 +285,35 @@ class Client:
     """Like :func:`delete` but returns a coroutine."""
     return ClientResponse(
         await self._get_session().delete(self._full_url(path, *fmt_args)))
+
+  def get_file(self, hash, relationships=None):
+    """Gets a file object given its hash (SHA-256, SHA-1 or MD5).
+
+    Alongside with the general file information, you can get some data
+    about the relations the file has with other entities stored in VT. Check the
+    relations a file can have (and you can retrieve) here:
+    https://developers.virustotal.com/v3.0/reference#files-relationships
+
+    :param hash: File hash.
+    :param relationships: Comma-separated relationships to retrieve.
+    :type hash: str
+    :type relationships: str
+    :return: An instance of :class:`Object` representing the file.
+    """
+    return _make_sync(self.get_file_async(hash, relationships))
+
+  async def get_file_async(self, hash, relationships=None):
+    """Like :func:`get_file` but returns a coroutine."""
+    url = '/files/{}'
+    if isinstance(relationships, str) and relationships:
+      for r in relationships.split(','):
+        if r not in self.ALLOWED_FILE_RELATIONSHIPS:
+          raise ValueError('Relationship "{}" cannot be requested'.format(r))
+
+      url += '?relationships={}'.format(relationships)
+
+    response = await self.get_object_async(url.format(hash))
+    return response
 
   def download_file(self, hash, file):
     """Downloads a file given its hash (SHA-256, SHA-1 or MD5).
@@ -626,3 +681,14 @@ class Client:
         break
       await asyncio.sleep(20)
     return analysis
+
+  def get_hunting_notification_files(self, filter_tag='', limit=None):
+    if not isinstance(filter_tag, str):
+      raise ValueError('Value to filtering with must be a string')
+
+    filter_tag = filter_tag.lower()
+    files_matching_hunting_rulesets = self.iterator(
+        '/intelligence/hunting_notification_files?filter={}'.format(filter_tag),
+        limit=limit)
+    return files_matching_hunting_rulesets
+

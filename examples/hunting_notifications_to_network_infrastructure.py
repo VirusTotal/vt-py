@@ -109,18 +109,21 @@ class HuntingNotificationToNetworkInfrastructureHandler:
 
     print('TOP CONTACTED DOMAINS')
     print('Num. Requests\tDomain')
-    for domain_tuple in sorted(self.networking_counters['domains'].items(),
-        key=lambda x: -x[1]):
-      print('{:>12}\t{:>12}'.format(domain_tuple[1], domain_tuple[0]))
+    sorted_domains = sorted(self.networking_counters['domains'].items(),
+        key=lambda x: -x[1])
+    for domain_tuple in sorted_domains:
+      print('{:>12}\t{:>5}'.format(domain_tuple[1], domain_tuple[0]))
     print('TOP CONTACTED IPs')
     print('Num. Requests\tIP')
-    for ip_tuple in sorted(self.networking_counters['ips'].items(),
-        key=lambda x: -x[1]):
+    sorted_ips = sorted(self.networking_counters['domains'].items(),
+        key=lambda x: -x[1])
+    for ip_tuple in sorted_ips:
       print('{:>12}\t{:>12}'.format(ip_tuple[1], ip_tuple[0]))
     print('TOP CONTACTED URLs')
     print('Num. Requests\tURL')
-    for url_tuple in sorted(self.networking_counters['urls'].items(),
-        key=lambda x: -x[1]):
+    sorted_urls = sorted(self.networking_counters['domains'].items(),
+      key=lambda x: -x[1])
+    for url_tuple in sorted_urls:
       print('{:>12}\t{:>12}'.format(url_tuple[1], url_tuple[0]))
 
     print('\nNETWORK INFRASTRUCTURE')

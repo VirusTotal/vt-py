@@ -14,7 +14,6 @@
 import datetime
 import io
 import json
-from unittest import mock
 
 import pytest
 import pytest_httpserver

@@ -18,8 +18,7 @@ import time
 import vt
 
 
-LOCAL_STORE = 'intelligencefiles'
-STOP_SIGNAL = '__STOP__'
+DEFAULT_PATH = 'intelligencefiles'
 
 LOGGING_LEVEL = logging.INFO  # Modify if you just want to focus on errors
 logging.basicConfig(level=LOGGING_LEVEL,
@@ -68,7 +67,7 @@ class DownloadTopNFilesHandler:
   @staticmethod
   def create_download_folder(path=None):
     """Create the folder where the downloaded files will be put."""
-    local_path = path or LOCAL_STORE
+    local_path = path or DEFAULT_PATH
     folder_name = time.strftime('%Y%m%dT%H%M%S')
     folder_path = os.path.join(local_path, folder_name)
 
@@ -101,7 +100,7 @@ async def main():
   parser.add_argument('--apikey', required=True, help='Your VirusTotal API key')
 
   parser.add_argument(
-    '-p', '--path', required=False,
+    '-o', '--output-path', required=False,
     help='The path where you want to put the files in')
 
   parser.add_argument(
@@ -118,7 +117,7 @@ async def main():
 
   search = ' '.join(args.query)
   search = search.strip().strip('\'')
-  storage_path = args.path
+  storage_path = args.output_path
   numfiles = int(args.numfiles)
   workers = int(args.workers)
   api_key = args.apikey

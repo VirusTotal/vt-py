@@ -29,9 +29,8 @@ import vt
 class HuntingNotificationToNetworkInfrastructureHandler:
   """Class for handling the process of analysing Hunting Notifications."""
 
-  def __init__(self, apikey, limit):
+  def __init__(self, apikey):
     self.apikey = apikey
-    self.limit_of_files = limit
     self.queue = asyncio.Queue()
     self.files_queue = asyncio.Queue()
     self.networking_counters = {
@@ -40,16 +39,19 @@ class HuntingNotificationToNetworkInfrastructureHandler:
     self.networking_infrastructure = defaultdict(
         lambda: defaultdict(lambda: {}))
 
-  async def get_hunting_notification_files(self, search_filter, date_filter):
+  async def get_hunting_notification_files(
+      self, search_filter, date_filter, max_files):
     """Get/Enqueue files related with a certain Hunting Ruleset.
 
     :param search_filter: filter for getting notifications of a specific
     ruleset.
     :param date_filter: timestamp representing the min notification date of the
-    file (a.k.a the date the file was entered into VT and captured by
+    file (a.k.a the date the file was submitted into VT and captured by
     the Hunting Ruleset).
+    :param max_files: Max. number of file to be retrieved/analyzed from VT.
     :type search_filter: str
     :type date_filter: int
+    :type max_files: int
     """
 
     async with vt.Client(self.apikey) as client:
@@ -57,9 +59,9 @@ class HuntingNotificationToNetworkInfrastructureHandler:
         raise ValueError('Value to filtering with must be a string')
 
       filter_tag = search_filter.lower()
-      files = client.iterator(
-        '/intelligence/hunting_notification_files?filter={}'.format(filter_tag),
-        limit=self.limit_of_files)
+      url = '/intelligence/hunting_notification_files?filter={}'.format(
+          filter_tag)
+      files = client.iterator(url, limit=max_files)
       async for f in files:
         if f.context_attributes['hunting_notification_date'] > date_filter:
           await self.files_queue.put(f.sha256)
@@ -76,14 +78,7 @@ class HuntingNotificationToNetworkInfrastructureHandler:
     """
     url = '/files/{}'
     async with vt.Client(self.apikey) as client:
-      vt_metadata = await client.get_data_async('/metadata')
-      file_relationships = vt_metadata['relationships']['file']
-      allowed_relationships = [i['name'] for i in file_relationships]
       if isinstance(relationships, str) and relationships:
-        for r in relationships.split(','):
-          if r not in allowed_relationships:
-            raise ValueError('Relationship "{}" cannot be requested'.format(r))
-
         url += '?relationships={}'.format(relationships)
 
       file_obj = await client.get_object_async(url.format(hash))
@@ -195,10 +190,11 @@ async def main():
 
   loop = asyncio.get_event_loop()
   handler = HuntingNotificationToNetworkInfrastructureHandler(
-      args.apikey, limit)
+      args.apikey)
 
   enqueue_files_task = loop.create_task(
-      handler.get_hunting_notification_files(args.filter, timestamp_to_compare))
+      handler.get_hunting_notification_files(
+          args.filter, timestamp_to_compare, limit))
   network_inf_task = loop.create_task(handler.get_network_infrastructure())
   build_network_inf_task = loop.create_task(
       handler.build_network_infrastructure())

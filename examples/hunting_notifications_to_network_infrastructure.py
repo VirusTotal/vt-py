@@ -15,11 +15,7 @@
 
 """
 This example program shows how to use the vt-py synchronous API for getting
-the VirusTotal file feed. For a more elaborate example that includes the use
-of cursors and the asynchronous API see file_feed_async.py.
-
-NOTICE: In order to use this program you will need an API key that has
-privileges for using the VirusTotal Feed API.
+the VirusTotal files that matched a Hunting Notification Ruleset.
 """
 
 import argparse
@@ -33,9 +29,8 @@ import vt
 class HuntingNotificationToNetworkInfrastructureHandler:
   """Class for handling the process of analysing Hunting Notifications."""
 
-  def __init__(self, apikey, ruleset_filter, limit):
+  def __init__(self, apikey, limit):
     self.apikey = apikey
-    self.filter = ruleset_filter
     self.limit_of_files = limit
     self.queue = asyncio.Queue()
     self.files_queue = asyncio.Queue()
@@ -45,49 +40,81 @@ class HuntingNotificationToNetworkInfrastructureHandler:
     self.networking_infrastructure = defaultdict(
         lambda: defaultdict(lambda: {}))
 
-  async def get_hunting_notification_files(self, date_filter):
-    """Get files related with the selected Hunting Ruleset.
+  async def get_hunting_notification_files(self, search_filter, date_filter):
+    """Get/Enqueue files related with a certain Hunting Ruleset.
 
-      Args:
-          date_filter: timestamp representing the min notification date of the
-            file (a.k.a the date the file was entered into VT and captured by
-            the Hunting Ruleset).
+    :param search_filter: filter for getting notifications of a specific
+    ruleset.
+    :param date_filter: timestamp representing the min notification date of the
+    file (a.k.a the date the file was entered into VT and captured by
+    the Hunting Ruleset).
+    :type search_filter: str
+    :type date_filter: int
     """
 
     async with vt.Client(self.apikey) as client:
-      files = client.get_hunting_notification_files(self.filter,
-          self.limit_of_files)
+      if not isinstance(search_filter, str):
+        raise ValueError('Value to filtering with must be a string')
+
+      filter_tag = search_filter.lower()
+      files = client.iterator(
+        '/intelligence/hunting_notification_files?filter={}'.format(filter_tag),
+        limit=self.limit_of_files)
       async for f in files:
         if f.context_attributes['hunting_notification_date'] > date_filter:
           await self.files_queue.put(f.sha256)
+
+  async def get_file_async(self, hash, relationships=None):
+    """Get a file object from VT.
+
+    :param hash: SHA-256, SHA-1 or MD5 hash that describes the
+    :param relationships: relationships to be retrieved alongside with the file.
+    Different relationship names should be separated by a comma.
+    :type hash: str
+    :type relationships: str
+    :return: `class:Object` containing the file information.
+    """
+    url = '/files/{}'
+    async with vt.Client(self.apikey) as client:
+      vt_metadata = await client.get_data_async('/metadata')
+      file_relationships = vt_metadata['relationships']['file']
+      allowed_relationships = [i['name'] for i in file_relationships]
+      if isinstance(relationships, str) and relationships:
+        for r in relationships.split(','):
+          if r not in allowed_relationships:
+            raise ValueError('Relationship "{}" cannot be requested'.format(r))
+
+        url += '?relationships={}'.format(relationships)
+
+      file_obj = await client.get_object_async(url.format(hash))
+    return file_obj
 
   async def get_network_infrastructure(self):
     """Process a file and get its network infrastructure."""
 
     while True:
       hash = await self.files_queue.get()
-      async with vt.Client(self.apikey) as client:
-        file_obj = await client.get_file_async(
-          hash, 'contacted_domains,contacted_ips,contacted_urls')
-        relationships = file_obj.relationships
-        contacted_domains = relationships['contacted_domains']['data']
-        contacted_ips = relationships['contacted_ips']['data']
-        contacted_urls = relationships['contacted_urls']['data']
-        await self.queue.put(
-            {'contacted_addresses': contacted_domains,
-             'type': 'domains',
-             'file': hash})
-        await self.queue.put(
-            {'contacted_addresses': contacted_ips,
-             'type': 'ips',
-             'file': hash})
-        await self.queue.put(
-            {'contacted_addresses': contacted_urls,
-             'type': 'urls',
-             'file': hash})
-        self.networking_infrastructure[hash]['domains'] = contacted_domains
-        self.networking_infrastructure[hash]['ips'] = contacted_ips
-        self.networking_infrastructure[hash]['urls'] = contacted_urls
+      file_obj = await self.get_file_async(
+        hash, 'contacted_domains,contacted_ips,contacted_urls')
+      relationships = file_obj.relationships
+      contacted_domains = relationships['contacted_domains']['data']
+      contacted_ips = relationships['contacted_ips']['data']
+      contacted_urls = relationships['contacted_urls']['data']
+      await self.queue.put(
+          {'contacted_addresses': contacted_domains,
+           'type': 'domains',
+           'file': hash})
+      await self.queue.put(
+          {'contacted_addresses': contacted_ips,
+           'type': 'ips',
+           'file': hash})
+      await self.queue.put(
+          {'contacted_addresses': contacted_urls,
+           'type': 'urls',
+           'file': hash})
+      self.networking_infrastructure[hash]['domains'] = contacted_domains
+      self.networking_infrastructure[hash]['ips'] = contacted_ips
+      self.networking_infrastructure[hash]['urls'] = contacted_urls
       self.files_queue.task_done()
 
   async def build_network_infrastructure(self):
@@ -144,7 +171,7 @@ class HuntingNotificationToNetworkInfrastructureHandler:
 async def main():
 
   parser = argparse.ArgumentParser(
-      description='Get files from the VirusTotal feed.')
+      description='Get files matching a Hunting Ruleset in VirusTotal.')
 
   parser.add_argument('--apikey',
       required=True, help='your VirusTotal API key')
@@ -168,10 +195,10 @@ async def main():
 
   loop = asyncio.get_event_loop()
   handler = HuntingNotificationToNetworkInfrastructureHandler(
-      args.apikey, args.filter, limit)
+      args.apikey, limit)
 
   enqueue_files_task = loop.create_task(
-      handler.get_hunting_notification_files(timestamp_to_compare))
+      handler.get_hunting_notification_files(args.filter, timestamp_to_compare))
   network_inf_task = loop.create_task(handler.get_network_infrastructure())
   build_network_inf_task = loop.create_task(
       handler.build_network_infrastructure())

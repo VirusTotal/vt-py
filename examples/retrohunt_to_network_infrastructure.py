@@ -26,7 +26,7 @@ import vt
 
 
 class RetroHuntJobToNetworkInfrastructureHandler:
-  """Class for handling the process of analysing Hunting Notifications."""
+  """Class for handling the process of analysing RetroHunt Jobs."""
 
   def __init__(self, apikey):
     self.apikey = apikey

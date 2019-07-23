@@ -57,7 +57,8 @@ class RetroHuntJobToNetworkInfrastructureHandler:
 
   async def get_file_async(self, file_hash, relationships=None):
     """Get a file object from VT.
-     :param file_hash: SHA-256, SHA-1 or MD5 hash that describes the
+
+    :param file_hash: SHA-256, SHA-1 or MD5 hash that describes the
     :param relationships: relationships to be retrieved alongside with the file.
     Different relationship names should be separated by a comma.
     :type file_hash: str

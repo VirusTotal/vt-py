@@ -15,16 +15,11 @@
 
 """
 This example program shows how to use the vt-py synchronous API for getting
-the VirusTotal file feed. For a more elaborate example that includes the use
-of cursors and the asynchronous API see file_feed_async.py.
-
-NOTICE: In order to use this program you will need an API key that has
-privileges for using the VirusTotal Feed API.
+the VirusTotal files that matched a RetroHunt Job in VT.
 """
 
 import argparse
 import asyncio
-import datetime
 from collections import defaultdict
 
 import vt
@@ -33,10 +28,8 @@ import vt
 class RetroHuntJobToNetworkInfrastructureHandler:
   """Class for handling the process of analysing Hunting Notifications."""
 
-  def __init__(self, apikey, retrohunt_job_id, limit):
+  def __init__(self, apikey):
     self.apikey = apikey
-    self.retrohunt_job_id = retrohunt_job_id
-    self.limit_of_files = limit
     self.queue = asyncio.Queue()
     self.files_queue = asyncio.Queue()
     self.networking_counters = {
@@ -45,48 +38,66 @@ class RetroHuntJobToNetworkInfrastructureHandler:
     self.networking_infrastructure = defaultdict(
         lambda: defaultdict(lambda: {}))
 
-  async def get_retrohunt_matching_files(self):
+  async def get_retrohunt_matching_files(self, retrohunt_job_id, max_files):
     """Get files related with the selected RetroHunt Job.
 
-      Args:
-          date_filter: timestamp representing the min notification date of the
-            file (a.k.a the date the file was entered into VT and captured by
-            the Hunting Ruleset).
+    :param retrohunt_job_id: identifier of the RetroHunt Job whose files we want
+    to analyze.
+    :param max_files: Max. number of files to be analyzed.
+    :type retrohunt_job_id: str
+    :type max_files: int
     """
 
     async with vt.Client(self.apikey) as client:
-      files = client.get_retrohunt_matching_files(self.retrohunt_job_id,
-          self.limit_of_files)
+      url = '/intelligence/retrohunt_jobs/{}/matching_files'.format(
+          retrohunt_job_id)
+      files = client.iterator(url, limit=max_files)
       async for f in files:
         await self.files_queue.put(f.sha256)
+
+  async def get_file_async(self, file_hash, relationships=None):
+    """Get a file object from VT.
+     :param file_hash: SHA-256, SHA-1 or MD5 hash that describes the
+    :param relationships: relationships to be retrieved alongside with the file.
+    Different relationship names should be separated by a comma.
+    :type file_hash: str
+    :type relationships: str
+    :return: `class:Object` containing the file information.
+    """
+    url = '/files/{}'
+    async with vt.Client(self.apikey) as client:
+      if isinstance(relationships, str) and relationships:
+        url += '?relationships={}'.format(relationships)
+
+      file_obj = await client.get_object_async(url.format(file_hash))
+    return file_obj
 
   async def get_network_infrastructure(self):
     """Process a file and get its network infrastructure."""
 
     while True:
-      hash = await self.files_queue.get()
-      async with vt.Client(self.apikey) as client:
-        file_obj = await client.get_file_async(
-          hash, 'contacted_domains,contacted_ips,contacted_urls')
-        relationships = file_obj.relationships
-        contacted_domains = relationships['contacted_domains']['data']
-        contacted_ips = relationships['contacted_ips']['data']
-        contacted_urls = relationships['contacted_urls']['data']
-        await self.queue.put(
-            {'contacted_addresses': contacted_domains,
-             'type': 'domains',
-             'file': hash})
-        await self.queue.put(
-            {'contacted_addresses': contacted_ips,
-             'type': 'ips',
-             'file': hash})
-        await self.queue.put(
-            {'contacted_addresses': contacted_urls,
-             'type': 'urls',
-             'file': hash})
-        self.networking_infrastructure[hash]['domains'] = contacted_domains
-        self.networking_infrastructure[hash]['ips'] = contacted_ips
-        self.networking_infrastructure[hash]['urls'] = contacted_urls
+      file_hash = await self.files_queue.get()
+      file_obj = await self.get_file_async(
+        file_hash, 'contacted_domains,contacted_ips,contacted_urls')
+      relationships = file_obj.relationships
+      contacted_domains = relationships['contacted_domains']['data']
+      contacted_ips = relationships['contacted_ips']['data']
+      contacted_urls = relationships['contacted_urls']['data']
+      await self.queue.put(
+          {'contacted_addresses': contacted_domains,
+           'type': 'domains',
+           'file': file_hash})
+      await self.queue.put(
+          {'contacted_addresses': contacted_ips,
+           'type': 'ips',
+           'file': file_hash})
+      await self.queue.put(
+          {'contacted_addresses': contacted_urls,
+           'type': 'urls',
+           'file': file_hash})
+      self.networking_infrastructure[file_hash]['domains'] = contacted_domains
+      self.networking_infrastructure[file_hash]['ips'] = contacted_ips
+      self.networking_infrastructure[file_hash]['urls'] = contacted_urls
       self.files_queue.task_done()
 
   async def build_network_infrastructure(self):
@@ -158,11 +169,10 @@ async def main():
   limit = int(args.limit)
 
   loop = asyncio.get_event_loop()
-  handler = RetroHuntJobToNetworkInfrastructureHandler(
-      args.apikey, args.retrohunt_job, limit)
+  handler = RetroHuntJobToNetworkInfrastructureHandler(args.apikey)
 
   enqueue_files_task = loop.create_task(
-      handler.get_retrohunt_matching_files())
+      handler.get_retrohunt_matching_files(args.retrohunt_job, limit))
   network_inf_task = loop.create_task(handler.get_network_infrastructure())
   build_network_inf_task = loop.create_task(
       handler.build_network_infrastructure())

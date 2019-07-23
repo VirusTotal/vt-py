@@ -16,11 +16,8 @@ import asyncio
 import base64
 import json
 
-from multidict import MultiDict
-
 from .error import APIError
 from .feed import Feed
-from .feed import FeedType
 from .object import Object
 from .iterator import Iterator
 from .version import __version__
@@ -247,30 +244,6 @@ class Client:
     resources like TCP connections.
     """
     return _make_sync(self.close_async( ))
-
-  def get_file(self, hash, relationships=None):
-    """Gets a file object given its hash (SHA-256, SHA-1 or MD5).
-    Alongside with the general file information, you can get some data
-    about the relations the file has with other entities stored in VT. Check the
-    relations a file can have (and you can retrieve) here:
-    https://developers.virustotal.com/v3.0/reference#files-relationships
-
-    :param hash: File hash.
-    :param relationships: Comma-separated relationships to retrieve.
-    :type hash: str
-    :type relationships: str
-    :return: An instance of :class:`Object` representing the file.
-    """
-    return _make_sync(self.get_file_async(hash, relationships))
-
-  async def get_file_async(self, hash, relationships=None):
-    """Like :func:`get_file` but returns a coroutine."""
-    url = '/files/{}'
-    if isinstance(relationships, str) and relationships:
-      url += '?relationships={}'.format(relationships)
-
-    response = await self.get_object_async(url.format(hash))
-    return response
 
   def delete(self, path, *fmt_args):
     """Sends a DELETE request to a given API endpoint.
@@ -654,9 +627,3 @@ class Client:
         break
       await asyncio.sleep(20)
     return analysis
-
-  def get_retrohunt_matching_files(self, retrohunt_job_id, limit=None):
-    files_matching_retrohunt_job = self.iterator(
-      '/intelligence/retrohunt_jobs/{}/matching_files'.format(retrohunt_job_id),
-      limit=limit)
-    return files_matching_retrohunt_job

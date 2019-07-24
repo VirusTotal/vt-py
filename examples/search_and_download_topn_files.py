@@ -4,8 +4,11 @@
 This example program shows how to download files from VirusTotal matching a
 VirusTotal Intelligence search.
 
-NOTICE: In order to use this program you will need an API key that has
-privileges for using VirusTotal Intelligence and for downloading files.
+NOTE: In order to use this script you will need to have access to
+VT Intelligence or to the Premium API. Learn more about these services at:
+https://www.virustotal.com/gui/intelligence-overview
+https://developers.virustotal.com/v3.0/reference#search
+https://www.virustotal.com/learn/
 """
 
 

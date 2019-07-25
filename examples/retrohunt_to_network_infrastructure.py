@@ -144,25 +144,21 @@ class RetroHuntJobToNetworkInfrastructureHandler:
        'type': 'Signers',
        'file': file_hash}
     )
-
     await self.commonalities_queue.put(
       {'commonalities': creation_dates,
        'type': 'Creation Time',
        'file': file_hash}
     )
-
     await self.commonalities_queue.put(
       {'commonalities': imphashes,
        'type': 'Imphash',
        'file': file_hash}
     )
-
     await self.commonalities_queue.put(
       {'commonalities': signed_dates,
        'type': 'Date Signed',
        'file': file_hash}
     )
-
     await self.commonalities_queue.put(
       {'commonalities': file_versions,
        'type': 'File Version',
@@ -248,9 +244,6 @@ async def main():
   parser.add_argument('--apikey',
       required=True, help='your VirusTotal API key')
 
-  parser.add_argument('--filter',
-      default='', help='Name of the ruleset to filter with')
-
   parser.add_argument('-l', '--limit',
       default=None, help='Limit of files to be analyzed')
 
@@ -265,7 +258,7 @@ async def main():
 
   enqueue_files_task = loop.create_task(
       handler.get_retrohunt_matching_files(args.retrohunt_job, limit))
-  network_inf_task = loop.create_task(handler.get_file_statistics())
+  file_statistics_task = loop.create_task(handler.get_file_statistics())
   build_network_inf_task = loop.create_task(
       handler.build_network_infrastructure())
   build_commonalities_task = loop.create_task(
@@ -277,7 +270,7 @@ async def main():
   await handler.networking_queue.join()
   await handler.commonalities_queue.join()
 
-  network_inf_task.cancel()
+  file_statistics_task.cancel()
   build_network_inf_task.cancel()
   build_commonalities_task.cancel()
 

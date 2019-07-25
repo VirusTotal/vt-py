@@ -21,6 +21,7 @@ the VirusTotal files that matched a RetroHunt Job in VT.
 import argparse
 import asyncio
 from collections import defaultdict
+from datetime import datetime
 
 import vt
 
@@ -28,16 +29,19 @@ import vt
 class RetroHuntJobToNetworkInfrastructureHandler:
   """Class for handling the process of analysing RetroHunt Jobs."""
 
+  MIN_IN_COMMON = 1
+
   def __init__(self, apikey):
     self.apikey = apikey
     self.networking_queue = asyncio.Queue()
     self.commonalities_queue = asyncio.Queue()
     self.files_queue = asyncio.Queue()
     self.files_commonalities = {
-      'creation_time': defaultdict(lambda: []),
-      'imphash': defaultdict(lambda: []),
-      'date_signed': defaultdict(lambda: []),
-      'signers': defaultdict(lambda: [])
+      'Creation Time': defaultdict(lambda: []),
+      'Imphash': defaultdict(lambda: []),
+      'Date Signed': defaultdict(lambda: []),
+      'Signers': defaultdict(lambda: []),
+      'File Version': defaultdict(lambda: []),
     }
     self.networking_counters = {
         'domains': defaultdict(lambda: 0), 'ips': defaultdict(lambda: 0),
@@ -80,68 +84,87 @@ class RetroHuntJobToNetworkInfrastructureHandler:
       file_obj = await client.get_object_async(url.format(file_hash))
     return file_obj
 
-  async def get_network_infrastructure(self):
-    """Process a file and get its network infrastructure."""
-
+  async def get_file_statistics(self):
+    """Process a file and get its statistics."""
     while True:
       file_hash = await self.files_queue.get()
       file_obj = await self.get_file_async(
         file_hash, 'contacted_domains,contacted_ips,contacted_urls')
+      await self.get_network_infrastructure(file_obj)
       await self.get_commonalities(file_obj)
-      relationships = file_obj.relationships
-      contacted_domains = relationships['contacted_domains']['data']
-      contacted_ips = relationships['contacted_ips']['data']
-      contacted_urls = relationships['contacted_urls']['data']
-      await self.networking_queue.put(
-          {'contacted_addresses': contacted_domains,
-           'type': 'domains',
-           'file': file_hash})
-      await self.networking_queue.put(
-          {'contacted_addresses': contacted_ips,
-           'type': 'ips',
-           'file': file_hash})
-      await self.networking_queue.put(
-          {'contacted_addresses': contacted_urls,
-           'type': 'urls',
-           'file': file_hash})
-      self.networking_infrastructure[file_hash]['domains'] = contacted_domains
-      self.networking_infrastructure[file_hash]['ips'] = contacted_ips
-      self.networking_infrastructure[file_hash]['urls'] = contacted_urls
-      self.files_queue.task_done()
+
+  async def get_network_infrastructure(self, file_obj):
+    """Process a file and get its network infrastructure."""
+
+    file_hash = file_obj.sha256
+    relationships = file_obj.relationships
+    contacted_domains = relationships['contacted_domains']['data']
+    contacted_ips = relationships['contacted_ips']['data']
+    contacted_urls = relationships['contacted_urls']['data']
+    await self.networking_queue.put(
+        {'contacted_addresses': contacted_domains,
+         'type': 'domains',
+         'file': file_hash})
+    await self.networking_queue.put(
+        {'contacted_addresses': contacted_ips,
+         'type': 'ips',
+         'file': file_hash})
+    await self.networking_queue.put(
+        {'contacted_addresses': contacted_urls,
+         'type': 'urls',
+         'file': file_hash})
+    self.networking_infrastructure[file_hash]['domains'] = contacted_domains
+    self.networking_infrastructure[file_hash]['ips'] = contacted_ips
+    self.networking_infrastructure[file_hash]['urls'] = contacted_urls
+    self.files_queue.task_done()
 
   async def get_commonalities(self, file_obj):
+    """Process a file and get the information to be put in common.
+
+    :param file_obj: File object to be processed.
+    :type file_obj: `class:Object`
+    """
     file_hash = file_obj.sha256
     file_dict = file_obj.to_dict()
     file_signers = vt.dictpath.get_all(file_dict,
         '$.attributes.signature_info["signers details"][*].name')
     creation_dates = vt.dictpath.get_all(file_dict,
         '$.attributes.creation_date')
+    creation_dates = map(lambda x: datetime.fromtimestamp(x), creation_dates)
     imphashes = vt.dictpath.get_all(file_dict,
         '$.attributes.pe_info.imphash')
     signed_dates = vt.dictpath.get_all(file_dict,
         '$.attributes.signature_info.["signing date"]')
+    file_versions = vt.dictpath.get_all(file_dict,
+        '$.attributes.signature_info.["file version"]')
 
     await self.commonalities_queue.put(
       {'commonalities': file_signers,
-       'type': 'signers',
+       'type': 'Signers',
        'file': file_hash}
     )
 
     await self.commonalities_queue.put(
       {'commonalities': creation_dates,
-       'type': 'creation_time',
+       'type': 'Creation Time',
        'file': file_hash}
     )
 
     await self.commonalities_queue.put(
       {'commonalities': imphashes,
-       'type': 'imphash',
+       'type': 'Imphash',
        'file': file_hash}
     )
 
     await self.commonalities_queue.put(
       {'commonalities': signed_dates,
-       'type': 'date_signed',
+       'type': 'Date Signed',
+       'file': file_hash}
+    )
+
+    await self.commonalities_queue.put(
+      {'commonalities': file_versions,
+       'type': 'File Version',
        'file': file_hash}
     )
 
@@ -160,6 +183,7 @@ class RetroHuntJobToNetworkInfrastructureHandler:
       self.networking_queue.task_done()
 
   async def build_commonalities(self):
+    """Build the statistics about the commonalities between analyzed files."""
     while True:
       item = await self.commonalities_queue.get()
       file_hash = item['file']
@@ -170,7 +194,7 @@ class RetroHuntJobToNetworkInfrastructureHandler:
 
 
   def print_results(self):
-    """Print results of the network infrastructure analysis."""
+    """Print results of network infrastructure and commonalities analysis."""
 
     print('TOP CONTACTED DOMAINS')
     print('Num. Requests\tDomain')
@@ -204,10 +228,12 @@ class RetroHuntJobToNetworkInfrastructureHandler:
 
     print('\nCOMMONALITIES BETWEEN FILES')
     for key, commonality in self.files_commonalities.items():
-      comm_items = [(k, v) for k, v in commonality.items() if len(v) > 1]
+      comm_items = [(k, v) for k, v in commonality.items() if
+                    len(v) > self.MIN_IN_COMMON]
       if comm_items:
         print('{}'.format(key))
         for value_in_common, files_having_it_in_common in comm_items:
+          value_in_common = str(value_in_common)
           print('\t{:<32}\tFiles having it in common:'.format(value_in_common))
           for file_hash in files_having_it_in_common:
             print('\t{:<32}\t{:<32}'.format('', file_hash))
@@ -238,7 +264,7 @@ async def main():
 
   enqueue_files_task = loop.create_task(
       handler.get_retrohunt_matching_files(args.retrohunt_job, limit))
-  network_inf_task = loop.create_task(handler.get_network_infrastructure())
+  network_inf_task = loop.create_task(handler.get_file_statistics())
   build_network_inf_task = loop.create_task(
       handler.build_network_infrastructure())
   build_commonalities_task = loop.create_task(

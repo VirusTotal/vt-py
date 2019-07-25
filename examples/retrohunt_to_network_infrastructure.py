@@ -30,8 +30,15 @@ class RetroHuntJobToNetworkInfrastructureHandler:
 
   def __init__(self, apikey):
     self.apikey = apikey
-    self.queue = asyncio.Queue()
+    self.networking_queue = asyncio.Queue()
+    self.commonalities_queue = asyncio.Queue()
     self.files_queue = asyncio.Queue()
+    self.files_commonalities = {
+      'creation_time': defaultdict(lambda: []),
+      'imphash': defaultdict(lambda: []),
+      'date_signed': defaultdict(lambda: []),
+      'signers': defaultdict(lambda: [])
+    }
     self.networking_counters = {
         'domains': defaultdict(lambda: 0), 'ips': defaultdict(lambda: 0),
         'urls': defaultdict(lambda: 0)}
@@ -80,19 +87,20 @@ class RetroHuntJobToNetworkInfrastructureHandler:
       file_hash = await self.files_queue.get()
       file_obj = await self.get_file_async(
         file_hash, 'contacted_domains,contacted_ips,contacted_urls')
+      await self.get_commonalities(file_obj)
       relationships = file_obj.relationships
       contacted_domains = relationships['contacted_domains']['data']
       contacted_ips = relationships['contacted_ips']['data']
       contacted_urls = relationships['contacted_urls']['data']
-      await self.queue.put(
+      await self.networking_queue.put(
           {'contacted_addresses': contacted_domains,
            'type': 'domains',
            'file': file_hash})
-      await self.queue.put(
+      await self.networking_queue.put(
           {'contacted_addresses': contacted_ips,
            'type': 'ips',
            'file': file_hash})
-      await self.queue.put(
+      await self.networking_queue.put(
           {'contacted_addresses': contacted_urls,
            'type': 'urls',
            'file': file_hash})
@@ -101,11 +109,47 @@ class RetroHuntJobToNetworkInfrastructureHandler:
       self.networking_infrastructure[file_hash]['urls'] = contacted_urls
       self.files_queue.task_done()
 
+  async def get_commonalities(self, file_obj):
+    file_hash = file_obj.sha256
+    file_dict = file_obj.to_dict()
+    file_signers = vt.dictpath.get_all(file_dict,
+        '$.attributes.signature_info["signers details"][*].name')
+    creation_dates = vt.dictpath.get_all(file_dict,
+        '$.attributes.creation_date')
+    imphashes = vt.dictpath.get_all(file_dict,
+        '$.attributes.pe_info.imphash')
+    signed_dates = vt.dictpath.get_all(file_dict,
+        '$.attributes.signature_info.["signing date"]')
+
+    await self.commonalities_queue.put(
+      {'commonalities': file_signers,
+       'type': 'signers',
+       'file': file_hash}
+    )
+
+    await self.commonalities_queue.put(
+      {'commonalities': creation_dates,
+       'type': 'creation_time',
+       'file': file_hash}
+    )
+
+    await self.commonalities_queue.put(
+      {'commonalities': imphashes,
+       'type': 'imphash',
+       'file': file_hash}
+    )
+
+    await self.commonalities_queue.put(
+      {'commonalities': signed_dates,
+       'type': 'date_signed',
+       'file': file_hash}
+    )
+
   async def build_network_infrastructure(self):
     """Build the statistics about the network infrastructure of a file."""
 
     while True:
-      item = await self.queue.get()
+      item = await self.networking_queue.get()
       type = item['type']
       for contacted_address in item['contacted_addresses']:
         if type in ('domains', 'ips'):
@@ -113,7 +157,17 @@ class RetroHuntJobToNetworkInfrastructureHandler:
         else:
           address = contacted_address['context_attributes']['url']
         self.networking_counters[type][address] += 1
-      self.queue.task_done()
+      self.networking_queue.task_done()
+
+  async def build_commonalities(self):
+    while True:
+      item = await self.commonalities_queue.get()
+      file_hash = item['file']
+      type = item['type']
+      for commonality in item['commonalities']:
+        self.files_commonalities[type][commonality].append(file_hash)
+      self.commonalities_queue.task_done()
+
 
   def print_results(self):
     """Print results of the network infrastructure analysis."""
@@ -148,6 +202,16 @@ class RetroHuntJobToNetworkInfrastructureHandler:
               else:
                 print('\t\t{}'.format(address['context_attributes']['url']))
 
+    print('\nCOMMONALITIES BETWEEN FILES')
+    for key, commonality in self.files_commonalities.items():
+      comm_items = [(k, v) for k, v in commonality.items() if len(v) > 1]
+      if comm_items:
+        print('{}'.format(key))
+        for value_in_common, files_having_it_in_common in comm_items:
+          print('\t{:<32}\tFiles having it in common:'.format(value_in_common))
+          for file_hash in files_having_it_in_common:
+            print('\t{:<32}\t{:<32}'.format('', file_hash))
+
 
 async def main():
 
@@ -177,14 +241,18 @@ async def main():
   network_inf_task = loop.create_task(handler.get_network_infrastructure())
   build_network_inf_task = loop.create_task(
       handler.build_network_infrastructure())
+  build_commonalities_task = loop.create_task(
+      handler.build_commonalities())
 
   await asyncio.gather(enqueue_files_task)
 
   await handler.files_queue.join()
-  await handler.queue.join()
+  await handler.networking_queue.join()
+  await handler.commonalities_queue.join()
 
   network_inf_task.cancel()
   build_network_inf_task.cancel()
+  build_commonalities_task.cancel()
 
   handler.print_results()
 

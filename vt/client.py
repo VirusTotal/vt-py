@@ -336,7 +336,7 @@ class Client:
 
     This function parses the server's response and return only the data, if the
     response is not in the expected format an exception is raised. For endpoints
-    where the data is a VirusTotal object you can use get_object_async instead.
+    where the data is a VirusTotal object you can use :func:`get_object` instead.
 
     :param path: Path to API endpoint, can contain format placeholders {}.
     :param fmt_args: A variable number of arguments that are put into any
@@ -623,9 +623,7 @@ class Client:
 
   async def _wait_for_analysis_completion(self, analysis):
     while True:
-      print(analysis.id)
       analysis = await self.get_object_async('/analyses/{}', analysis.id)
-      print(analysis.status)
       if analysis.status == 'completed':
         break
       await asyncio.sleep(20)

@@ -34,7 +34,6 @@ class RetroHuntJobToNetworkInfrastructureHandler:
   def __init__(self, apikey):
     self.apikey = apikey
     self.networking_queue = asyncio.Queue()
-    self.commonalities_queue = asyncio.Queue()
     self.files_queue = asyncio.Queue()
     self.files_commonalities = {
       'Creation Time': defaultdict(lambda: []),
@@ -120,31 +119,20 @@ class RetroHuntJobToNetworkInfrastructureHandler:
     file_versions = vt.dictpath.get_all(file_dict,
         '$.attributes.signature_info.["file version"]')
 
-    await self.commonalities_queue.put(
-      {'commonalities': file_signers,
-       'type': 'Signers',
-       'file': file_hash}
-    )
-    await self.commonalities_queue.put(
-      {'commonalities': creation_dates,
-       'type': 'Creation Time',
-       'file': file_hash}
-    )
-    await self.commonalities_queue.put(
-      {'commonalities': imphashes,
-       'type': 'Imphash',
-       'file': file_hash}
-    )
-    await self.commonalities_queue.put(
-      {'commonalities': signed_dates,
-       'type': 'Date Signed',
-       'file': file_hash}
-    )
-    await self.commonalities_queue.put(
-      {'commonalities': file_versions,
-       'type': 'File Version',
-       'file': file_hash}
-    )
+    for file_signer in file_signers:
+      self.files_commonalities['Signers'][file_signer].append(file_hash)
+
+    for creation_date in creation_dates:
+      self.files_commonalities['Creation Time'][creation_date].append(file_hash)
+
+    for imphash in imphashes:
+      self.files_commonalities['Imphash'][imphash].append(file_hash)
+
+    for sign_date in signed_dates:
+      self.files_commonalities['Date Signed'][sign_date].append(file_hash)
+
+    for file_version in file_versions:
+      self.files_commonalities['File Version'][file_version].append(file_hash)
 
   async def build_network_infrastructure(self):
     """Build the statistics about the network infrastructure of a file."""
@@ -159,16 +147,6 @@ class RetroHuntJobToNetworkInfrastructureHandler:
           address = contacted_address['context_attributes']['url']
         self.networking_counters[type][address] += 1
       self.networking_queue.task_done()
-
-  async def build_commonalities(self):
-    """Build the statistics about the commonalities between analyzed files."""
-    while True:
-      item = await self.commonalities_queue.get()
-      file_hash = item['file']
-      type = item['type']
-      for commonality in item['commonalities']:
-        self.files_commonalities[type][commonality].append(file_hash)
-      self.commonalities_queue.task_done()
 
   def print_results(self):
     """Print results of network infrastructure and commonalities analysis."""
@@ -241,18 +219,14 @@ async def main():
   file_statistics_task = loop.create_task(handler.get_file_statistics())
   build_network_inf_task = loop.create_task(
       handler.build_network_infrastructure())
-  build_commonalities_task = loop.create_task(
-      handler.build_commonalities())
 
   await asyncio.gather(enqueue_files_task)
 
   await handler.files_queue.join()
   await handler.networking_queue.join()
-  await handler.commonalities_queue.join()
 
   file_statistics_task.cancel()
   build_network_inf_task.cancel()
-  build_commonalities_task.cancel()
 
   handler.print_results()
 

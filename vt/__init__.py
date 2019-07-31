@@ -14,6 +14,7 @@
 # limitations under the License.
 
 from .client import *
+from .dictpath import *
 from .error import *
 from .feed import *
 from .iterator import *

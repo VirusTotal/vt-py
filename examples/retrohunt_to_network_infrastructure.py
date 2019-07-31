@@ -24,7 +24,6 @@ from collections import defaultdict
 from datetime import datetime
 
 import vt
-from .utils import dictpath
 
 
 class RetroHuntJobToNetworkInfrastructureHandler:
@@ -53,7 +52,7 @@ class RetroHuntJobToNetworkInfrastructureHandler:
   async def get_retrohunt_matching_files(self, retrohunt_job_id, max_files):
     """Get files related with the selected RetroHunt Job.
 
-    :param retrohunt_job_id: identifier of the RetroHunt Job whose files we want
+    :param retrohunt_job_id: Identifier of the RetroHunt Job whose files we want
     to analyze.
     :param max_files: Max. number of files to be analyzed.
     :type retrohunt_job_id: str
@@ -61,38 +60,21 @@ class RetroHuntJobToNetworkInfrastructureHandler:
     """
 
     async with vt.Client(self.apikey) as client:
-      url = '/intelligence/retrohunt_jobs/{}/matching_files'.format(
+      url = ('/intelligence/retrohunt_jobs/{}/matching_files?'
+             'relationships=contacted_domains,contacted_ips,'
+             'contacted_urls').format(
           retrohunt_job_id)
       files = client.iterator(url, limit=max_files)
       async for f in files:
-        await self.files_queue.put(f.sha256)
-
-  async def get_file_async(self, file_hash, relationships=None):
-    """Get a file object from VT.
-
-    :param file_hash: SHA-256, SHA-1 or MD5 hash that describes the
-    :param relationships: relationships to be retrieved alongside with the file.
-    Different relationship names should be separated by a comma.
-    :type file_hash: str
-    :type relationships: str
-    :return: `class:Object` containing the file information.
-    """
-    url = '/files/{}'
-    async with vt.Client(self.apikey) as client:
-      if isinstance(relationships, str) and relationships:
-        url += '?relationships={}'.format(relationships)
-
-      file_obj = await client.get_object_async(url.format(file_hash))
-    return file_obj
+        await self.files_queue.put(f)
 
   async def get_file_statistics(self):
     """Process a file and get its statistics."""
     while True:
-      file_hash = await self.files_queue.get()
-      file_obj = await self.get_file_async(
-        file_hash, 'contacted_domains,contacted_ips,contacted_urls')
+      file_obj = await self.files_queue.get()
       await self.get_network_infrastructure(file_obj)
       await self.get_commonalities(file_obj)
+      self.files_queue.task_done()
 
   async def get_network_infrastructure(self, file_obj):
     """Process a file and get its network infrastructure."""
@@ -117,7 +99,6 @@ class RetroHuntJobToNetworkInfrastructureHandler:
     self.networking_infrastructure[file_hash]['domains'] = contacted_domains
     self.networking_infrastructure[file_hash]['ips'] = contacted_ips
     self.networking_infrastructure[file_hash]['urls'] = contacted_urls
-    self.files_queue.task_done()
 
   async def get_commonalities(self, file_obj):
     """Process a file and get the information to be put in common.
@@ -127,16 +108,16 @@ class RetroHuntJobToNetworkInfrastructureHandler:
     """
     file_hash = file_obj.sha256
     file_dict = file_obj.to_dict()
-    file_signers = dictpath.get_all(file_dict,
+    file_signers = vt.dictpath.get_all(file_dict,
         '$.attributes.signature_info["signers details"][*].name')
-    creation_dates = dictpath.get_all(file_dict,
+    creation_dates = vt.dictpath.get_all(file_dict,
         '$.attributes.creation_date')
     creation_dates = map(lambda x: datetime.fromtimestamp(x), creation_dates)
-    imphashes = dictpath.get_all(file_dict,
+    imphashes = vt.dictpath.get_all(file_dict,
         '$.attributes.pe_info.imphash')
-    signed_dates = dictpath.get_all(file_dict,
+    signed_dates = vt.dictpath.get_all(file_dict,
         '$.attributes.signature_info.["signing date"]')
-    file_versions = dictpath.get_all(file_dict,
+    file_versions = vt.dictpath.get_all(file_dict,
         '$.attributes.signature_info.["file version"]')
 
     await self.commonalities_queue.put(
@@ -188,7 +169,6 @@ class RetroHuntJobToNetworkInfrastructureHandler:
       for commonality in item['commonalities']:
         self.files_commonalities[type][commonality].append(file_hash)
       self.commonalities_queue.task_done()
-
 
   def print_results(self):
     """Print results of network infrastructure and commonalities analysis."""
@@ -248,7 +228,7 @@ async def main():
       default=None, help='Limit of files to be analyzed')
 
   parser.add_argument('-r', '--retrohunt-job',
-      default=None, help='Number of days to be analyzed (backward)')
+      default=None, help='Identifier of the RetroHunt job to analyze')
 
   args = parser.parse_args()
   limit = int(args.limit)

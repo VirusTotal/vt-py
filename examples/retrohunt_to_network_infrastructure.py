@@ -24,6 +24,7 @@ from collections import defaultdict
 from datetime import datetime
 
 import vt
+from utils import dictpath
 
 
 class RetroHuntJobToNetworkInfrastructureHandler:
@@ -107,16 +108,16 @@ class RetroHuntJobToNetworkInfrastructureHandler:
     """
     file_hash = file_obj.sha256
     file_dict = file_obj.to_dict()
-    file_signers = vt.dictpath.get_all(file_dict,
+    file_signers = dictpath.get_all(file_dict,
         '$.attributes.signature_info["signers details"][*].name')
-    creation_dates = vt.dictpath.get_all(file_dict,
+    creation_dates = dictpath.get_all(file_dict,
         '$.attributes.creation_date')
     creation_dates = map(lambda x: datetime.fromtimestamp(x), creation_dates)
-    imphashes = vt.dictpath.get_all(file_dict,
+    imphashes = dictpath.get_all(file_dict,
         '$.attributes.pe_info.imphash')
-    signed_dates = vt.dictpath.get_all(file_dict,
+    signed_dates = dictpath.get_all(file_dict,
         '$.attributes.signature_info.["signing date"]')
-    file_versions = vt.dictpath.get_all(file_dict,
+    file_versions = dictpath.get_all(file_dict,
         '$.attributes.signature_info.["file version"]')
 
     for file_signer in file_signers:

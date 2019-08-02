@@ -16,11 +16,8 @@ import asyncio
 import base64
 import json
 
-from multidict import MultiDict
-
 from .error import APIError
 from .feed import Feed
-from .feed import FeedType
 from .object import Object
 from .iterator import Iterator
 from .version import __version__

@@ -233,7 +233,7 @@ def test_delete(httpserver):
 def test_iterator(httpserver):
 
   httpserver.expect_request(
-      '/api/v3/dummy_collection',
+      '/api/v3/dummy_collection/foo',
       method='GET',
       headers={'X-Apikey': 'dummy_api_key'}
   ).respond_with_json({
@@ -245,9 +245,8 @@ def test_iterator(httpserver):
   })
 
   with new_client(httpserver) as client:
-    it = client.iterator('/dummy_collection')
+    it = client.iterator('/dummy_collection/{}', 'foo')
     for i, obj in enumerate(it):
-      print(obj.id)
       assert 0 == i
 
 

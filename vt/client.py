@@ -498,6 +498,8 @@ class Client:
     a collection, like /intelligence/hunting_rulesets.
 
     :param path: Path to API endpoint.
+    :param fmt_args: A variable number of arguments that are put into any
+      placeholders used in path.
     :param obj: Instance :class:`Object` whith the type expected by the API
       endpoint.
     :type path: str
@@ -512,7 +514,7 @@ class Client:
     response = await self.post_async(path, *fmt_args, data=data)
     return await self._response_to_object(response)
 
-  def iterator(self, path, params=None, cursor=None,
+  def iterator(self, path, *fmt_args, params=None, cursor=None,
                limit=None, batch_size=None):
     """Returns an iterator for the collection specified by the given path.
 
@@ -520,6 +522,8 @@ class Client:
     example of such an endpoint are /comments and /intelligence/search.
 
     :param path: Path to API endpoint returning a collection.
+    :param fmt_args: A variable number of arguments that are put into any
+      placeholders used in path.
     :param params: Additional parameters passed to the endpoint.
     :param cursor: Cursor for resuming the iteration at the point it was left
       previously. A cursor can be obtained with Iterator.cursor(). This

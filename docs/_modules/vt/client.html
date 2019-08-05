@@ -146,7 +146,7 @@
            <div itemprop="articleBody">
             
   <h1>Source code for vt.client</h1><div class="highlight"><pre>
-<span></span><span class="c1"># Copyright (c) 2019 The vt-py authors. All Rights Reserved.</span>
+<span></span><span class="c1"># Copyright © 2019 The vt-py authors. All Rights Reserved.</span>
 <span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
 <span class="c1"># you may not use this file except in compliance with the License.</span>
 <span class="c1"># You may obtain a copy of the License at</span>
@@ -164,11 +164,8 @@
 <span class="kn">import</span> <span class="nn">base64</span>
 <span class="kn">import</span> <span class="nn">json</span>
 
-<span class="kn">from</span> <span class="nn">multidict</span> <span class="k">import</span> <span class="n">MultiDict</span>
-
 <span class="kn">from</span> <span class="nn">.error</span> <span class="k">import</span> <span class="n">APIError</span>
 <span class="kn">from</span> <span class="nn">.feed</span> <span class="k">import</span> <span class="n">Feed</span>
-<span class="kn">from</span> <span class="nn">.feed</span> <span class="k">import</span> <span class="n">FeedType</span>
 <span class="kn">from</span> <span class="nn">.object</span> <span class="k">import</span> <span class="n">Object</span>
 <span class="kn">from</span> <span class="nn">.iterator</span> <span class="k">import</span> <span class="n">Iterator</span>
 <span class="kn">from</span> <span class="nn">.version</span> <span class="k">import</span> <span class="n">__version__</span>
@@ -234,9 +231,8 @@
   <span class="k">def</span> <span class="nf">content</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">StreamReader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_aiohttp_resp</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
 
-  <span class="k">if</span> <span class="kc">False</span><span class="p">:</span>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">read_async</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-      <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aiohttp_resp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+  <span class="k">async</span> <span class="k">def</span> <span class="nf">read_async</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aiohttp_resp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 
   <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">_make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">read_async</span><span class="p">())</span>
@@ -321,8 +317,12 @@
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apikey</span><span class="p">,</span> <span class="n">agent</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Intialize the client with the provided API key.&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">apikey</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;API key must be a string&#39;</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="ow">not</span> <span class="n">apikey</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Expecting API key, got: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">apikey</span><span class="p">))</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;API key can not be an empty string&#39;</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_host</span> <span class="o">=</span> <span class="n">host</span> <span class="ow">or</span> <span class="n">_API_HOST</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_apikey</span> <span class="o">=</span> <span class="n">apikey</span>
@@ -363,7 +363,7 @@
 
   <span class="k">def</span> <span class="nf">_extract_data_from_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">json_response</span><span class="p">):</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="s1">&#39;data&#39;</span> <span class="ow">in</span> <span class="n">json_response</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> does not returns a data field&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;response does not returns a data field&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">json_response</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
 
   <span class="k">async</span> <span class="k">def</span> <span class="nf">_response_to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
@@ -481,7 +481,7 @@
 
 <span class="sd">    This function parses the server&#39;s response and return only the data, if the</span>
 <span class="sd">    response is not in the expected format an exception is raised. For endpoints</span>
-<span class="sd">    where the data is a VirusTotal object you can use get_object_async instead.</span>
+<span class="sd">    where the data is a VirusTotal object you can use :func:`get_object` instead.</span>
 
 <span class="sd">    :param path: Path to API endpoint, can contain format placeholders {}.</span>
 <span class="sd">    :param fmt_args: A variable number of arguments that are put into any</span>
@@ -768,9 +768,7 @@
 
   <span class="k">async</span> <span class="k">def</span> <span class="nf">_wait_for_analysis_completion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis</span><span class="p">):</span>
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-      <span class="nb">print</span><span class="p">(</span><span class="n">analysis</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
       <span class="n">analysis</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object_async</span><span class="p">(</span><span class="s1">&#39;/analyses/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">analysis</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-      <span class="nb">print</span><span class="p">(</span><span class="n">analysis</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">analysis</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s1">&#39;completed&#39;</span><span class="p">:</span>
         <span class="k">break</span>
       <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>

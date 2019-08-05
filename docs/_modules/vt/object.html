@@ -250,6 +250,9 @@
     <span class="k">if</span> <span class="s1">&#39;context_attributes&#39;</span> <span class="ow">in</span> <span class="n">obj_dict</span><span class="p">:</span>
       <span class="n">obj</span><span class="o">.</span><span class="n">_context_attributes</span> <span class="o">=</span> <span class="n">obj_dict</span><span class="p">[</span><span class="s1">&#39;context_attributes&#39;</span><span class="p">]</span>
 
+    <span class="k">if</span> <span class="s1">&#39;relationships&#39;</span> <span class="ow">in</span> <span class="n">obj_dict</span><span class="p">:</span>
+      <span class="n">obj</span><span class="o">.</span><span class="n">_relationships</span> <span class="o">=</span> <span class="n">obj_dict</span><span class="p">[</span><span class="s1">&#39;relationships&#39;</span><span class="p">]</span>
+
     <span class="k">return</span> <span class="n">obj</span></div>
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj_type</span><span class="p">,</span> <span class="n">obj_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">obj_attributes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -304,6 +307,12 @@
   <span class="k">def</span> <span class="nf">context_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_context_attributes&#39;</span><span class="p">):</span>
       <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_context_attributes</span>
+    <span class="k">return</span> <span class="p">{}</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">relationships</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_relationships&#39;</span><span class="p">):</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_relationships</span>
     <span class="k">return</span> <span class="p">{}</span>
 
   <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">modified_attributes_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>

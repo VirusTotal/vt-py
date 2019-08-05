@@ -1,3 +1,7 @@
+[![GitHub version](https://badge.fury.io/gh/VirusTotal%2Fvt-py.svg)](https://badge.fury.io/gh/VirusTotal%2Fvt-py)
+![GitHub](https://img.shields.io/github/license/VirusTotal/vt-py)
+[![GitHub issues](https://img.shields.io/github/issues/VirusTotal/vt-py)](https://GitHub.com/VirusTotal/vt-py/issues/)
+
 # vt-py
 
 This is the official Python client library for VirusTotal. With this library

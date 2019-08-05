@@ -1,6 +1,7 @@
-![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/VirusTotal/vt-py?style=for-the-badge)
-![GitHub](https://img.shields.io/github/license/VirusTotal/vt-py?style=for-the-badge)
-![GitHub issues](https://img.shields.io/github/issues/VirusTotal/vt-py?style=for-the-badge)
+![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/VirusTotal/vt-py)
+![GitHub](https://img.shields.io/github/license/VirusTotal/vt-py)
+![GitHub issues](https://img.shields.io/github/issues/VirusTotal/vt-py)
+
 
 # vt-py
 

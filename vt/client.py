@@ -541,11 +541,8 @@ class Client:
     :type batch_size: int
     :returns: An instance of :class:`Iterator`.
     """
-    return Iterator(self, path,
-        params=params,
-        cursor=cursor,
-        limit=limit,
-        batch_size=batch_size)
+    return Iterator(self, self._full_url(path, *path_args),
+        params=params, cursor=cursor, limit=limit, batch_size=batch_size)
 
   def scan_file(self, file, wait_for_completion=False):
     """Scans a file.

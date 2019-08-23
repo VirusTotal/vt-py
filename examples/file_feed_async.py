@@ -35,12 +35,14 @@ import vt
 
 class FeedReader:
 
-  def __init__(self, apikey, output_dir, num_workers=4, cursor=None):
+  def __init__(self, apikey, output_dir, num_workers=4,
+               download_files=False,cursor=None):
     self._apikey = apikey
     self._aborted = False
     self._cursor = cursor
     self._output_dir = output_dir
     self._num_workers = num_workers
+    self._download_files = download_files
     self._queue = asyncio.Queue(maxsize=num_workers)
 
   async def _get_from_feed_and_enqueue(self):
@@ -67,12 +69,17 @@ class FeedReader:
         # named <sha256> with the file's content.
         with open(file_path + '.json', mode='w') as f:
           f.write(json.dumps(file_obj.to_dict()))
-        # The URL for downloading the file comes as a context attribute named
-        # 'download_url'.
-        download_url = file_obj.context_attributes['download_url']
-        response = await client.get_async(download_url)
-        with open(file_path, mode='wb') as f:
-          f.write(await response.read_async())
+        if self._download_files:
+          # The URL for downloading the file comes as a context attribute named
+          # 'download_url'.
+          download_url = file_obj.context_attributes['download_url']
+          response = await client.get_async(download_url)
+          with open(file_path, mode='wb') as f:
+            f.write(await response.read_async())
+        else:
+          # When not downloading files this yields the control to event loop
+          # so that other coroutines haven an opportunity to run.
+          await asyncio.sleep(0)
         self._queue.task_done()
         print(file_obj.id)
 
@@ -109,7 +116,10 @@ class FeedReader:
 def main():
 
   parser = argparse.ArgumentParser(
-      description='get files from the VirusTotal feed.')
+    description='Get files from the VirusTotal feed. '
+      'For each file in the feed a <sha256>.json file is created in the output '
+      'directory containing information about the file. Additionally you can '
+      'download the actual file with the --download-files option.')
 
   parser.add_argument('--apikey',
       required=True,
@@ -122,6 +132,9 @@ def main():
   parser.add_argument('--output',
       default='./file-feed',
       help='path to output directory')
+
+  parser.add_argument('--download-files',
+      action='store_true', help='download files')
 
   parser.add_argument('--num_workers',
       type=int,
@@ -138,6 +151,7 @@ def main():
       args.apikey,
       args.output,
       num_workers=args.num_workers,
+      download_files=args.download_files,
       cursor=args.cursor)
 
   feed_reader.run()

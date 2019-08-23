@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import bz2
 import datetime
 import io
 import json
@@ -19,6 +20,7 @@ import pytest
 import pytest_httpserver
 
 from vt import Client
+from vt import FeedType
 from vt import Object
 
 
@@ -319,3 +321,40 @@ def test_scan_url(httpserver):
     analysis = client.scan_url('https://www.dummy.url')
 
   assert analysis.type == 'analysis'
+
+
+def test_feed(httpserver):
+
+  httpserver.expect_ordered_request(
+      '/api/v3/feeds/files/200102030405',
+      method='GET',
+      headers={'X-Apikey': 'dummy_api_key'}
+  ).respond_with_data(
+    bz2.compress(b'{\"type\": \"file\", \"id\": \"dummy_file_id_1\"}'))
+
+  # The feed iterator should tolerate missing feed packages, so let's return
+  # a NotFoundError for package 200102030406.
+  httpserver.expect_ordered_request(
+      '/api/v3/feeds/files/200102030406',
+      method='GET',
+      headers={'X-Apikey': 'dummy_api_key'}
+  ).respond_with_json({
+      'error': {
+          'code': 'NotFoundError'
+    }}, status=404)
+
+  httpserver.expect_ordered_request(
+      '/api/v3/feeds/files/200102030407',
+      method='GET',
+      headers={'X-Apikey': 'dummy_api_key'}
+  ).respond_with_data(
+    bz2.compress(b'{\"type\": \"file\", \"id\": \"dummy_file_id_2\"}'))
+
+  with new_client(httpserver) as client:
+    feed = client.feed(FeedType.FILES, cursor='200102030405')
+    obj = feed.__next__()
+    assert obj.type == 'file'
+    assert obj.id == 'dummy_file_id_1'
+    obj = feed.__next__()
+    assert obj.type == 'file'
+    assert obj.id == 'dummy_file_id_2'

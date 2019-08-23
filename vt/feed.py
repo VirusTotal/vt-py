@@ -156,7 +156,7 @@ class Feed:
       next_item = self._batch.readline()
     self._batch_cursor += 1
     self._count += 1
-    return Object.from_dict(json.loads(next_item))
+    return Object.from_dict(json.loads(next_item.decode('utf-8')))
 
   async def __anext__(self):
     if self._batch:
@@ -170,7 +170,7 @@ class Feed:
       next_item = self._batch.readline()
     self._batch_cursor += 1
     self._count += 1
-    return Object.from_dict(json.loads(next_item))
+    return Object.from_dict(json.loads(next_item.decode('utf-8')))
 
   @property
   def cursor(self):

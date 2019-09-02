@@ -67,6 +67,12 @@ class Feed:
     self._batch = None
     self._count = 0
 
+    # This class tolerates a given number of missing batches in the feed,
+    # if self._missing_batches_tolerancy is set to 0, there's no tolerancy
+    # for missing batches and even a single missing batch will cause an error.
+    # However, missing batches can occur from time to time.
+    self._missing_batches_tolerancy = 1
+
     if cursor:
       batch_time, _, batch_skip = cursor.partition('-')
       self._batch_time = datetime.strptime(batch_time, '%Y%m%d%H%M')
@@ -78,6 +84,12 @@ class Feed:
     self._next_batch_time = self._batch_time
 
   async def _get_batch_async(self, batch_time):
+    """"Retrieves a specific batch from the backend.
+
+    There's one batch per minute, each identified by the date in YYYYMMDDhhmm
+    format. The batch_time argument is a datetime object that is converted to
+    this format, the seconds in the datetime are ignored.
+    """
     while True:
       response = await self._client.get_async('/feeds/{}/{}'.format(
           self._type.value, batch_time.strftime('%Y%m%d%H%M')))
@@ -93,6 +105,33 @@ class Feed:
   def _get_batch(self, *args, **kwargs):
     return asyncio.get_event_loop().run_until_complete(
         self._get_batch_async(*args, **kwargs))
+
+  async def _get_next_batch_async(self):
+    """Retrieves the next batch from the feed.
+
+    This function tolerates a certain number of missing batches. If some batch
+    is missing the next one will be retrieved. If more than
+    """
+    missing_batches = 0
+    while True:
+      try:
+        self._batch_time = self._next_batch_time
+        self._next_batch_time += timedelta(seconds=60)
+        self._batch = await self._get_batch_async(self._batch_time)
+        self._batch_cursor = 0
+        break
+      except APIError as error:
+        # The only acceptable error here is NotFoundError, if such an error
+        # occurrs we try to get the next batch.
+        if error.code != 'NotFoundError':
+          raise error
+        missing_batches += 1
+        if missing_batches > self._missing_batches_tolerancy:
+          raise error
+
+  def _get_next_batch(self):
+    return asyncio.get_event_loop().run_until_complete(
+        self._get_next_batch_async())
 
   def _skip(self, n):
     for _ in range(n):
@@ -111,16 +150,13 @@ class Feed:
     else:
       next_item = None
     if not next_item:
-      self._batch_time = self._next_batch_time
-      self._batch = self._get_batch(self._batch_time)
-      self._batch_cursor = 0
+      self._get_next_batch()
       self._skip(self._batch_skip)
       self._batch_skip = 0
-      self._next_batch_time += timedelta(seconds=60)
       next_item = self._batch.readline()
     self._batch_cursor += 1
     self._count += 1
-    return Object.from_dict(json.loads(next_item))
+    return Object.from_dict(json.loads(next_item.decode('utf-8')))
 
   async def __anext__(self):
     if self._batch:
@@ -128,16 +164,13 @@ class Feed:
     else:
       next_item = None
     if not next_item:
-      self._batch_time = self._next_batch_time
-      self._batch = await self._get_batch_async(self._batch_time)
-      self._batch_cursor = 0
+      await self._get_next_batch_async()
       self._skip(self._batch_skip)
       self._batch_skip = 0
-      self._next_batch_time += timedelta(seconds=60)
       next_item = self._batch.readline()
     self._batch_cursor += 1
     self._count += 1
-    return Object.from_dict(json.loads(next_item))
+    return Object.from_dict(json.loads(next_item.decode('utf-8')))
 
   @property
   def cursor(self):

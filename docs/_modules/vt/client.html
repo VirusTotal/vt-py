@@ -689,11 +689,8 @@
 <span class="sd">    :type batch_size: int</span>
 <span class="sd">    :returns: An instance of :class:`Iterator`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">Iterator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span>
-        <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
-        <span class="n">cursor</span><span class="o">=</span><span class="n">cursor</span><span class="p">,</span>
-        <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
-        <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">Iterator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_full_url</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">),</span>
+        <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">cursor</span><span class="o">=</span><span class="n">cursor</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Client.scan_file"><a class="viewcode-back" href="../../api/client.html#vt.Client.scan_file">[docs]</a>  <span class="k">def</span> <span class="nf">scan_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">wait_for_completion</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Scans a file.</span>

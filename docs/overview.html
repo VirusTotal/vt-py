@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Search &mdash; vt-py  documentation</title>
+  <title>Overview &mdash; vt-py  documentation</title>
   
 
   
@@ -25,7 +25,6 @@
         <script type="text/javascript" src="_static/underscore.js"></script>
         <script type="text/javascript" src="_static/doctools.js"></script>
         <script type="text/javascript" src="_static/language_data.js"></script>
-        <script type="text/javascript" src="_static/searchtools.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -35,7 +34,9 @@
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="#" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Quickstart" href="quickstart.html" />
+    <link rel="prev" title="How to install" href="howtoinstall.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -62,7 +63,7 @@
 
           
 <div role="search">
-  <form id="rtd-search-form" class="wy-form" action="#" method="get">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
@@ -80,9 +81,9 @@
             
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="howtoinstall.html">How to install</a></li>
-<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apireference.html">API reference</a></li>
 </ul>
@@ -130,12 +131,14 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Search</li>
+      <li>Overview</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
+            <a href="_sources/overview.rst.txt" rel="nofollow"> View page source</a>
+          
         
       </li>
     
@@ -147,24 +150,43 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <noscript>
-  <div id="fallback" class="admonition warning">
-    <p class="last">
-      Please activate JavaScript to enable the search
-      functionality.
-    </p>
-  </div>
-  </noscript>
+  <div class="section" id="overview">
+<h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
+<p>The API for this library is relatively small and shares the same concepts and
+principles seen in the underlying <a class="reference external" href="https://developers.virustotal.com/v3.0/reference">REST API</a>.
+For this reason we highly recommend you to familiarize yourself with these
+<a class="reference external" href="https://developers.virustotal.com/v3.0/reference#key-concepts">concepts</a> before
+continuing.</p>
+<p>While using this library you may have the impression that it’s very similar to
+other general-purpose HTTP libraries like <a class="reference external" href="http://python-requests.org">requests</a>,
+as you will see very generic APIs like <a class="reference internal" href="api/client.html#vt.Client.get" title="vt.Client.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">vt.Client.get()</span></code></a>, <a class="reference internal" href="api/client.html#vt.Client.post" title="vt.Client.post"><code class="xref py py-meth docutils literal notranslate"><span class="pre">vt.Client.post()</span></code></a>
+and so on. In fact, you will find yourself relying on the REST API documentation
+in order to find the right endpoint where to send a request to, or learn about
+the attributes exported by some object. This has been a deliberate decision.
+We wanted <cite>vt-py</cite> to be as lightweight and generic as posible, so that changes
+in the REST API don’t always require a new version of this client library, but
+at the same time offering the right abstractions so that you don’t need to deal
+with details like setting HTTP headers, serializing and deserializing JSON, etc.</p>
+<p>So, this is not a high-level library that completely abstract you out of the
+underlying REST API, quite the contrary, this library is more like a HTTP library
+that has been enriched with features specifically tailored to work with the
+VirusTotal API.</p>
+</div>
 
-  
-  <div id="search-results">
-  
-  </div>
 
            </div>
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="quickstart.html" class="btn btn-neutral float-right" title="Quickstart" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="howtoinstall.html" class="btn btn-neutral float-left" title="How to install" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>
@@ -197,14 +219,7 @@
   
   
     
-  
-  <script type="text/javascript">
-    jQuery(function() { Search.loadIndex("searchindex.js"); });
-  </script>
-  
-  <script type="text/javascript" id="searchindexloader"></script>
    
-
 
 </body>
 </html>

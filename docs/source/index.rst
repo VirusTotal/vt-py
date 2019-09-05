@@ -27,5 +27,6 @@ multi-processing.
    :caption: Contents:
 
    howtoinstall
+   overview
    quickstart
    apireference

@@ -27,7 +27,7 @@ if sys.version_info < (3, 5, 0):
 
 install_requires = [
     'asyncio',
-    'aiohttp==3.6.2',
+    'aiohttp',
     'pytest',
     'pytest_httpserver',
 ]
@@ -41,7 +41,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url='https://github.com/VirusTotal/vt-py',
     packages=['vt'],
-    python_requires='>=3.4.0',
+    python_requires='>=3.6.0',
     install_requires=install_requires,
     classifiers=[
         'Programming Language :: Python :: 3',

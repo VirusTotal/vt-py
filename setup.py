@@ -22,8 +22,8 @@ with open(convert_path('vt/version.py')) as ver_file:
 with open('README.md', 'r') as fh:
   long_description = fh.read()
 
-if sys.version_info < (3, 5, 0):
-  raise RuntimeError('vt-py requires Python 3.5.0+')
+if sys.version_info < (3, 6, 0):
+  raise RuntimeError('vt-py requires Python 3.6.0+')
 
 install_requires = [
     'asyncio',

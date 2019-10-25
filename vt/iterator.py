@@ -121,8 +121,8 @@ class Iterator:
     self._batch_cursor = 0
     return self
 
-  async def __aiter__(self):
-    self._items, self._server_cursor = await self._get_batch_async(
+  def __aiter__(self):
+    self._items, self._server_cursor = self._get_batch_async(
         self._batch_cursor)
     self._batch_cursor = 0
     return self

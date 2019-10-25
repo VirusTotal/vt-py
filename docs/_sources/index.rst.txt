@@ -9,7 +9,7 @@ Welcome to vt-py's documentation!
 `vt-py <https://github.com/VirusTotal/vt-py>`_ is the official Python client library
 for the `VirusTotal API v3 <https://developers.virustotal.com/v3.0/reference>`_.
 
-This library requires Python 3.5.6+, Python 2.x is not supported. This is because vt-py
+This library requires Python 3.6.0+, Python 2.x is not supported. This is because vt-py
 makes use of the new `async/await <https://snarky.ca/how-the-heck-does-async-await-work-in-python-3-5/>`_
 syntax for implementing asynchronous coroutines.
 

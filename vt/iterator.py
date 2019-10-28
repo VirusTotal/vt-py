@@ -58,7 +58,7 @@ class Iterator:
   """
 
   def __init__(self, client, path, params=None, cursor=None,
-               limit=None, batch_size=None):
+               limit=0, batch_size=0):
     """Initializes an iterator.
 
     This function is not intended to be called directly. Client.iterator() is
@@ -67,7 +67,6 @@ class Iterator:
     self._client = client
     self._path = path
     self._params = params or {}
-    self._limit = limit
     self._batch_size = batch_size
     self._limit = limit
     self._items = []
@@ -116,44 +115,28 @@ class Iterator:
     return self._parse_response(json_resp, batch_cursor)
 
   def __iter__(self):
-    self._items, self._server_cursor = self._get_batch(
-        self._batch_cursor)
-    self._batch_cursor = 0
-    return self
+    self._items, self._server_cursor = self._get_batch()
+    while (self._items or self._server_cursor) and self._count < self._limit:
+      if len(self._items) == 0:
+        self._items, self._server_cursor = self._get_batch()
+        self._batch_cursor = 0
+      else:
+        item = self._items.pop(0)
+        self._count += 1
+        self._batch_cursor += 1
+        yield Object.from_dict(item)
 
-  def __aiter__(self):
-    self._items, self._server_cursor = self._get_batch_async(
-        self._batch_cursor)
-    self._batch_cursor = 0
-    return self
-
-  def __next__(self):
-    if self._limit and self._count == self._limit:
-      raise StopIteration()
-    if len(self._items) == 0 and not self._server_cursor:
-      raise StopIteration()
-    if len(self._items) == 0:
-      self._items, self._server_cursor = self._get_batch()
-      self._batch_cursor = 0
-    if len(self._items) == 0:
-      raise StopIteration()
-    self._count += 1
-    self._batch_cursor += 1
-    return Object.from_dict(self._items.pop(0))
-
-  async def __anext__(self):
-    if self._limit and self._count == self._limit:
-      raise StopAsyncIteration()
-    if len(self._items) == 0 and not self._server_cursor:
-      raise StopAsyncIteration()
-    if len(self._items) == 0:
-      self._items, self._server_cursor = await self._get_batch_async()
-      self._batch_cursor = 0
-    if len(self._items) == 0:
-      raise StopAsyncIteration()
-    self._count += 1
-    self._batch_cursor += 1
-    return Object.from_dict(self._items.pop(0))
+  async def __aiter__(self):
+    self._items, self._server_cursor = await self._get_batch_async()
+    while (self._items or self._server_cursor) and self._count < self._limit:
+      if len(self._items) == 0:
+        self._items, self._server_cursor = await self._get_batch_async()
+        self._batch_cursor = 0
+      else:
+        item = self._items.pop(0)
+        self._count += 1
+        self._batch_cursor += 1
+        yield Object.from_dict(item)
 
   @property
   def cursor(self):

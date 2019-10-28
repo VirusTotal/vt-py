@@ -515,7 +515,7 @@ class Client:
     return await self._response_to_object(response)
 
   def iterator(self, path, *path_args, params=None, cursor=None,
-               limit=None, batch_size=None):
+               limit=0, batch_size=0):
     """Returns an iterator for the collection specified by the given path.
 
     The endpoint specified by path must return a collection of objects. An

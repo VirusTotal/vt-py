@@ -1,5 +1,4 @@
-# Lint as: python3
-
+#!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 # Copyright © 2019 The vt-py authors. All Rights Reserved.
 # Licensed under the Apache License, Version 2.0 (the "License");

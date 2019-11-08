@@ -2,7 +2,7 @@
 How to install
 **************
 
-The easiest way of installing `vt-py` is using `pip`:
+The easiest and recommended way of installing `vt-py` is using `pip`:
 
 .. code-block:: sh
 

@@ -22,5 +22,4 @@ and automate your workflow quickly and efficiently.
 For more information about how to use *vt-py* visit the [documentation](https://virustotal.github.io/vt-py/) page.
 
 You may also want to take a look at some of our [example scripts](https://github.com/VirusTotal/vt-py/tree/master/examples),
-which besides doing useful work for you can be used as a guidance on how to use
-*vt-py*.
+where you can find some useful tools that can serve as a guidance on how to use *vt-py*.

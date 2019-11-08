@@ -83,6 +83,7 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../howtoinstall.html">How to install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../apireference.html">API reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Client</a></li>
@@ -391,7 +392,7 @@ placeholders used in path.</p></li>
 
 <dl class="method">
 <dt id="vt.Client.iterator">
-<code class="sig-name descname">iterator</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">*path_args</em>, <em class="sig-param">params=None</em>, <em class="sig-param">cursor=None</em>, <em class="sig-param">limit=None</em>, <em class="sig-param">batch_size=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.iterator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.iterator" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">iterator</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">*path_args</em>, <em class="sig-param">params=None</em>, <em class="sig-param">cursor=None</em>, <em class="sig-param">limit=0</em>, <em class="sig-param">batch_size=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/client.html#Client.iterator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Client.iterator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns an iterator for the collection specified by the given path.</p>
 <p>The endpoint specified by path must return a collection of objects. An
 example of such an endpoint are /comments and /intelligence/search.</p>

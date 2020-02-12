@@ -36,6 +36,7 @@ __all__ = [
 class FeedType(enum.Enum):
   """Feed types."""
   FILES = 'files'
+  URLS = 'urls'
 
 
 class Feed:

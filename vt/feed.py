@@ -79,7 +79,7 @@ class Feed:
       self._batch_time = datetime.strptime(batch_time, '%Y%m%d%H%M')
       self._batch_skip = int(batch_skip) if batch_skip else 0
     else:
-      self._batch_time = datetime.utcnow() - timedelta(minutes=10)
+      self._batch_time = datetime.utcnow() - timedelta(minutes=70)
       self._batch_skip = 0
 
     self._next_batch_time = self._batch_time

@@ -142,7 +142,7 @@ class Feed:
   def __iter__(self):
     return self
 
-  async def __aiter__(self):
+  def __aiter__(self):
     return self
 
   def __next__(self):

@@ -140,38 +140,30 @@ class Feed:
       self._batch_cursor += 1
 
   def __iter__(self):
-    return self
+    while True:
+      if self._batch:
+        next_item = self._batch.readline()
+      else:
+        self._get_next_batch()
+        self._skip(self._batch_skip)
+        self._batch_skip = 0
+        next_item = self._batch.readline()
+      self._batch_cursor += 1
+      self._count += 1
+      yield Object.from_dict(json.loads(next_item.decode('utf-8')))
 
-  def __aiter__(self):
-    return self
-
-  def __next__(self):
-    if self._batch:
-      next_item = self._batch.readline()
-    else:
-      next_item = None
-    if not next_item:
-      self._get_next_batch()
-      self._skip(self._batch_skip)
-      self._batch_skip = 0
-      next_item = self._batch.readline()
-    self._batch_cursor += 1
-    self._count += 1
-    return Object.from_dict(json.loads(next_item.decode('utf-8')))
-
-  async def __anext__(self):
-    if self._batch:
-      next_item = self._batch.readline()
-    else:
-      next_item = None
-    if not next_item:
-      await self._get_next_batch_async()
-      self._skip(self._batch_skip)
-      self._batch_skip = 0
-      next_item = self._batch.readline()
-    self._batch_cursor += 1
-    self._count += 1
-    return Object.from_dict(json.loads(next_item.decode('utf-8')))
+  async def __aiter__(self):
+    while True:
+      if self._batch:
+        next_item = self._batch.readline()
+      else:
+        await self._get_next_batch_async()
+        self._skip(self._batch_skip)
+        self._batch_skip = 0
+        next_item = self._batch.readline()
+      self._batch_cursor += 1
+      self._count += 1
+      yield Object.from_dict(json.loads(next_item.decode('utf-8')))
 
   @property
   def cursor(self):

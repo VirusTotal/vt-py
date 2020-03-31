@@ -55,6 +55,8 @@ class FeedReader:
           break
       self._cursor = feed.cursor
 
+      self._enqueue_files_task.done()
+
   async def _process_files_from_queue(self):
     """Process files put in the queue by _get_from_feed_and_enqueue.
 
@@ -83,6 +85,9 @@ class FeedReader:
         self._queue.task_done()
         print(file_obj.id)
 
+      task = self._worker_tasks.pop(0)
+      task.done()
+
   def abort(self):
     self._aborted = True
 
@@ -92,9 +97,12 @@ class FeedReader:
   def run(self):
 
     loop = asyncio.get_event_loop()
+    loop_tasks = []
     # Create a task that read file object's from the feed and put them in a
     # queue.
-    loop.create_task(self._get_from_feed_and_enqueue())
+    self._enqueue_files_task = loop.create_task(
+        self._get_from_feed_and_enqueue())
+    loop_tasks.append(self._enqueue_files_task)
 
     # Create multiple tasks that read file object's from the queue, download
     # the file's content, and create the output files.
@@ -109,7 +117,8 @@ class FeedReader:
       loop.add_signal_handler(s, self.abort)
 
     # Wait until all worker tasks has completed.
-    loop.run_until_complete(asyncio.gather(*self._worker_tasks))
+    loop_tasks.extend(self._worker_tasks)
+    loop.run_until_complete(asyncio.gather(*loop_tasks))
     loop.close()
 
 

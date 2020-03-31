@@ -352,9 +352,10 @@ def test_feed(httpserver):
 
   with new_client(httpserver) as client:
     feed = client.feed(FeedType.FILES, cursor='200102030405')
-    obj = feed.__next__()
+    feed_iterator = feed.__iter__()
+    obj = next(feed_iterator)
     assert obj.type == 'file'
     assert obj.id == 'dummy_file_id_1'
-    obj = feed.__next__()
+    obj = next(feed_iterator)
     assert obj.type == 'file'
     assert obj.id == 'dummy_file_id_2'

@@ -150,7 +150,11 @@ class Feed:
         next_item = self._batch.readline()
       self._batch_cursor += 1
       self._count += 1
-      yield Object.from_dict(json.loads(next_item.decode('utf-8')))
+
+      if next_item:
+        yield Object.from_dict(json.loads(next_item.decode('utf-8')))
+      else:
+        self._batch = None
 
   async def __aiter__(self):
     while True:
@@ -163,7 +167,11 @@ class Feed:
         next_item = self._batch.readline()
       self._batch_cursor += 1
       self._count += 1
-      yield Object.from_dict(json.loads(next_item.decode('utf-8')))
+
+      if next_item:
+        yield Object.from_dict(json.loads(next_item.decode('utf-8')))
+      else:
+        self._batch = None
 
   @property
   def cursor(self):

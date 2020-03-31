@@ -351,10 +351,13 @@ def test_feed(httpserver):
     bz2.compress(b'{\"type\": \"file\", \"id\": \"dummy_file_id_2\"}'))
 
   with new_client(httpserver) as client:
+    num_expected_packages_to_get = 2
+    package_index = 1
     feed = client.feed(FeedType.FILES, cursor='200102030405')
-    obj = feed.__next__()
-    assert obj.type == 'file'
-    assert obj.id == 'dummy_file_id_1'
-    obj = feed.__next__()
-    assert obj.type == 'file'
-    assert obj.id == 'dummy_file_id_2'
+    for obj in feed:
+      assert obj.type == 'file'
+      assert obj.id == 'dummy_file_id_%d' % package_index
+      package_index += 1
+      num_expected_packages_to_get -= 1
+      if num_expected_packages_to_get == 0:
+        break

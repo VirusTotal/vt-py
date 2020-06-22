@@ -165,6 +165,9 @@ def test_get_object(httpserver):
   assert obj.foo == 'foo'
   assert obj.bar == 'bar'
 
+  assert obj.get('foo') == 'foo'
+  assert obj.get('bar') == 'bar'
+  assert obj.get('baz') is None
 
 def test_patch_object(httpserver):
 

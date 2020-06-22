@@ -36,7 +36,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="API reference" href="apireference.html" />
-    <link rel="prev" title="How to install" href="howtoinstall.html" /> 
+    <link rel="prev" title="Overview" href="overview.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -83,6 +83,7 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="howtoinstall.html">How to install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Quickstart</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#get-information-about-a-file">Get information about a file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#get-information-about-an-url">Get information about an URL</a></li>
@@ -176,7 +177,7 @@ with some other SHA-256, SHA-1 or MD5:</p>
 </pre></div>
 </div>
 <p>Now <cite>file</cite> is an instance of <a class="reference internal" href="api/object.html#vt.Object" title="vt.Object"><code class="xref py py-class docutils literal notranslate"><span class="pre">vt.Object</span></code></a> that contains information
-about the requested file. This object have all the attributes returned in the
+about the requested file. This object have the attributes returned in the
 API response which are listed in the <a class="reference external" href="https://developers.virustotal.com/v3.0/reference#files">VirusTotal API v3 documentation</a>. Some examples:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">file</span><span class="o">.</span><span class="n">size</span>
 <span class="go">68</span>
@@ -194,6 +195,22 @@ API response which are listed in the <a class="reference external" href="https:/
 <span class="go">{&#39;failure&#39;: 0, &#39;harmless&#39;: 0, &#39;malicious&#39;: 62, &#39;suspicious&#39;: 0, &#39;timeout&#39;: 0, &#39;type-unsupported&#39;: 9, &#39;undetected&#39;: 2}</span>
 </pre></div>
 </div>
+<p>Alternatively, you can use the <code class="xref py py-meth docutils literal notranslate"><span class="pre">vt.Object.get()</span></code> method for retrieving
+object’s attributes:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">file</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;size&quot;</span><span class="p">)</span>
+<span class="go">68</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">file</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type_tag&quot;</span><span class="p">)</span>
+<span class="go">&#39;text&#39;</span>
+</pre></div>
+</div>
+<p>This method is useful for those attributes that are optional and do not appear
+in all files. For example, a Portable Executable (PE) file won’t have the <cite>pdf_info</cite>
+attribute, and PDF document won’t have the <cite>pe_info</cite> attribute. This means that
+<cite>file.pe_info</cite> will fail for PDF files but with <cite>file.get(“pe_info”)</cite> you are
+on the safe side, as it will return <cite>None</cite> if the <cite>pe_info</cite> attribute is not
+present.</p>
 </div>
 <div class="section" id="get-information-about-an-url">
 <h2>Get information about an URL<a class="headerlink" href="#get-information-about-an-url" title="Permalink to this headline">¶</a></h2>
@@ -374,7 +391,7 @@ was created with <cite>enabled=False</cite> by default:</p>
         <a href="apireference.html" class="btn btn-neutral float-right" title="API reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="howtoinstall.html" class="btn btn-neutral float-left" title="How to install" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="overview.html" class="btn btn-neutral float-left" title="Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

@@ -7,4 +7,5 @@ Feed
 
 .. automodule:: vt
     :members: Feed, FeedType
+    :noindex:
     :undoc-members:

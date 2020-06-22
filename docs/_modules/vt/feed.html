@@ -184,7 +184,8 @@
 
 <div class="viewcode-block" id="FeedType"><a class="viewcode-back" href="../../api/feed.html#vt.FeedType">[docs]</a><span class="k">class</span> <span class="nc">FeedType</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Feed types.&quot;&quot;&quot;</span>
-  <span class="n">FILES</span> <span class="o">=</span> <span class="s1">&#39;files&#39;</span></div>
+  <span class="n">FILES</span> <span class="o">=</span> <span class="s1">&#39;files&#39;</span>
+  <span class="n">URLS</span> <span class="o">=</span> <span class="s1">&#39;urls&#39;</span></div>
 
 
 <div class="viewcode-block" id="Feed"><a class="viewcode-back" href="../../api/feed.html#vt.Feed">[docs]</a><span class="k">class</span> <span class="nc">Feed</span><span class="p">:</span>
@@ -227,7 +228,7 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">_batch_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">batch_time</span><span class="p">,</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">%H%M&#39;</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_batch_skip</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">batch_skip</span><span class="p">)</span> <span class="k">if</span> <span class="n">batch_skip</span> <span class="k">else</span> <span class="mi">0</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_batch_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_batch_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">70</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_batch_skip</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_next_batch_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch_time</span>
@@ -288,38 +289,38 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">_batch_cursor</span> <span class="o">+=</span> <span class="mi">1</span>
 
   <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span><span class="p">:</span>
+        <span class="n">next_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_get_next_batch</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_skip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_batch_skip</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_batch_skip</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">next_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_batch_cursor</span> <span class="o">+=</span> <span class="mi">1</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+      <span class="k">if</span> <span class="n">next_item</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">Object</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">next_item</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)))</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span> <span class="o">=</span> <span class="kc">None</span>
 
   <span class="k">async</span> <span class="k">def</span> <span class="nf">__aiter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span><span class="p">:</span>
+        <span class="n">next_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_next_batch_async</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_skip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_batch_skip</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_batch_skip</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">next_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_batch_cursor</span> <span class="o">+=</span> <span class="mi">1</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">+=</span> <span class="mi">1</span>
 
-  <span class="k">def</span> <span class="nf">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span><span class="p">:</span>
-      <span class="n">next_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">next_item</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">next_item</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_get_next_batch</span><span class="p">()</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_skip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_batch_skip</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_batch_skip</span> <span class="o">=</span> <span class="mi">0</span>
-      <span class="n">next_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_batch_cursor</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="k">return</span> <span class="n">Object</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">next_item</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)))</span>
-
-  <span class="k">async</span> <span class="k">def</span> <span class="nf">__anext__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span><span class="p">:</span>
-      <span class="n">next_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">next_item</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">next_item</span><span class="p">:</span>
-      <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_next_batch_async</span><span class="p">()</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_skip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_batch_skip</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_batch_skip</span> <span class="o">=</span> <span class="mi">0</span>
-      <span class="n">next_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_batch_cursor</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="k">return</span> <span class="n">Object</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">next_item</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)))</span>
+      <span class="k">if</span> <span class="n">next_item</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">Object</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">next_item</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)))</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span> <span class="o">=</span> <span class="kc">None</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">cursor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

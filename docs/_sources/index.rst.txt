@@ -13,7 +13,7 @@ This library requires Python 3.6.0+, Python 2.x is not supported. This is becaus
 makes use of the new `async/await <https://snarky.ca/how-the-heck-does-async-await-work-in-python-3-5/>`_
 syntax for implementing asynchronous coroutines.
 
-Not supporting Python 2.x was a difficult decission to make, as we are aware
+Not supporting Python 2.x was a difficult decision to make, as we are aware
 that Python 2.x is still popular among VirusTotal users, but in the long run we
 think it's the right one.
 

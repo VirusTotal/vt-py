@@ -316,8 +316,20 @@
       <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_relationships</span>
     <span class="k">return</span> <span class="p">{}</span>
 
-  <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">modified_attributes_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Object.get"><a class="viewcode-back" href="../../api/object.html#vt.Object.get">[docs]</a>  <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns an attribute by name.</span>
 
+<span class="sd">    If the attribute is not present in the object, it returns None</span>
+<span class="sd">    or the value specified in the &quot;default&quot; argument.</span>
+
+<span class="sd">    :param attr_name: Name of the attribute.</span>
+<span class="sd">    :param default: An optional value that will be returned if the</span>
+<span class="sd">      attribute is not present in the object.</span>
+<span class="sd">    :type attr_name: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">attr_name</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span></div>
+
+  <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">modified_attributes_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="p">}</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">:</span>

@@ -20,7 +20,7 @@ with some other SHA-256, SHA-1 or MD5:
 >>> file = client.get_object("/files/44d88612fea8a8f36de82e1278abb02f")
 
 Now `file` is an instance of :class:`vt.Object` that contains information
-about the requested file. This object have all the attributes returned in the
+about the requested file. This object have the attributes returned in the
 API response which are listed in the `VirusTotal API v3 documentation
 <https://developers.virustotal.com/v3.0/reference#files>`_. Some examples:
 
@@ -36,6 +36,21 @@ API response which are listed in the `VirusTotal API v3 documentation
 >>> file.last_analysis_stats
 {'failure': 0, 'harmless': 0, 'malicious': 62, 'suspicious': 0, 'timeout': 0, 'type-unsupported': 9, 'undetected': 2}
 
+Alternatively, you can use the :meth:`vt.Object.get` method for retrieving
+object's attributes:
+
+>>> file.get("size")
+68
+
+>>> file.get("type_tag")
+'text'
+
+This method is useful for those attributes that are optional and do not appear
+in all files. For example, a Portable Executable (PE) file won't have the `pdf_info`
+attribute, and PDF document won't have the `pe_info` attribute. This means that
+`file.pe_info` will fail for PDF files but with `file.get("pe_info")` you are
+on the safe side, as it will return `None` if the `pe_info` attribute is not
+present.
 
 Get information about an URL
 ----------------------------

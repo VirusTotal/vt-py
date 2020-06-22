@@ -165,9 +165,9 @@
 <p class="admonition-title">Note</p>
 <p>This feature is available only for premium users.</p>
 </div>
-<span class="target" id="module-vt"></span><dl class="class">
-<dt id="vt.Feed">
-<em class="property">class </em><code class="sig-prename descclassname">vt.</code><code class="sig-name descname">Feed</code><span class="sig-paren">(</span><em class="sig-param">client</em>, <em class="sig-param">feed_type</em>, <em class="sig-param">cursor=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/feed.html#Feed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.Feed" title="Permalink to this definition">¶</a></dt>
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">vt.</code><code class="sig-name descname">Feed</code><span class="sig-paren">(</span><em class="sig-param">client</em>, <em class="sig-param">feed_type</em>, <em class="sig-param">cursor=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/feed.html#Feed"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Feed represents a stream of objects received from VirusTotal in real-time.</p>
 <p>For more information about VirusTotal Feeds see:
 <a class="reference external" href="https://developers.virustotal.com/v3.0/reference#feeds">https://developers.virustotal.com/v3.0/reference#feeds</a></p>
@@ -182,8 +182,8 @@ examples/file_feed.py in this repository.</p>
 <p>Instances of this class are not created directly, you should use the
 <a class="reference internal" href="client.html#vt.Client.feed" title="vt.Client.feed"><code class="xref py py-func docutils literal notranslate"><span class="pre">vt.Client.feed()</span></code></a> method instead.</p>
 <dl class="method">
-<dt id="vt.Feed.cursor">
-<em class="property">property </em><code class="sig-name descname">cursor</code><a class="headerlink" href="#vt.Feed.cursor" title="Permalink to this definition">¶</a></dt>
+<dt>
+<em class="property">property </em><code class="sig-name descname">cursor</code></dt>
 <dd><p>Returns a cursor indicating the last item retrieved from the feed.</p>
 <p>This cursor can be used for creating a new Feed object that continues where
 a previous one left.</p>
@@ -192,12 +192,17 @@ a previous one left.</p>
 </dd></dl>
 
 <dl class="class">
-<dt id="vt.FeedType">
-<em class="property">class </em><code class="sig-prename descclassname">vt.</code><code class="sig-name descname">FeedType</code><a class="reference internal" href="../_modules/vt/feed.html#FeedType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vt.FeedType" title="Permalink to this definition">¶</a></dt>
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">vt.</code><code class="sig-name descname">FeedType</code><a class="reference internal" href="../_modules/vt/feed.html#FeedType"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Feed types.</p>
 <dl class="attribute">
-<dt id="vt.FeedType.FILES">
-<code class="sig-name descname">FILES</code><em class="property"> = 'files'</em><a class="headerlink" href="#vt.FeedType.FILES" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="sig-name descname">FILES</code><em class="property"> = 'files'</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">URLS</code><em class="property"> = 'urls'</em></dt>
 <dd></dd></dl>
 
 </dd></dl>

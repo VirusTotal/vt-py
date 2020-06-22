@@ -193,7 +193,13 @@
 
 <span class="k">def</span> <span class="nf">_make_sync</span><span class="p">(</span><span class="n">future</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Utility function that waits for an async call, making it sync.&quot;&quot;&quot;</span>
-  <span class="k">return</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">future</span><span class="p">)</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="n">event_loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
+  <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
+    <span class="c1"># Generate an event loop if there isn&#39;t any.</span>
+    <span class="n">event_loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">new_event_loop</span><span class="p">()</span>
+    <span class="n">asyncio</span><span class="o">.</span><span class="n">set_event_loop</span><span class="p">(</span><span class="n">event_loop</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">event_loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">future</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="url_id"><a class="viewcode-back" href="../../api/utils.html#vt.url_id">[docs]</a><span class="k">def</span> <span class="nf">url_id</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>

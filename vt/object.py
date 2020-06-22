@@ -167,8 +167,20 @@ class Object(object):
       return self._relationships
     return {}
 
-  def to_dict(self, modified_attributes_only=False):
+  def get(self, attr_name, default=None):
+    """Returns an attribute by name.
 
+    If the attribute is not present in the object, it returns None
+    or the value specified in the "default" argument.
+
+    :param attr_name: Name of the attribute.
+    :param default: An optional value that will be returned if the
+      attribute is not present in the object.
+    :type attr_name: str
+    """
+    return self.__dict__.get(attr_name, default)
+
+  def to_dict(self, modified_attributes_only=False):
     result = {'type': self._type}
 
     if self._id:

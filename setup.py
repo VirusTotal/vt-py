@@ -26,8 +26,9 @@ if sys.version_info < (3, 6, 0):
   raise RuntimeError('vt-py requires Python 3.6.0+')
 
 install_requires = [
-    'asyncio',
     'aiohttp',
+]
+tests_require = [
     'pytest',
     'pytest_httpserver',
 ]
@@ -43,6 +44,7 @@ setuptools.setup(
     packages=['vt'],
     python_requires='>=3.6.0',
     install_requires=install_requires,
+    tests_require=tests_require,
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: Apache Software License',

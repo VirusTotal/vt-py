@@ -66,7 +66,7 @@ While retrieving a file any of its hashes can be used as the file identifier,
 but with URLs is a bit more complicated. You must use :func:`vt.url_id` for
 generating the appropriate identifier. You can find more information about why
 this is necessary in:
-`<https://developers.virustotal.com/v3.0/reference#section-url-identifiers>`_.
+`<https://developers.virustotal.com/v3.0/reference#url>`_.
 
 Also notice how we are using a placeholder `{}` in the path. The placeholder
 will be replaced with the value of `url_id`. This works exactly like Python's

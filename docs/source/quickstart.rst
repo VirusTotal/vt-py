@@ -119,7 +119,7 @@ until the analysis has been completed.
 Scan an URL
 -----------
 
-Scanning a URL is very similar to `scanning a file <scan-a-file>`_, you just
+Scanning a URL is very similar to `scanning a file <#scan-a-file>`_, you just
 need to use :meth:`vt.Client.scan_url` instead of :meth:`vt.Client.scan_file`:
 
 >>> analysis = client.scan_url('https://somedomain.com/foo/bar')

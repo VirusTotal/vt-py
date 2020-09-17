@@ -28,12 +28,15 @@ https://support.virustotal.com/hc/en-us/articles/360001387057-VirusTotal-Intelli
 import argparse
 import asyncio
 from collections import defaultdict
+import re
 
 import vt
 
 
 class VTISearchToNetworkInfrastructureHandler:
   """Class for handling the process of analysing VTI search matches."""
+
+  _SEARCH_ENTITY_REGEX = re.compile(r'entity: (\w+)')
 
   def __init__(self, apikey):
     self.apikey = apikey
@@ -61,6 +64,10 @@ class VTISearchToNetworkInfrastructureHandler:
     """Query intelligence for files matching the given criteria."""
     if not isinstance(query, str):
       raise ValueError('Search filter must be a string.')
+
+    entity_match = self._SEARCH_ENTITY_REGEX.match(query.lower())
+    if entity_match and entity_match.group(1) != 'file':
+      raise ValueError('Only file search queries are valid in this example.')
 
     async with vt.Client(self.apikey) as client:
       query = query.lower()
@@ -143,21 +150,24 @@ async def main():
   loop = asyncio.get_event_loop()
   handler = VTISearchToNetworkInfrastructureHandler(args.apikey)
 
-  enqueue_files_task = loop.create_task(
-      handler.get_matching_files(args.query, int(args.limit)))
-  network_task = loop.create_task(handler.get_network())
-  build_network_task = loop.create_task(
-      handler.build_network())
+  try:
+    enqueue_files_task = loop.create_task(
+        handler.get_matching_files(args.query, int(args.limit)))
+    network_task = loop.create_task(handler.get_network())
+    build_network_task = loop.create_task(
+        handler.build_network())
 
-  await asyncio.gather(enqueue_files_task)
+    await asyncio.gather(enqueue_files_task)
 
-  await handler.files_queue.join()
-  await handler.queue.join()
+    await handler.files_queue.join()
+    await handler.queue.join()
 
-  network_task.cancel()
-  build_network_task.cancel()
-
-  handler.print_results()
+    handler.print_results()
+  except Exception as e:
+    print(f'ERROR: {e}')
+  finally:
+    network_task.cancel()
+    build_network_task.cancel()
 
 
 if __name__ == '__main__':

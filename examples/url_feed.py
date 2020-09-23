@@ -26,18 +26,25 @@ import os
 import vt
 
 
+def process_item(item):
+  """Processes a fetched item from the feed."""
+  total_clean = (
+      item.last_analysis_stats['harmless'] +
+      item.last_analysis_stats['undetected'])
+  num_spaces = 100 - len(item.url) if len(item.url) < 100 else 10
+  print(
+      f'{item.url}{" " * num_spaces}'
+      f'{item.last_analysis_stats["malicious"]}/{total_clean}')
+
+
 def main():
 
   parser = argparse.ArgumentParser(
       description='Get URLs from the VirusTotal feed. '
-      'For each file in the feed a <url_id>.json file is created in the output '
-      'directory containing information about the file.')
+      'For each URL in the feed, print its detection ratio.')
 
   parser.add_argument('--apikey',
       required=True, help='your VirusTotal API key')
-
-  parser.add_argument('--output',
-      default='./url-feed', help='path to output directory')
 
   parser.add_argument('--cursor',
       required=False,
@@ -45,21 +52,18 @@ def main():
 
   args = parser.parse_args()
 
-  if not os.path.exists(args.output):
-    os.makedirs(args.output)
-
   with vt.Client(args.apikey) as client:
-    # Iterate over the file feed, one file at a time. This loop doesn't
+    # Iterate over the URL feed, one file at a time. This loop doesn't
     # finish, when the feed is consumed it will keep waiting for more files.
 
-    for url_obj in client.feed(vt.FeedType.URLS, cursor=args.cursor):
-      # Write the file's metadata into a JSON-encoded file.
-
-      url_path = os.path.join(args.output, url_obj.id)
-      with open(url_path + '.json', mode='w') as f:
-        f.write(json.dumps(url_obj.to_dict()))
-
-      print(url_obj.id)
+    try:
+      for url_obj in client.feed(vt.FeedType.URLS, cursor=args.cursor):
+        # process the url_obj
+        process_item(url_obj)
+    except KeyboardInterrupt:
+      print('\nKeyboard interrupt. Closing.')
+    finally:
+      client.close()
 
 
 if __name__ == '__main__':

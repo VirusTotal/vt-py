@@ -37,6 +37,7 @@ class FeedType(enum.Enum):
   """Feed types."""
   FILES = 'files'
   URLS = 'urls'
+  FILE_BEHAVIOURS = 'file-behaviours'
 
 
 class Feed:

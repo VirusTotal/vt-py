@@ -28,9 +28,7 @@ import vt
 
 def process_item(item):
   """Processes a fetched item from the feed."""
-  total_clean = (
-      item.last_analysis_stats['harmless'] +
-      item.last_analysis_stats['undetected'])
+  total_clean = sum(item.last_analysis_stats.values())
   num_spaces = 100 - len(item.url) if len(item.url) < 100 else 10
   print(
       f'{item.url}{" " * num_spaces}'

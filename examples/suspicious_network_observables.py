@@ -89,6 +89,7 @@ async def get_netloc_report_relationships(loop, apikey, netloc):
   results = await asyncio.gather(*tasks, return_exceptions=True)
   print_results(results, netloc)
 
+
 def main():
   parser = argparse.ArgumentParser(
       description='Get suspicious sightings related to a network observable.')

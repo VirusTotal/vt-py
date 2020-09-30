@@ -250,8 +250,8 @@ def test_iterator(httpserver):
   })
 
   with new_client(httpserver) as client:
-    it = client.iterator('/dummy_collection/{}', 'foo')
-    for i, obj in enumerate(it):
+    it = client.iterator('/dummy_collection/foo', limit=10)
+    for i, _ in enumerate(it):
       assert 0 == i
 
 

@@ -56,12 +56,12 @@ async def upload_rules(queue, apikey, enable):
                 'enabled': enable,
                 'rules': f.read()})
 
-        try:
-          await client.post_object_async(
-              path='/intelligence/hunting_rulesets', obj=ruleset)
-          print(f'File {file_path} uploaded.')
-        except vt.error.APIError as e:
-          print(f'Error uploading {file_path}: {e}')
+      try:
+        await client.post_object_async(
+            path='/intelligence/hunting_rulesets', obj=ruleset)
+        print(f'File {file_path} uploaded.')
+      except vt.error.APIError as e:
+        print(f'Error uploading {file_path}: {e}')
 
       queue.task_done()
 

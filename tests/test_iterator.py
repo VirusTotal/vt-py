@@ -11,11 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import bz2
-import datetime
-import io
-import json
-
 import pytest
 import pytest_httpserver
 

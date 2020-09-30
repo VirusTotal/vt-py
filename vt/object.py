@@ -147,6 +147,12 @@ class Object(object):
       self.__on_attr_change(attr)
     super().__setattr__(attr, value)
 
+  def __repr__(self):
+    return f'<vt.object.Object {str(self)}>'
+
+  def __str__(self):
+    return f'{self.type} {self.id}'
+
   @property
   def id(self):
     return self._id

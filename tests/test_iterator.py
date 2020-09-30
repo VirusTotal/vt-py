@@ -59,11 +59,12 @@ def test_next(httpserver, iterator_response):
   with new_client(httpserver) as client:
     it = client.iterator('/dummy_collection/foo', limit=10)
     assert next(it).id == 'dummy_id_1'
+    assert next(it).id == 'dummy_id_2'
 
     # iteration must start right where the next stayed
     last = None
     for i, obj in enumerate(it):
-      assert obj.id == f'dummy_id_{i+2}'
+      assert obj.id == f'dummy_id_{i+3}'
       last = obj
 
     assert last.id == 'dummy_id_4'
@@ -81,18 +82,19 @@ def test_next(httpserver, iterator_response):
 def test_next_limit(httpserver, iterator_response):
   """Tests iterator's next with a limit smaller than the total of elements."""
   with new_client(httpserver) as client:
-    it = client.iterator('/dummy_collection/foo', limit=2)
+    it = client.iterator('/dummy_collection/foo', limit=3)
     assert next(it).id == 'dummy_id_1'
+    assert next(it).id == 'dummy_id_2'
 
     # iteration must start right where the next stayed
     last = None
     for i, obj in enumerate(it):
-      assert obj.id == f'dummy_id_{i+2}'
+      assert obj.id == f'dummy_id_{i+3}'
       last = obj
 
     # last element must be the one marked by the limit
-    assert last.id == 'dummy_id_2'
-    assert it._count == 2
+    assert last.id == 'dummy_id_3'
+    assert it._count == 3
 
     with pytest.raises(StopIteration):
       # there shouldn't be more available elements after the for loop

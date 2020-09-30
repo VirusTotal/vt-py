@@ -143,7 +143,7 @@ class Iterator:
   def __next__(self):
     if not self._items and self._count == 0:  # next is called before iter
       self._items, self._server_cursor = self._get_batch()
-    else:  # next is called after iter
+    elif (not self._items and self._count > 0) or self._count >= self._limit:
       raise StopIteration()
     item = self._items.pop(0)
     self._count += 1
@@ -153,7 +153,7 @@ class Iterator:
   async def __anext__(self):
     if not self._items and self._count == 0:  # next is called before iter
       self._items, self._server_cursor = await self._get_batch_async()
-    else:  # next is called after iter
+    elif (not self._items and self._count > 0) or self._count >= self._limit:
       raise StopAsyncIteration()
     item = self._items.pop(0)
     self._count += 1

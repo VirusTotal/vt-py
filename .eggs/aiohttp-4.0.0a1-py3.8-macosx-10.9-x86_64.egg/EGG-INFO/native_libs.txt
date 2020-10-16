@@ -1,5 +1,0 @@
-aiohttp/_frozenlist.cpython-38-darwin.so
-aiohttp/_helpers.cpython-38-darwin.so
-aiohttp/_http_parser.cpython-38-darwin.so
-aiohttp/_http_writer.cpython-38-darwin.so
-aiohttp/_websocket.cpython-38-darwin.so

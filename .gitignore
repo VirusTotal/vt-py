@@ -9,6 +9,7 @@ __pycache__/
 /build/
 /dist/
 vt_py.egg-info
+.eggs
 
 /docs/build/doctrees
 

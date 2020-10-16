@@ -1,0 +1,17 @@
+attrs>=17.4.0
+iniconfig
+packaging
+pluggy<1.0,>=0.12
+py>=1.8.2
+toml
+
+[checkqa_mypy]
+mypy==0.780
+
+[testing]
+argcomplete
+hypothesis>=3.56
+mock
+nose
+requests
+xmlschema

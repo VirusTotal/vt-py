@@ -25,12 +25,6 @@ with open('README.md', 'r') as fh:
 if sys.version_info < (3, 6, 0):
   raise RuntimeError('vt-py requires Python 3.6.0+')
 
-install_requires = [
-    'aiohttp',
-    'pytest',
-    'pytest_httpserver',
-]
-
 setuptools.setup(
     name='vt-py',
     version=main_ns['__version__'],
@@ -41,7 +35,9 @@ setuptools.setup(
     url='https://github.com/VirusTotal/vt-py',
     packages=['vt'],
     python_requires='>=3.6.0',
-    install_requires=install_requires,
+    install_requires=['aiohttp'],
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest', 'pytest_httpserver', 'pytest_asyncio'],
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: Apache Software License',

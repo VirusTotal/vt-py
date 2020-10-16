@@ -1,0 +1,4 @@
+
+[dev]
+pre-commit
+tox

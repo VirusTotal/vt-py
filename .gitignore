@@ -11,3 +11,10 @@ __pycache__/
 vt_py.egg-info
 
 /docs/build/doctrees
+
+# VirtualEnv
+/venv
+
+# IntelliJ
+.iml
+/.idea

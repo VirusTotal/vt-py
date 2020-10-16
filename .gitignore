@@ -17,5 +17,5 @@ vt_py.egg-info
 /venv
 
 # IntelliJ
-.iml
+*.iml
 /.idea

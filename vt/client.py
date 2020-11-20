@@ -168,12 +168,15 @@ class Client:
   :param agent: A string that identifies your application.
   :param host: By default https://www.virustotal.com, it can be changed for
     testing purposes.
+  :param trust_env: Get proxies information from HTTP_PROXY/HTTPS_PROXY
+    environment variables if the parameter is True (False by default).
   :type apikey: str
   :type agent: str
   :type host: str
+  :type trust_env: bool
   """
 
-  def __init__(self, apikey, agent="unknown", host=None):
+  def __init__(self, apikey, agent="unknown", host=None, trust_env=False):
     """Intialize the client with the provided API key."""
 
     if not isinstance(apikey, str):
@@ -186,6 +189,7 @@ class Client:
     self._apikey = apikey
     self._agent = agent
     self._session = None
+    self._trust_env = trust_env
 
   def _full_url(self, path, *args):
     try:
@@ -204,7 +208,8 @@ class Client:
             'X-Apikey': self._apikey,
             'Accept-Encoding': 'gzip',
             'User-Agent': _USER_AGENT_FMT.format_map({
-                'agent': self._agent, 'version': __version__})})
+                'agent': self._agent, 'version': __version__})},
+        trust_env=self._trust_env)
     return self._session
 
   async def __aenter__(self):

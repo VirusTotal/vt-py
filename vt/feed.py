@@ -27,6 +27,10 @@ import bz2
 from .error import APIError
 from .object import Object
 
+from typing import Optional, TYPE_CHECKING
+if TYPE_CHECKING:
+    from .client import Client
+
 
 __all__ = [
     'Feed',
@@ -58,16 +62,16 @@ class Feed:
   :func:`vt.Client.feed` method instead.
   """
 
-  def __init__(self, client, feed_type, cursor=None):
+  def __init__(self, client: "Client", feed_type: FeedType, cursor: Optional[str] = None):
     """Initializes a Feed object.
 
     This function is not intended to be called directly. Client.feed() is
     the preferred way for creating a feed.
     """
-    self._client = client
-    self._type = feed_type
-    self._batch = None
-    self._count = 0
+    self._client: "Client" = client
+    self._type: FeedType = feed_type
+    self._batch: Optional[io.BytesIO] = None
+    self._count: int = 0
 
     # This class tolerates a given number of missing batches in the feed,
     # if self._missing_batches_tolerancy is set to 0, there's no tolerancy
@@ -85,7 +89,7 @@ class Feed:
 
     self._next_batch_time = self._batch_time
 
-  async def _get_batch_async(self, batch_time):
+  async def _get_batch_async(self, batch_time: datetime) -> io.BytesIO:
     """"Retrieves a specific batch from the backend.
 
     There's one batch per minute, each identified by the date in YYYYMMDDhhmm
@@ -104,7 +108,7 @@ class Feed:
         raise error
     return io.BytesIO(bz2.decompress(await response.content.read_async()))
 
-  def _get_batch(self, *args, **kwargs):
+  def _get_batch(self, *args, **kwargs) -> io.BytesIO:
     return asyncio.get_event_loop().run_until_complete(
         self._get_batch_async(*args, **kwargs))
 
@@ -135,7 +139,7 @@ class Feed:
     return asyncio.get_event_loop().run_until_complete(
         self._get_next_batch_async())
 
-  def _skip(self, n):
+  def _skip(self, n: int):
     for _ in range(n):
       self._batch.readline()
       self._batch_cursor += 1
@@ -175,7 +179,7 @@ class Feed:
         self._batch = None
 
   @property
-  def cursor(self):
+  def cursor(self) -> str:
     """Returns a cursor indicating the last item retrieved from the feed.
 
     This cursor can be used for creating a new Feed object that continues where

@@ -17,9 +17,9 @@ class APIError(Exception):
   """Class that encapsules errors returned by the VirusTotal API."""
 
   @classmethod
-  def from_dict(cls, dict_error):
+  def from_dict(cls, dict_error: dict) -> "APIError":
     return cls(dict_error['code'], dict_error.get('message'))
 
-  def __init__(self, code, message):
+  def __init__(self, code: str, message: str):
     self.code = code
     self.message = message

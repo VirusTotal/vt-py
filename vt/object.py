@@ -14,6 +14,7 @@
 import datetime
 import functools
 import re
+from typing import Any, Dict, List, Optional, Union
 
 __all__ = ['Object']
 
@@ -24,7 +25,7 @@ class WhistleBlowerDict(dict):
   This class wraps a standard Python dictionary and calls the provided callback
   whenever a change occurs in the dictionary.
   """
-  def __init__(self, initial_dict, on_change_callback):
+  def __init__(self, initial_dict: dict, on_change_callback):
     self._on_change_callback = on_change_callback
     for k,v in initial_dict.items():
       if isinstance(v, dict):
@@ -66,7 +67,7 @@ class Object(object):
   )
 
   @classmethod
-  def from_dict(cls, obj_dict):
+  def from_dict(cls, obj_dict: dict) -> "Object":
     """Creates an object from its dictionary representation.
 
     The dictionary representation of a VirusTotal API object has the following
@@ -107,14 +108,14 @@ class Object(object):
 
     return obj
 
-  def __init__(self, obj_type, obj_id=None, obj_attributes=None):
+  def __init__(self, obj_type: str, obj_id: Optional[str] = None, obj_attributes: Optional[dict] = None):
     """Initializes a VirusTotal API object."""
 
     if not isinstance(obj_attributes, (dict, type(None))):
       raise ValueError('Object attributes must be a dictionary')
 
-    self._type = obj_type
-    self._id = obj_id
+    self._type: str = obj_type
+    self._id: Optional[str] = obj_id
 
     # Initialize object attributes with the ones coming in the obj_attributes,
     # this way if obj_attributes contains {'foo': 'somevalue'} you can access
@@ -123,13 +124,13 @@ class Object(object):
       for attr, value in obj_attributes.items():
         setattr(self, attr, value)
 
-    self._modified_attrs = []
+    self._modified_attrs: List[str] = []
 
-  def __on_attr_change(self, attr):
+  def __on_attr_change(self, attr: str):
     if hasattr(self, '_modified_attrs'):
       self._modified_attrs.append(attr)
 
-  def __getattribute__(self, attr):
+  def __getattribute__(self, attr: str):
     value = super(Object, self).__getattribute__(attr)
     for re in Object.DATE_ATTRIBUTES:
       if re.match(attr):
@@ -137,7 +138,7 @@ class Object(object):
         break
     return value
 
-  def __setattr__(self, attr, value):
+  def __setattr__(self, attr: str, value: Union[dict, datetime.datetime, int]):
     if isinstance(value, dict):
       value = WhistleBlowerDict(
           value, functools.partial(self.__on_attr_change, attr))
@@ -147,18 +148,18 @@ class Object(object):
       self.__on_attr_change(attr)
     super().__setattr__(attr, value)
 
-  def __repr__(self):
+  def __repr__(self) -> str:
     return f'<vt.object.Object {str(self)}>'
 
-  def __str__(self):
+  def __str__(self) -> str:
     return f'{self.type} {self.id}'
 
   @property
-  def id(self):
+  def id(self) -> Optional[str]:
     return self._id
 
   @property
-  def type(self):
+  def type(self) -> str:
     return self._type
 
   @property
@@ -173,7 +174,7 @@ class Object(object):
       return self._relationships
     return {}
 
-  def get(self, attr_name, default=None):
+  def get(self, attr_name: str, default: Optional[Any] = None):
     """Returns an attribute by name.
 
     If the attribute is not present in the object, it returns None
@@ -186,8 +187,8 @@ class Object(object):
     """
     return self.__dict__.get(attr_name, default)
 
-  def to_dict(self, modified_attributes_only=False):
-    result = {'type': self._type}
+  def to_dict(self, modified_attributes_only: bool = False) -> dict:
+    result: Dict[str, Any] = {'type': self._type}
 
     if self._id:
       result['id'] = self._id

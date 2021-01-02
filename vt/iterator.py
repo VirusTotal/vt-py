@@ -12,8 +12,12 @@
 # limitations under the License.
 
 
+from typing import AsyncGenerator, Generator, List, Optional, Tuple
 from .object import Object
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from .client import Client
 
 __all__ = ['Iterator']
 
@@ -57,22 +61,22 @@ class Iterator:
   >>>  asyncio.get_event_loop().run_until_complete(print_comments)
   """
 
-  def __init__(self, client, path, params=None, cursor=None,
-               limit=None, batch_size=0):
+  def __init__(self, client: "Client", path: str, params: Optional[dict] = None, cursor: Optional[str] = None,
+               limit: Optional[int] = None, batch_size:int = 0):
     """Initializes an iterator.
 
     This function is not intended to be called directly. Client.iterator() is
     the preferred way for creating an iteraror.
     """
-    self._client = client
-    self._path = path
-    self._params = params or {}
-    self._batch_size = batch_size
-    self._limit = limit
-    self._items = []
-    self._count = 0
-    self._server_cursor = None
-    self._batch_cursor = 0
+    self._client: "Client" = client
+    self._path: str = path
+    self._params: dict = params or {}
+    self._batch_size: int = batch_size
+    self._limit: Optional[int] = limit
+    self._items: List[dict] = []
+    self._count: int = 0
+    self._server_cursor: Optional[str] = None
+    self._batch_cursor: int = 0
 
     if 'cursor' in self._params:
       raise ValueError('Do not pass "cursor" as a path param')
@@ -89,7 +93,7 @@ class Iterator:
       except ValueError:
         raise ValueError('invalid cursor')
 
-  def _build_params(self):
+  def _build_params(self) -> dict:
     params = self._params.copy()
     if self._server_cursor:
       params['cursor'] = self._server_cursor
@@ -97,24 +101,24 @@ class Iterator:
       params['limit'] = self._batch_size
     return params
 
-  def _parse_response(self, json_resp, batch_cursor):
+  def _parse_response(self, json_resp, batch_cursor: int) -> Tuple[List[dict], Optional[str]]:
     if not isinstance(json_resp.get('data'), list):
       raise ValueError('{} is not a collection'.format(self._path))
     meta = json_resp.get('meta', {})
     items = json_resp['data'][batch_cursor:]
     return items, meta.get('cursor')
 
-  async def _get_batch_async(self, batch_cursor=0):
+  async def _get_batch_async(self, batch_cursor: int = 0):
     json_resp = await self._client.get_json_async(
         self._path, params=self._build_params())
     return self._parse_response(json_resp, batch_cursor)
 
-  def _get_batch(self, batch_cursor=0):
+  def _get_batch(self, batch_cursor: int = 0):
     json_resp = self._client.get_json(
         self._path, params=self._build_params())
     return self._parse_response(json_resp, batch_cursor)
 
-  def _iterate(self):
+  def _iterate(self) -> Optional[Object]:
     if len(self._items) == 0:
       self._items, self._server_cursor = self._get_batch()
       self._batch_cursor = 0
@@ -124,7 +128,7 @@ class Iterator:
       self._batch_cursor += 1
       return Object.from_dict(item)
 
-  async def _aiterate(self):
+  async def _aiterate(self) -> Optional[Object]:
     if len(self._items) == 0:
       self._items, self._server_cursor = await self._get_batch_async()
       self._batch_cursor = 0
@@ -134,7 +138,7 @@ class Iterator:
       self._batch_cursor += 1
       return Object.from_dict(item)
 
-  def __iter__(self):
+  def __iter__(self) -> Generator[Optional[Object], None, None]:
     if not self._items and self._count == 0:  # iter called before next
       self._items, self._server_cursor = self._get_batch()
     if self._limit:
@@ -144,7 +148,7 @@ class Iterator:
       while (self._items or self._server_cursor):
         yield self._iterate()
 
-  async def __aiter__(self):
+  async def __aiter__(self) -> AsyncGenerator[Optional[Object], None]:
     if not self._items and self._count == 0: # iter called before next
       self._items, self._server_cursor = await self._get_batch_async()
     if self._limit:
@@ -154,7 +158,7 @@ class Iterator:
       while self._items or self._server_cursor:
         yield await self._aiterate()
 
-  def __next__(self):
+  def __next__(self) -> Object:
     if not self._items and self._count == 0:  # next is called before iter
       self._items, self._server_cursor = self._get_batch()
     if self._limit:
@@ -167,7 +171,7 @@ class Iterator:
     self._batch_cursor += 1
     return Object.from_dict(item)
 
-  async def __anext__(self):
+  async def __anext__(self) -> Object:
     if not self._items and self._count == 0:  # next is called before iter
       self._items, self._server_cursor = await self._get_batch_async()
     if self._limit:
@@ -181,7 +185,7 @@ class Iterator:
     return Object.from_dict(item)
 
   @property
-  def cursor(self):
+  def cursor(self) -> Optional[str]:
     """Cursor indicating the last returned object.
 
     This cursor can be used for creating a new iterator that continues where

@@ -22,7 +22,6 @@ privileges for creating References.
 import argparser
 import vt
 import json
-import os
 
 def create_reference(url, creation_date, title, author, client):
   """ Creates a reference in VirusTotal.

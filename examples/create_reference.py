@@ -19,11 +19,11 @@ NOTICE: In order to use this program you will need an API key that has
 privileges for creating References.
 """
 
-import argparser
+import argparse
 import vt
 import json
 
-def create_reference(url, creation_date, title, author, client):
+def create_reference(url, creation_date, title, author, iocs, client):
   """ Creates a reference in VirusTotal.
 
   Args:
@@ -31,10 +31,13 @@ def create_reference(url, creation_date, title, author, client):
     creation_date: Reference creation date (YY-MM-DD HH:mm:ss).
     title: Reference title.
     author: Author
+    iocs: List of IOCs. Each IOC must be a dict with type and (id|url). E.g:
+      {'type': 'file', 'id': '4c3499f3cc4a4fdc7e67417e055891c78540282dccc57e37a01167dfe351b244'}
+      {'type': "url", 'url': "http://www.colasprint.com/_vti_log/upload.asp"},
+      {'type': "domain", 'id': "opsonew3org.sg"},
+      {'type': "ip_address", 'id': '8.8.8.8'}
     client: VirusTotal client.
 
-  Returns:
-    reference id.
   """
 
   # Generate url identifier
@@ -46,17 +49,18 @@ def create_reference(url, creation_date, title, author, client):
               'title': title,
               'author': author
           },
+          'relationships': {},
           'type': 'reference'
       }
   }
 
+  # Add IOCs to Reference.
+  add_iocs_to_reference_payload(iocs, payload)
+
   # Post object
-  response = client.post('/references', data = json.dumps(payload))
+  client.post('/references', data = json.dumps(payload))
 
-  return response.json()['data']['id']
-
-
-def add_iocs(iocs, reference_id, client):
+def add_iocs_to_reference_payload(iocs, reference_payload):
   """Adds IOCs relationships to a given reference.
 
   Args:
@@ -65,8 +69,7 @@ def add_iocs(iocs, reference_id, client):
       {'type': "url", 'url': "http://www.colasprint.com/_vti_log/upload.asp"},
       {'type': "domain", 'id': "opsonew3org.sg"},
       {'type': "ip_address", 'id': '8.8.8.8'}
-    reference_id: Reference identifier
-    client: vt client
+    reference_payload: Reference payload
 
   """
 
@@ -83,20 +86,7 @@ def add_iocs(iocs, reference_id, client):
   for relationships, relationship_name in zip(
       relationship_items, relationship_names):
 
-    payload = {
-        'data': relationships
-    }
-
-    r = client.post(
-        f"/references/{reference_id}/{relationship_name}",
-        data = json.dumps(payload)
-    )
-
-    if(r.status == 200):
-      print(f"Posted {len(relationships)} {relationship_name}")
-    else:
-      print(relationship_names, r.text())
-
+    reference_payload['data']['relationships'][relationship_name] = relationships
 
 def main():
   parser = argparse.ArgumentParser(
@@ -110,15 +100,6 @@ def main():
   url = 'https://blog.google/threat-analysis-group/new-campaign-targeting-security-researchers/'
 
   client = vt.Client(API_KEY)
-
-  # Create Reference and obtain reference_id.
-  reference_id = create_reference(
-      url=url,
-      creation_date="2021-01-25 00:00:00",
-      title="New campaign targeting security researchers",
-      author="Google Threat Analysis Group",
-      client=client
-  )
 
   # IOCs must specify their type and ID.
   # For urls, instead of "id", "url" field is specified.
@@ -155,11 +136,15 @@ def main():
       {'type': "domain", 'id': "www.fabioluciani.com"}
   ]
 
-  # Add IOCs to the Relationship
-  add_iocs(
+  # Create Reference
+  create_reference(
+      url=url,
+      creation_date="2021-01-25 00:00:00",
+      title="New campaign targeting security researchers",
+      author="Google Threat Analysis Group",
       iocs=iocs,
-      reference_id=reference_id,
-      client=client)
+      client=client
+  )
 
   client.close()
 

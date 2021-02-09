@@ -57,14 +57,16 @@ def create_reference(url, creation_date, title, author, client):
 
 
 def add_iocs(iocs, reference_id, client):
-  """
+  """Adds IOCs relationships to a given reference.
 
   Args:
-    iocs:
-    reference_id:
-    client:
-
-  Returns:
+    iocs: List of IOCs. Each IOC must be a dict with type and (id|url). E.g:
+      {'type': 'file', 'id': '4c3499f3cc4a4fdc7e67417e055891c78540282dccc57e37a01167dfe351b244'}
+      {'type': "url", 'url': "http://www.colasprint.com/_vti_log/upload.asp"},
+      {'type': "domain", 'id': "opsonew3org.sg"},
+      {'type': "ip_address", 'id': '8.8.8.8'}
+    reference_id: Reference identifier
+    client: vt client
 
   """
 

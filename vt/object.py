@@ -201,6 +201,9 @@ class Object(object):
     if attributes:
       result['attributes'] = attributes
 
+    if self.relationships:
+      result['relationships'] = self.relationships
+
     if self.context_attributes:
       result['context_attributes'] = self.context_attributes
 

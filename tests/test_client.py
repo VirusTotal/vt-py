@@ -11,13 +11,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Client tests."""
+
 import bz2
 import datetime
 import io
 import json
 
 import pytest
-import pytest_httpserver
 
 from vt import Client
 from vt import FeedType
@@ -25,35 +26,42 @@ from vt import Object
 
 
 def new_client(httpserver):
-  return Client('dummy_api_key',
+  return Client(
+      'dummy_api_key',
       host='http://' + httpserver.host + ':' + str(httpserver.port))
 
 
 def test_object_from_dict():
-
   obj = Object.from_dict({
       'type': 'dummy_type',
       'id': 'dummy_id',
       'attributes': {
           'attr1': 'foo',
           'attr2': 1,
+      },
+      'relationships': {
+          'foos': {'data': [
+              {'type': 'foo', 'id': 'foo_id'}
+          ]}
       }})
 
   assert obj.id == 'dummy_id'
   assert obj.type == 'dummy_type'
   assert obj.attr1 == 'foo'
   assert obj.attr2 == 1
+  assert obj.relationships['foos']['data'][0]['id'] == 'foo_id'
 
-  with pytest.raises(ValueError, match=r"Expecting dictionary, got: int"):
+  with pytest.raises(ValueError, match=r'Expecting dictionary, got: int'):
     Object.from_dict(1)
 
-  with pytest.raises(ValueError, match=r"Object type not found"):
+  with pytest.raises(ValueError, match=r'Object type not found'):
     Object.from_dict({})
 
-  with pytest.raises(ValueError, match=r"Object id not found"):
+  with pytest.raises(ValueError, match=r'Object id not found'):
     Object.from_dict({'type': 'dummy_type'})
 
-  with pytest.raises(ValueError, match=r'Object attributes must be a dictionary'):
+  with pytest.raises(
+      ValueError, match=r'Object attributes must be a dictionary'):
     Object.from_dict({'type': 'dummy_type', 'id': 'dummy_id', 'attributes': 1})
 
 
@@ -154,8 +162,7 @@ def test_get_object(httpserver):
           'type': 'dummy_type',
           'attributes': {
               'foo': 'foo',
-              'bar': 'bar'}
-  }})
+              'bar': 'bar'}}})
 
   with new_client(httpserver) as client:
     obj = client.get_object('/dummy_types/dummy_id')
@@ -168,6 +175,7 @@ def test_get_object(httpserver):
   assert obj.get('foo') == 'foo'
   assert obj.get('bar') == 'bar'
   assert obj.get('baz') is None
+
 
 def test_patch_object(httpserver):
 
@@ -298,7 +306,7 @@ def test_scan_file(httpserver):
   })
 
   with new_client(httpserver) as client:
-    f = io.StringIO("dummy file")
+    f = io.StringIO('dummy file')
     analysis = client.scan_file(f)
 
   assert analysis.type == 'analysis'
@@ -333,7 +341,7 @@ def test_feed(httpserver):
       method='GET',
       headers={'X-Apikey': 'dummy_api_key'}
   ).respond_with_data(
-    bz2.compress(b'{\"type\": \"file\", \"id\": \"dummy_file_id_1\"}'))
+      bz2.compress(b'{\"type\": \"file\", \"id\": \"dummy_file_id_1\"}'))
 
   # The feed iterator should tolerate missing feed packages, so let's return
   # a NotFoundError for package 200102030406.
@@ -343,15 +351,14 @@ def test_feed(httpserver):
       headers={'X-Apikey': 'dummy_api_key'}
   ).respond_with_json({
       'error': {
-          'code': 'NotFoundError'
-    }}, status=404)
+          'code': 'NotFoundError'}}, status=404)
 
   httpserver.expect_ordered_request(
       '/api/v3/feeds/files/200102030407',
       method='GET',
       headers={'X-Apikey': 'dummy_api_key'}
   ).respond_with_data(
-    bz2.compress(b'{\"type\": \"file\", \"id\": \"dummy_file_id_2\"}'))
+      bz2.compress(b'{\"type\": \"file\", \"id\": \"dummy_file_id_2\"}'))
 
   with new_client(httpserver) as client:
     feed = client.feed(FeedType.FILES, cursor='200102030405')

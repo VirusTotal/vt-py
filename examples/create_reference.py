@@ -88,13 +88,12 @@ def main():
   parser.add_argument('--apikey', required=True, help='your VirusTotal API key')
 
   args = parser.parse_args()
-  api_key = args.apikey
+  client = vt.Client(args.apikey)
 
+  # Reference's URL.
   url = (
       'https://blog.google/threat-analysis-group/'
       'new-campaign-targeting-security-researchers/')
-
-  client = vt.Client(api_key)
 
   # Fill in the reference's IOCs
   # Allowed types: files, domains, urls, ip_addresses.

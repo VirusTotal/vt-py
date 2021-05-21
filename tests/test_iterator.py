@@ -24,7 +24,7 @@ def new_client(httpserver):
 
 @pytest.fixture
 def iterator_response(httpserver):
-  httpserver.expect_request(
+  httpserver.expect_ordered_request(
       '/api/v3/dummy_collection/foo',
       method='GET',
       headers={'X-Apikey': 'dummy_api_key'}
@@ -41,7 +41,15 @@ def iterator_response(httpserver):
           'id': 'dummy_id_3',
           'type': 'dummy_type',
           'attributes': {'order': 0}
-          }, {
+          }],
+      'meta': {'cursor': 3}
+  })
+  httpserver.expect_ordered_request(
+      '/api/v3/dummy_collection/foo',
+      method='GET',
+      headers={'X-Apikey': 'dummy_api_key'}
+  ).respond_with_json({
+      'data': [{
           'id': 'dummy_id_4',
           'type': 'dummy_type',
           'attributes': {'order': 0}
@@ -52,7 +60,7 @@ def iterator_response(httpserver):
 def test_next(httpserver, iterator_response):
   """Tests iterator's next with a limit higher than the total of elements."""
   with new_client(httpserver) as client:
-    it = client.iterator('/dummy_collection/foo', limit=10)
+    it = client.iterator('/dummy_collection/foo', limit=10, batch_size=3)
     assert next(it).id == 'dummy_id_1'
     assert next(it).id == 'dummy_id_2'
 
@@ -103,7 +111,7 @@ def test_next_limit(httpserver, iterator_response):
 async def test_anext(httpserver, iterator_response):
   """Tests iterator's async next."""
   async with new_client(httpserver) as client:
-    it = client.iterator('/dummy_collection/foo', limit=10)
+    it = client.iterator('/dummy_collection/foo', limit=10, batch_size=3)
     assert (await it.__anext__()).id == 'dummy_id_1'
 
     # iteration must start right where the next stayed

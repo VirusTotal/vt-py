@@ -111,7 +111,7 @@ def test_next_limit(httpserver, iterator_response):
 async def test_anext(httpserver, iterator_response):
   """Tests iterator's async next."""
   async with new_client(httpserver) as client:
-    it = client.iterator('/dummy_collection/foo', limit=10)
+    it = client.iterator('/dummy_collection/foo', limit=10, batch_size=3)
     assert (await it.__anext__()).id == 'dummy_id_1'
 
     # iteration must start right where the next stayed

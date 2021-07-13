@@ -96,7 +96,9 @@ class ClientResponse:
     return _make_sync(self.read_async())
 
   async def json_async(self):
-    return await self._aiohttp_resp.json()
+    content_length = int(self.headers.get('content-length', '-1'))
+    response_content = await self.content.read_async(content_length)
+    return json.loads(response_content)
 
   def json(self):
     return _make_sync(self.json_async())
@@ -233,7 +235,8 @@ class Client:
     error = await self.get_error_async(response)
     if error:
       raise error
-    return await response.json_async()
+    response_text = await response.read_async()
+    return json.loads(response_text)
 
   async def _response_to_object(self, response):
     json_response = await self._response_to_json(response)

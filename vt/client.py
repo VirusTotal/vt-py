@@ -235,8 +235,7 @@ class Client:
     error = await self.get_error_async(response)
     if error:
       raise error
-    response_text = await response.read_async()
-    return json.loads(response_text)
+    return await response.json_async()
 
   async def _response_to_object(self, response):
     json_response = await self._response_to_json(response)

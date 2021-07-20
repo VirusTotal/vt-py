@@ -20,55 +20,60 @@ import vt
 
 
 async def get_files_to_upload(queue, path):
-  """Finds which files will be uploaded to VirusTotal."""
-  if os.path.isfile(path):
-    await queue.put(path)
-    return
+    """Finds which files will be uploaded to VirusTotal."""
+    if os.path.isfile(path):
+        await queue.put(path)
+        return
 
-  with os.scandir(path) as it:
-    for entry in it:
-        if not entry.name.startswith('.') and entry.is_file():
-            await queue.put(entry.path)
+    with os.scandir(path) as it:
+        for entry in it:
+            if not entry.name.startswith(".") and entry.is_file():
+                await queue.put(entry.path)
 
 
 async def upload_hashes(queue, apikey):
-  """Uploads selected files to VirusTotal."""
-  async with vt.Client(apikey) as client:
-    while not queue.empty():
-      file_path = await queue.get()
-      await client.scan_file_async(file=file_path)
-      print(f'File {file_path} uploaded.')
-      queue.task_done()
+    """Uploads selected files to VirusTotal."""
+    async with vt.Client(apikey) as client:
+        while not queue.empty():
+            file_path = await queue.get()
+            await client.scan_file_async(file=file_path)
+            print(f"File {file_path} uploaded.")
+            queue.task_done()
 
 
 def main():
 
-  parser = argparse.ArgumentParser(description='Upload files to VirusTotal.')
+    parser = argparse.ArgumentParser(description="Upload files to VirusTotal.")
 
-  parser.add_argument('--apikey', required=True, help='your VirusTotal API key')
-  parser.add_argument('--path', required=True,
-                      help='path to the file/directory to upload.')
-  parser.add_argument('--workers', type=int, required=False, default=4,
-                      help='number of concurrent workers')
-  args = parser.parse_args()
+    parser.add_argument("--apikey", required=True, help="your VirusTotal API key")
+    parser.add_argument(
+        "--path", required=True, help="path to the file/directory to upload."
+    )
+    parser.add_argument(
+        "--workers",
+        type=int,
+        required=False,
+        default=4,
+        help="number of concurrent workers",
+    )
+    args = parser.parse_args()
 
-  if not os.path.exists(args.path):
-    print(f'ERROR: file {args.path} not found.')
-    sys.exit(1)
+    if not os.path.exists(args.path):
+        print(f"ERROR: file {args.path} not found.")
+        sys.exit(1)
 
-  loop = asyncio.get_event_loop()
-  queue = asyncio.Queue(loop=loop)
-  loop.create_task(get_files_to_upload(queue, args.path))
+    loop = asyncio.get_event_loop()
+    queue = asyncio.Queue(loop=loop)
+    loop.create_task(get_files_to_upload(queue, args.path))
 
-  _worker_tasks = []
-  for i in range(args.workers):
-    _worker_tasks.append(
-        loop.create_task(upload_hashes(queue, args.apikey)))
+    _worker_tasks = []
+    for i in range(args.workers):
+        _worker_tasks.append(loop.create_task(upload_hashes(queue, args.apikey)))
 
-  # Wait until all worker tasks has completed.
-  loop.run_until_complete(asyncio.gather(*_worker_tasks))
-  loop.close()
+    # Wait until all worker tasks has completed.
+    loop.run_until_complete(asyncio.gather(*_worker_tasks))
+    loop.close()
 
 
-if __name__ == '__main__':
-  main()
+if __name__ == "__main__":
+    main()

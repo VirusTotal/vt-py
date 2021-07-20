@@ -27,42 +27,43 @@ import vt
 
 
 def process_item(item):
-  """Processes a fetched item from the feed."""
-  total_clean = sum(item.last_analysis_stats.values())
-  num_spaces = 100 - len(item.url) if len(item.url) < 100 else 10
-  print(
-      f'{item.url}{" " * num_spaces}'
-      f'{item.last_analysis_stats["malicious"]}/{total_clean}')
+    """Processes a fetched item from the feed."""
+    total_clean = sum(item.last_analysis_stats.values())
+    num_spaces = 100 - len(item.url) if len(item.url) < 100 else 10
+    print(
+        f'{item.url}{" " * num_spaces}'
+        f'{item.last_analysis_stats["malicious"]}/{total_clean}'
+    )
 
 
 def main():
 
-  parser = argparse.ArgumentParser(
-      description='Get URLs from the VirusTotal feed. '
-      'For each URL in the feed, print its detection ratio.')
+    parser = argparse.ArgumentParser(
+        description="Get URLs from the VirusTotal feed. "
+        "For each URL in the feed, print its detection ratio."
+    )
 
-  parser.add_argument('--apikey',
-      required=True, help='your VirusTotal API key')
+    parser.add_argument("--apikey", required=True, help="your VirusTotal API key")
 
-  parser.add_argument('--cursor',
-      required=False,
-      help='cursor indicating where to start')
+    parser.add_argument(
+        "--cursor", required=False, help="cursor indicating where to start"
+    )
 
-  args = parser.parse_args()
+    args = parser.parse_args()
 
-  with vt.Client(args.apikey) as client:
-    # Iterate over the URL feed, one file at a time. This loop doesn't
-    # finish, when the feed is consumed it will keep waiting for more files.
+    with vt.Client(args.apikey) as client:
+        # Iterate over the URL feed, one file at a time. This loop doesn't
+        # finish, when the feed is consumed it will keep waiting for more files.
 
-    try:
-      for url_obj in client.feed(vt.FeedType.URLS, cursor=args.cursor):
-        # process the url_obj
-        process_item(url_obj)
-    except KeyboardInterrupt:
-      print('\nKeyboard interrupt. Closing.')
-    finally:
-      client.close()
+        try:
+            for url_obj in client.feed(vt.FeedType.URLS, cursor=args.cursor):
+                # process the url_obj
+                process_item(url_obj)
+        except KeyboardInterrupt:
+            print("\nKeyboard interrupt. Closing.")
+        finally:
+            client.close()
 
 
-if __name__ == '__main__':
-  main()
+if __name__ == "__main__":
+    main()

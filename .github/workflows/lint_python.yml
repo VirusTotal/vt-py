@@ -9,7 +9,7 @@ jobs:
       - run: pip install bandit black codespell flake8 isort mypy pytest pyupgrade safety
       - run: bandit --recursive --skip B101,B102,B303 .
       - run: black --check . || true
-      - run: codespell --ignore-words-list="nd" --skip="*.css,*.js,*.svg" || true
+      - run: codespell --ignore-words-list="nd" --skip="*.css,*.js,*.svg"
       - run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
       - run: flake8 . --count --exit-zero --ignore=E111,E114 --max-complexity=10 --max-line-length=88 --show-source --statistics
       - run: isort --check-only --profile black . || true
@@ -19,5 +19,5 @@ jobs:
       - run: python setup.py test
       - run: pip install jsonpath-ng pefile pytest-asyncio pytest-httpserver
       - run: pytest .
-      - run: shopt -s globstar && pyupgrade --py36-plus **/*.py || true
+      - run: shopt -s globstar && pyupgrade --py36-plus **/*.py
       - run: safety check

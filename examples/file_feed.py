@@ -24,6 +24,7 @@ privileges for using the VirusTotal Feed API.
 import argparse
 import json
 import os
+
 import vt
 
 

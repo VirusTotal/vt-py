@@ -21,10 +21,11 @@ https://www.virustotal.com/learn/
 import argparse
 import asyncio
 import hashlib
-import pefile
-import vt
 import sys
 
+import pefile
+
+import vt
 
 SEARCHES = [
     ('have', 'behaviour_network'),

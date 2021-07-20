@@ -24,11 +24,13 @@ privileges for using the VirusTotal Feed API.
 
 import argparse
 import asyncio
-import aiohttp
 import functools
 import json
 import os
 import signal
+
+import aiohttp
+
 import vt
 
 

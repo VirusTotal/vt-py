@@ -21,6 +21,7 @@ privileges for using VirusTotal Intelligence.
 """
 
 import argparse
+
 import vt
 
 

@@ -11,17 +11,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import aiohttp
 import asyncio
 import base64
 import json
 
+import aiohttp
+
 from .error import APIError
 from .feed import Feed
-from .object import Object
 from .iterator import Iterator
+from .object import Object
 from .version import __version__
-
 
 __all__ = [
     'Client',

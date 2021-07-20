@@ -26,8 +26,9 @@ https://support.virustotal.com/hc/en-us/articles/360000363717-VT-Hunting
 import argparse
 import asyncio
 import os
-import vt
 import sys
+
+import vt
 
 
 async def get_rules_files(queue, path):

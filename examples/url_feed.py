@@ -22,6 +22,7 @@ Set an env-var e.g. $VT_API_KEY
 import argparse
 import json
 import os
+
 import vt
 
 

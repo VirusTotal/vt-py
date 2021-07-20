@@ -22,8 +22,9 @@ import asyncio
 from collections import defaultdict
 from datetime import datetime
 
-import vt
 from utils import dictpath
+
+import vt
 
 
 class RetroHuntJobToNetworkInfrastructureHandler:

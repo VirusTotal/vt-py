@@ -11,9 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from distutils.util import convert_path
-import setuptools
 import sys
+from distutils.util import convert_path
+
+import setuptools
 
 main_ns = {}
 with open(convert_path('vt/version.py')) as ver_file:

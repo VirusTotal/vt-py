@@ -13,19 +13,16 @@
 # limitations under the License.
 
 
-from datetime import datetime
-from datetime import timedelta
-
+import asyncio
+import bz2
 import enum
 import io
 import json
 import time
-import asyncio
-import bz2
+from datetime import datetime, timedelta
 
 from .error import APIError
 from .object import Object
-
 
 __all__ = [
     'Feed',

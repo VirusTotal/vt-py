@@ -20,9 +20,7 @@ import json
 
 import pytest
 
-from vt import Client
-from vt import FeedType
-from vt import Object
+from vt import Client, FeedType, Object
 
 
 def new_client(httpserver):

@@ -18,8 +18,8 @@ import logging
 import os
 import sys
 import time
-import vt
 
+import vt
 
 DEFAULT_PATH = 'intelligencefiles'
 

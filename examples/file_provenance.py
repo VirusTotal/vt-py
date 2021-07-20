@@ -21,8 +21,9 @@ partners and from NSLR. The file is not uploaded to VirusTotal.
 import argparse
 import asyncio
 import hashlib
-import vt
 import sys
+
+import vt
 
 
 async def get_provenance_info(apikey, hash):

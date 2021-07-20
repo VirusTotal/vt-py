@@ -26,8 +26,8 @@ https://support.virustotal.com/hc/en-us/articles/360001387057-VirusTotal-Intelli
 
 import argparse
 import asyncio
-from collections import defaultdict
 import re
+from collections import defaultdict
 
 import vt
 

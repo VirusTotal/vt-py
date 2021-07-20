@@ -21,8 +21,8 @@ The scripts receives a file as input having a domain/IP address per line.
 import argparse
 import asyncio
 import re
-import vt
 
+import vt
 
 IP_REGEX = re.compile(r'\d+\.\d+\.\d+\.\d+')
 

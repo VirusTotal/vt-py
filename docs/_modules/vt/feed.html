@@ -272,7 +272,7 @@
         <span class="k">break</span>
       <span class="k">except</span> <span class="n">APIError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
         <span class="c1"># The only acceptable error here is NotFoundError, if such an error</span>
-        <span class="c1"># occurrs we try to get the next batch.</span>
+        <span class="c1"># occurs we try to get the next batch.</span>
         <span class="k">if</span> <span class="n">error</span><span class="o">.</span><span class="n">code</span> <span class="o">!=</span> <span class="s1">&#39;NotFoundError&#39;</span><span class="p">:</span>
           <span class="k">raise</span> <span class="n">error</span>
         <span class="n">missing_batches</span> <span class="o">+=</span> <span class="mi">1</span>

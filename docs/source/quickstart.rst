@@ -89,7 +89,7 @@ Scan a file
 
 Before scanning a file is highly recommended that you look up for it as
 described in `Get information about a file <#get-information-about-a-file>`_.
-If the file already exists and the lastest analysis is fresh enough, you can
+If the file already exists and the latest analysis is fresh enough, you can
 use that instead of scanning the file again. If not, you can scan it with:
 
 >>> with open("/path/to/file", "rb") as f:

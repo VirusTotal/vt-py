@@ -195,7 +195,7 @@ class Client:
 
   def __init__(self, apikey, agent="unknown", host=None, trust_env=False,
                timeout=300):
-    """Intialize the client with the provided API key."""
+    """Initialize the client with the provided API key."""
 
     if not isinstance(apikey, str):
       raise ValueError('API key must be a string')
@@ -295,7 +295,7 @@ class Client:
   def download_file(self, hash, file):
     """Downloads a file given its hash (SHA-256, SHA-1 or MD5).
 
-    The file indentified by the hash will be written to the provided file
+    The file identified by the hash will be written to the provided file
     object. The file object must be opened in write binary mode ('wb').
 
     :param hash: File hash.
@@ -388,7 +388,7 @@ class Client:
     """Given a :class:`ClientResponse` returns a :class:`APIError`
 
     This function checks if the response from the VirusTotal backend was an
-    error and returns the appropiate :class:`APIError` or None if no error
+    error and returns the appropriate :class:`APIError` or None if no error
     occurred.
 
     :param response: A :class:`ClientResponse` instance.
@@ -531,7 +531,7 @@ class Client:
     :param path: Path to API endpoint.
     :param path_args: A variable number of arguments that are put into any
       placeholders used in path.
-    :param obj: Instance :class:`Object` whith the type expected by the API
+    :param obj: Instance :class:`Object` with the type expected by the API
       endpoint.
     :type path: str
     :type obj: :class:`Object`

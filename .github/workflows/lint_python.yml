@@ -18,7 +18,6 @@ jobs:
       - run: mypy --install-types --non-interactive . || true
       - run: python setup.py test
       - run: pip install jsonpath-ng pefile pytest-asyncio pytest-httpserver
-      - run: pytest . || true
-      - run: pytest --doctest-modules . || true
+      - run: pytest .
       - run: shopt -s globstar && pyupgrade --py36-plus **/*.py || true
       - run: safety check

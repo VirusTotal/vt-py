@@ -247,7 +247,7 @@ function. This other code is equivalent:</p>
 <h2>Scan a file<a class="headerlink" href="#scan-a-file" title="Permalink to this headline">¶</a></h2>
 <p>Before scanning a file is highly recommended that you look up for it as
 described in <a class="reference external" href="#get-information-about-a-file">Get information about a file</a>.
-If the file already exists and the lastest analysis is fresh enough, you can
+If the file already exists and the latest analysis is fresh enough, you can
 use that instead of scanning the file again. If not, you can scan it with:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;/path/to/file&quot;</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
 <span class="gp">&gt;&gt;&gt; </span>  <span class="n">analysis</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">scan_file</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>

@@ -123,7 +123,7 @@ class Feed:
         break
       except APIError as error:
         # The only acceptable error here is NotFoundError, if such an error
-        # occurrs we try to get the next batch.
+        # occurs we try to get the next batch.
         if error.code != 'NotFoundError':
           raise error
         missing_batches += 1

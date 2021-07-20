@@ -5,7 +5,9 @@ python:
 - '3.7'
 install:
 - python setup.py install
+- pip install codespell
 script:
+- codespell --ignore-words-list="nd" --skip="*.css,*.js,*.svg"
 - python setup.py test
 deploy:
   provider: pypi

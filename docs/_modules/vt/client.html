@@ -323,7 +323,7 @@
 <span class="sd">  &quot;&quot;&quot;</span>
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apikey</span><span class="p">,</span> <span class="n">agent</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Intialize the client with the provided API key.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Initialize the client with the provided API key.&quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">apikey</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;API key must be a string&#39;</span><span class="p">)</span>
@@ -419,7 +419,7 @@
 <div class="viewcode-block" id="Client.download_file"><a class="viewcode-back" href="../../api/client.html#vt.Client.download_file">[docs]</a>  <span class="k">def</span> <span class="nf">download_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">hash</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Downloads a file given its hash (SHA-256, SHA-1 or MD5).</span>
 
-<span class="sd">    The file indentified by the hash will be written to the provided file</span>
+<span class="sd">    The file identified by the hash will be written to the provided file</span>
 <span class="sd">    object. The file object must be opened in write binary mode (&#39;wb&#39;).</span>
 
 <span class="sd">    :param hash: File hash.</span>
@@ -512,7 +512,7 @@
     <span class="sd">&quot;&quot;&quot;Given a :class:`ClientResponse` returns a :class:`APIError`</span>
 
 <span class="sd">    This function checks if the response from the VirusTotal backend was an</span>
-<span class="sd">    error and returns the appropiate :class:`APIError` or None if no error</span>
+<span class="sd">    error and returns the appropriate :class:`APIError` or None if no error</span>
 <span class="sd">    occurred.</span>
 
 <span class="sd">    :param response: A :class:`ClientResponse` instance.</span>

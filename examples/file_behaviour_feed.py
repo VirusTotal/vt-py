@@ -46,7 +46,7 @@ def main():
 
   parser = argparse.ArgumentParser(
       description='Get file behaviour reports from the VirusTotal feed. '
-      'Print documents dropping an executable or lauching a Powershell.')
+      'Print documents dropping an executable or launching a Powershell.')
 
   parser.add_argument('--apikey',
       required=True, help='your VirusTotal API key')

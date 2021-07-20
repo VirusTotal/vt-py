@@ -1,5 +1,4 @@
 #!/usr/local/bin/python
-# -*- coding: utf-8 -*-
 # Copyright © 2019 The vt-py authors. All Rights Reserved.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -79,7 +78,7 @@ class HuntingNotificationToNetworkInfrastructureHandler:
     url = '/files/{}'
     async with vt.Client(self.apikey) as client:
       if isinstance(relationships, str) and relationships:
-        url += '?relationships={}'.format(relationships)
+        url += f'?relationships={relationships}'
 
       file_obj = await client.get_object_async(url.format(hash))
     return file_obj
@@ -134,28 +133,28 @@ class HuntingNotificationToNetworkInfrastructureHandler:
     sorted_domains = sorted(self.networking_counters['domains'].items(),
         key=lambda x: -x[1])
     for domain_tuple in sorted_domains:
-      print('{:>12}\t{:>5}'.format(domain_tuple[1], domain_tuple[0]))
+      print(f'{domain_tuple[1]:>12}\t{domain_tuple[0]:>5}')
     print('TOP CONTACTED IPs')
     print('Num. Requests\tIP')
     sorted_ips = sorted(self.networking_counters['domains'].items(),
         key=lambda x: -x[1])
     for ip_tuple in sorted_ips:
-      print('{:>12}\t{:>12}'.format(ip_tuple[1], ip_tuple[0]))
+      print(f'{ip_tuple[1]:>12}\t{ip_tuple[0]:>12}')
     print('TOP CONTACTED URLs')
     print('Num. Requests\tURL')
     sorted_urls = sorted(self.networking_counters['domains'].items(),
       key=lambda x: -x[1])
     for url_tuple in sorted_urls:
-      print('{:>12}\t{:>12}'.format(url_tuple[1], url_tuple[0]))
+      print(f'{url_tuple[1]:>12}\t{url_tuple[0]:>12}')
 
     print('\nNETWORK INFRASTRUCTURE')
     for file_network in self.networking_infrastructure.items():
       contacted_addresses = file_network[1].values()
       if any(contacted_addresses):
-        print('File Hash: {}'.format(file_network[0]))
+        print(f'File Hash: {file_network[0]}')
         for network_inf in file_network[1].items():
           if network_inf[1]:
-            print('\t{}'.format(network_inf[0]))
+            print(f'\t{network_inf[0]}')
             for address in network_inf[1]:
               if address['type'] in ('domain', 'ip_address'):
                 print('\t\t{}'.format(address['id']))

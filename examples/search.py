@@ -1,5 +1,4 @@
 #!/usr/local/bin/python
-# -*- coding: utf-8 -*-
 # Copyright © 2019 The vt-py authors. All Rights Reserved.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -52,7 +51,7 @@ def main():
         params={'query': ' '.join(args.query)},
         limit=args.limit)
     for obj in it:
-      print("{}:{}".format(obj.type, obj.id))
+      print(f"{obj.type}:{obj.id}")
 
 
 if __name__ == '__main__':

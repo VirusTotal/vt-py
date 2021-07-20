@@ -19,7 +19,7 @@ main_ns = {}
 with open(convert_path('vt/version.py')) as ver_file:
   exec(ver_file.read(), main_ns)
 
-with open('README.md', 'r') as fh:
+with open('README.md') as fh:
   long_description = fh.read()
 
 if sys.version_info < (3, 6, 0):

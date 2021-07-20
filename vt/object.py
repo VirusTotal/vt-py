@@ -42,7 +42,7 @@ class WhistleBlowerDict(dict):
     super().__delitem__(item)
 
 
-class Object(object):
+class Object:
   """This class encapsulates any type of object in the VirusTotal API.
 
   Instances of this class are usually obtained from calls to
@@ -88,11 +88,11 @@ class Object(object):
     """
     if not isinstance(obj_dict, dict):
       raise ValueError(
-          'Expecting dictionary, got: {}'.format(type(obj_dict).__name__))
+          f'Expecting dictionary, got: {type(obj_dict).__name__}')
 
     for field in ('type', 'id'):
       if field not in obj_dict:
-        raise ValueError('Object {} not found'.format(field))
+        raise ValueError(f'Object {field} not found')
 
     obj = cls(
         obj_dict.get('type'),
@@ -130,7 +130,7 @@ class Object(object):
       self._modified_attrs.append(attr)
 
   def __getattribute__(self, attr):
-    value = super(Object, self).__getattribute__(attr)
+    value = super().__getattribute__(attr)
     for re in Object.DATE_ATTRIBUTES:
       if re.match(attr):
         value = datetime.datetime.utcfromtimestamp(value)

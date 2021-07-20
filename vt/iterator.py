@@ -99,7 +99,7 @@ class Iterator:
 
   def _parse_response(self, json_resp, batch_cursor):
     if not isinstance(json_resp.get('data'), list):
-      raise ValueError('{} is not a collection'.format(self._path))
+      raise ValueError(f'{self._path} is not a collection')
     meta = json_resp.get('meta', {})
     items = json_resp['data'][batch_cursor:]
     return items, meta.get('cursor')

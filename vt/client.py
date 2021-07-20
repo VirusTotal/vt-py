@@ -89,20 +89,37 @@ class ClientResponse:
   def content(self):
     return StreamReader(self._aiohttp_resp.content)
 
+  async def _get_chunked_response(self):
+    buffer = b""
+    async for data, _ in self.content.iter_chunks():
+      buffer += data
+    return buffer
+
   async def read_async(self):
-    return await self._aiohttp_resp.read()
+    if self.headers.get('Transfer-encoding') == 'chunked':
+      return await self._get_chunked_response()
+    else:
+      return await self._aiohttp_resp.read()
 
   def read(self):
     return _make_sync(self.read_async())
 
   async def json_async(self):
-    return await self._aiohttp_resp.json()
+    if self.headers.get('Transfer-encoding') == 'chunked':
+      response_content = await self._get_chunked_response()
+      return json.loads(response_content)
+    else:
+      return await self._aiohttp_resp.json()
 
   def json(self):
     return _make_sync(self.json_async())
 
   async def text_async(self):
-    return await self._aiohttp_resp.text()
+    if self.headers.get('Transfer-encoding') == 'chunked':
+      response_content = await self._get_chunked_response()
+      return response_content.decode(self._aiohttp_resp.get_encoding())
+    else:
+      return await self._aiohttp_resp.text()
 
   def text(self):
     return _make_sync(self.text_async())

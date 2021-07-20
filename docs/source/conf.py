@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Configuration file for the Sphinx documentation builder.
 #
@@ -19,14 +18,14 @@
 
 # -- Project information -----------------------------------------------------
 
-project = u'vt-py'
-copyright = u'2019, VirusTotal'
-author = u'VirusTotal'
+project = 'vt-py'
+copyright = '2019, VirusTotal'
+author = 'VirusTotal'
 
 # The short X.Y version
-version = u''
+version = ''
 # The full version, including alpha/beta/rc tags
-release = u''
+release = ''
 
 
 # -- General configuration ---------------------------------------------------
@@ -131,8 +130,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'vt-py.tex', u'vt-py Documentation',
-     u'VirusTotal', 'manual'),
+    (master_doc, 'vt-py.tex', 'vt-py Documentation',
+     'VirusTotal', 'manual'),
 ]
 
 
@@ -141,7 +140,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'vt-py', u'vt-py Documentation',
+    (master_doc, 'vt-py', 'vt-py Documentation',
      [author], 1)
 ]
 
@@ -152,7 +151,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'vt-py', u'vt-py Documentation',
+    (master_doc, 'vt-py', 'vt-py Documentation',
      author, 'vt-py', 'One line description of project.',
      'Miscellaneous'),
 ]

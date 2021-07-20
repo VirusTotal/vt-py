@@ -240,7 +240,7 @@ class Client:
     try:
       return Object.from_dict(self._extract_data_from_json(json_response))
     except ValueError as err:
-      raise ValueError('response is not an object: {}'.format(err))
+      raise ValueError(f'response is not an object: {err}')
 
   async def close_async(self):
     """Like :func:`close` but returns a coroutine."""
@@ -287,7 +287,7 @@ class Client:
 
   async def download_file_async(self, hash, file):
     """Like :func:`download_file` but returns a coroutine."""
-    response = await self.get_async('/files/{}/download'.format(hash))
+    response = await self.get_async(f'/files/{hash}/download')
     while True:
       chunk = await response.content.read_async(1024*1024)
       if not chunk:
@@ -586,7 +586,7 @@ class Client:
 
     part = aiohttp.get_payload(file)
     filename = file.name if hasattr(file, 'name') else 'unknown'
-    disposition = 'form-data; name="file"; filename="{}"'.format(filename)
+    disposition = f'form-data; name="file"; filename="{filename}"'
     part.headers['Content-Disposition'] = disposition
     form_data = aiohttp.MultipartWriter('form-data')
     form_data.append_payload(part)

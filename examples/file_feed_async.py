@@ -1,5 +1,4 @@
 #!/usr/local/bin/python
-# -*- coding: utf-8 -*-
 # Copyright © 2019 The vt-py authors. All Rights Reserved.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -165,7 +164,7 @@ def main():
 
   feed_reader.run()
 
-  print("\ncontinuation cursor: {}".format(feed_reader.cursor()))
+  print(f"\ncontinuation cursor: {feed_reader.cursor()}")
 
 
 if __name__ == '__main__':

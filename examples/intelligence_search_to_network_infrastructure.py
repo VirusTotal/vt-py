@@ -1,5 +1,4 @@
 #!/usr/local/bin/python
-# -*- coding: utf-8 -*-
 # Copyright © 2019 The vt-py authors. All Rights Reserved.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -55,7 +54,7 @@ class VTISearchToNetworkInfrastructureHandler:
     url = '/files/{}'
     async with vt.Client(self.apikey) as client:
       if isinstance(relationships, str) and relationships:
-        url += '?relationships={}'.format(relationships)
+        url += f'?relationships={relationships}'
       file_obj = await client.get_object_async(url.format(checksum))
 
     return file_obj

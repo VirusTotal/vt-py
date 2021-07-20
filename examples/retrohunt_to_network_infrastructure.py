@@ -1,5 +1,4 @@
 #!/usr/local/bin/python
-# -*- coding: utf-8 -*-
 # Copyright © 2019 The vt-py authors. All Rights Reserved.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -156,26 +155,26 @@ class RetroHuntJobToNetworkInfrastructureHandler:
     print('Num. Requests\tDomain')
     for domain_tuple in sorted(self.networking_counters['domains'].items(),
         key=lambda x: -x[1]):
-      print('{:>12}\t{:>5}'.format(domain_tuple[1], domain_tuple[0]))
+      print(f'{domain_tuple[1]:>12}\t{domain_tuple[0]:>5}')
     print('TOP CONTACTED IPs')
     print('Num. Requests\tIP')
     for ip_tuple in sorted(self.networking_counters['ips'].items(),
         key=lambda x: -x[1]):
-      print('{:>12}\t{:>12}'.format(ip_tuple[1], ip_tuple[0]))
+      print(f'{ip_tuple[1]:>12}\t{ip_tuple[0]:>12}')
     print('TOP CONTACTED URLs')
     print('Num. Requests\tURL')
     for url_tuple in sorted(self.networking_counters['urls'].items(),
         key=lambda x: -x[1]):
-      print('{:>12}\t{:>12}'.format(url_tuple[1], url_tuple[0]))
+      print(f'{url_tuple[1]:>12}\t{url_tuple[0]:>12}')
 
     print('\nNETWORK INFRASTRUCTURE')
     for file_network in self.networking_infrastructure.items():
       contacted_addresses = file_network[1].values()
       if any(contacted_addresses):
-        print('File Hash: {}'.format(file_network[0]))
+        print(f'File Hash: {file_network[0]}')
         for network_inf in file_network[1].items():
           if network_inf[1]:
-            print('\t{}'.format(network_inf[0]))
+            print(f'\t{network_inf[0]}')
             for address in network_inf[1]:
               if address['type'] in ('domain', 'ip_address'):
                 print('\t\t{}'.format(address['id']))
@@ -187,10 +186,10 @@ class RetroHuntJobToNetworkInfrastructureHandler:
       comm_items = [(k, v) for k, v in commonality.items() if
                     len(v) > self.MIN_IN_COMMON]
       if comm_items:
-        print('{}'.format(key))
+        print(f'{key}')
         for value_in_common, files_having_it_in_common in comm_items:
           value_in_common = str(value_in_common)
-          print('\t{:<32}\tFiles having it in common:'.format(value_in_common))
+          print(f'\t{value_in_common:<32}\tFiles having it in common:')
           for file_hash in files_having_it_in_common:
             print('\t{:<32}\t{:<32}'.format('', file_hash))
 

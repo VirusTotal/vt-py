@@ -193,7 +193,8 @@ class Client:
   :type trust_env: bool
   """
 
-  def __init__(self, apikey, agent="unknown", host=None, trust_env=False):
+  def __init__(self, apikey, agent="unknown", host=None, trust_env=False,
+               timeout=300):
     """Intialize the client with the provided API key."""
 
     if not isinstance(apikey, str):
@@ -207,6 +208,7 @@ class Client:
     self._agent = agent
     self._session = None
     self._trust_env = trust_env
+    self._timeout = timeout
 
   def _full_url(self, path, *args):
     try:
@@ -226,7 +228,8 @@ class Client:
             'Accept-Encoding': 'gzip',
             'User-Agent': _USER_AGENT_FMT.format_map({
                 'agent': self._agent, 'version': __version__})},
-        trust_env=self._trust_env)
+        trust_env=self._trust_env,
+        timeout=aiohttp.ClientTimeout(total=self._timeout))
     return self._session
 
   async def __aenter__(self):

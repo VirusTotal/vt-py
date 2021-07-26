@@ -308,6 +308,9 @@ class Client:
   async def download_file_async(self, hash, file):
     """Like :func:`download_file` but returns a coroutine."""
     response = await self.get_async(f'/files/{hash}/download')
+    error = await self.get_error_async(response)
+    if error:
+      raise error
     while True:
       chunk = await response.content.read_async(1024*1024)
       if not chunk:

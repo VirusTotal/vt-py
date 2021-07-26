@@ -20,6 +20,7 @@ import json
 
 import pytest
 
+from vt import APIError
 from vt import Client
 from vt import FeedType
 from vt import Object
@@ -277,6 +278,31 @@ def test_download_file(httpserver):
       client.download_file('01020304050607080900a0b0c0d0e0f', f)
       f.seek(0)
       assert f.read() == b'filecontent'
+
+
+def test_download_file_with_error(httpserver):
+
+  httpserver.expect_request(
+    '/api/v3/files/01020304050607080900a0b0c0ddead/download',
+    method='GET',
+    headers={'X-Apikey': 'dummy_api_key'}
+  ).respond_with_data(
+    status=404,
+    content_type="application/json",
+    response_data=json.dumps({
+      "error": {
+        "code": "NotFoundError",
+        "message": "Resource not found."
+      }
+    })
+  )
+
+  with pytest.raises(APIError) as e_info:
+    with new_client(httpserver) as client:
+      with io.BytesIO() as f:
+        client.download_file('01020304050607080900a0b0c0ddead', f)
+  assert e_info.value.args[0] == "NotFoundError"
+  assert e_info.value.args[1] == "Resource not found."
 
 
 def test_scan_file(httpserver):

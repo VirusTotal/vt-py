@@ -63,6 +63,7 @@ def test_next(httpserver, iterator_response):
     it = client.iterator('/dummy_collection/foo', limit=10, batch_size=3)
     assert next(it).id == 'dummy_id_1'
     assert next(it).id == 'dummy_id_2'
+    assert it._batch_cursor == 2
 
     # iteration must start right where the next stayed
     last = None
@@ -72,6 +73,7 @@ def test_next(httpserver, iterator_response):
 
     assert last.id == 'dummy_id_4'
     assert it._count == 4
+    assert it._batch_cursor == 1
 
     with pytest.raises(StopIteration):
       # there shouldn't be more available elements after the for loop
@@ -113,6 +115,7 @@ async def test_anext(httpserver, iterator_response):
   async with new_client(httpserver) as client:
     it = client.iterator('/dummy_collection/foo', limit=10, batch_size=3)
     assert (await it.__anext__()).id == 'dummy_id_1'
+    assert it._batch_cursor == 1
 
     # iteration must start right where the next stayed
     last, i = None, 0
@@ -123,6 +126,7 @@ async def test_anext(httpserver, iterator_response):
 
     assert last.id == 'dummy_id_4'
     assert it._count == 4
+    assert it._batch_cursor == 1
 
     with pytest.raises(StopAsyncIteration):
       # there shouldn't be more available elements after the for loop

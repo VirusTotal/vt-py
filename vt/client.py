@@ -18,8 +18,9 @@ import json
 
 from .error import APIError
 from .feed import Feed
-from .object import Object
 from .iterator import Iterator
+from .object import Object
+from .utils import _make_sync
 from .version import __version__
 
 

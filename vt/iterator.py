@@ -13,7 +13,7 @@
 
 
 from .object import Object
-
+from .utils import _make_sync
 
 __all__ = ['Iterator']
 
@@ -109,11 +109,6 @@ class Iterator:
         self._path, params=self._build_params())
     return self._parse_response(json_resp, batch_cursor)
 
-  def _get_batch(self, batch_cursor=0):
-    json_resp = self._client.get_json(
-        self._path, params=self._build_params())
-    return self._parse_response(json_resp, batch_cursor)
-
   def __iter__(self):
     return self
 
@@ -121,17 +116,10 @@ class Iterator:
     return self
 
   def __next__(self):
-    if not self._items and (self._server_cursor or self._count == 0):
-      self._items, self._server_cursor = self._get_batch()
-      self._batch_cursor = 0
-    if self._limit and self._count == self._limit:
+    try:
+      return _make_sync(self.__anext__())
+    except StopAsyncIteration:
       raise StopIteration()
-    if not self._items and not self._server_cursor:
-      raise StopIteration()
-    item = self._items.pop(0)
-    self._count += 1
-    self._batch_cursor += 1
-    return Object.from_dict(item)
 
   async def __anext__(self):
     if not self._items and (self._server_cursor or self._count == 0):

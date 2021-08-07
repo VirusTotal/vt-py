@@ -13,7 +13,7 @@
 
 
 from .object import Object
-
+from .utils import make_sync
 
 __all__ = ['Iterator']
 
@@ -109,70 +109,26 @@ class Iterator:
         self._path, params=self._build_params())
     return self._parse_response(json_resp, batch_cursor)
 
-  def _get_batch(self, batch_cursor=0):
-    json_resp = self._client.get_json(
-        self._path, params=self._build_params())
-    return self._parse_response(json_resp, batch_cursor)
-
-  def _iterate(self):
-    if len(self._items) == 0:
-      self._items, self._server_cursor = self._get_batch()
-      self._batch_cursor = 0
-    item = self._items.pop(0)
-    self._count += 1
-    self._batch_cursor += 1
-    return Object.from_dict(item)
-
-  async def _aiterate(self):
-    if len(self._items) == 0:
-      self._items, self._server_cursor = await self._get_batch_async()
-      self._batch_cursor = 0
-    item = self._items.pop(0)
-    self._count += 1
-    self._batch_cursor += 1
-    return Object.from_dict(item)
-
   def __iter__(self):
-    if not self._items and self._count == 0:  # iter called before next
-      self._items, self._server_cursor = self._get_batch()
-    if self._limit:
-      while (self._items or self._server_cursor) and self._count < self._limit:
-        yield self._iterate()
-    else:
-      while (self._items or self._server_cursor):
-        yield self._iterate()
+    return self
 
-  async def __aiter__(self):
-    if not self._items and self._count == 0: # iter called before next
-      self._items, self._server_cursor = await self._get_batch_async()
-    if self._limit:
-      while (self._items or self._server_cursor) and self._count < self._limit:
-        yield await self._aiterate()
-    else:
-      while self._items or self._server_cursor:
-        yield await self._aiterate()
+  def __aiter__(self):
+    return self
 
   def __next__(self):
-    if not self._items and self._count == 0:  # next is called before iter
-      self._items, self._server_cursor = self._get_batch()
-    if self._limit:
-      if (not self._items and self._count > 0) or self._count >= self._limit:
-        raise StopIteration()
-    elif (not self._items and self._count > 0):
-        raise StopIteration()
-    item = self._items.pop(0)
-    self._count += 1
-    self._batch_cursor += 1
-    return Object.from_dict(item)
+    try:
+      return make_sync(self.__anext__())
+    except StopAsyncIteration:
+      raise StopIteration()
 
   async def __anext__(self):
-    if not self._items and self._count == 0:  # next is called before iter
+    if not self._items and (self._server_cursor or self._count == 0):
       self._items, self._server_cursor = await self._get_batch_async()
-    if self._limit:
-      if (not self._items and self._count > 0) or self._count >= self._limit:
-        raise StopAsyncIteration()
-    elif (not self._items and self._count > 0):
-        raise StopAsyncIteration()
+      self._batch_cursor = 0
+    if self._limit and self._count == self._limit:
+      raise StopAsyncIteration()
+    if not self._items and not self._server_cursor:
+      raise StopAsyncIteration()
     item = self._items.pop(0)
     self._count += 1
     self._batch_cursor += 1

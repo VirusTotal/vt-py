@@ -13,7 +13,7 @@
 
 
 from .object import Object
-from .utils import _make_sync
+from .utils import make_sync
 
 __all__ = ['Iterator']
 
@@ -117,7 +117,7 @@ class Iterator:
 
   def __next__(self):
     try:
-      return _make_sync(self.__anext__())
+      return make_sync(self.__anext__())
     except StopAsyncIteration:
       raise StopIteration()
 

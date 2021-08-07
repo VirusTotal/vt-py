@@ -15,7 +15,7 @@
 import asyncio
 
 
-def _make_sync(future):
+def make_sync(future):
   """Utility function that waits for an async call, making it sync."""
   try:
     event_loop = asyncio.get_event_loop()

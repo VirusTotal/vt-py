@@ -20,7 +20,7 @@ from .error import APIError
 from .feed import Feed
 from .iterator import Iterator
 from .object import Object
-from .utils import _make_sync
+from .utils import make_sync
 from .version import __version__
 
 
@@ -41,17 +41,6 @@ _ENDPOINT_PREFIX = '/api/v3'
 # with gzipped content unless it contains the string "gzip" somewhere.
 # See: https://cloud.google.com/appengine/kb/#compression
 _USER_AGENT_FMT = '{agent}; vtpy {version}; gzip'
-
-
-def _make_sync(future):
-  """Utility function that waits for an async call, making it sync."""
-  try:
-    event_loop = asyncio.get_event_loop()
-  except RuntimeError:
-    # Generate an event loop if there isn't any.
-    event_loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(event_loop)
-  return event_loop.run_until_complete(future)
 
 
 def url_id(url):
@@ -103,7 +92,7 @@ class ClientResponse:
       return await self._aiohttp_resp.read()
 
   def read(self):
-    return _make_sync(self.read_async())
+    return make_sync(self.read_async())
 
   async def json_async(self):
     if self.headers.get('Transfer-encoding') == 'chunked':
@@ -113,7 +102,7 @@ class ClientResponse:
       return await self._aiohttp_resp.json()
 
   def json(self):
-    return _make_sync(self.json_async())
+    return make_sync(self.json_async())
 
   async def text_async(self):
     if self.headers.get('Transfer-encoding') == 'chunked':
@@ -123,7 +112,7 @@ class ClientResponse:
       return await self._aiohttp_resp.text()
 
   def text(self):
-    return _make_sync(self.text_async())
+    return make_sync(self.text_async())
 
 
 class StreamReader:
@@ -152,31 +141,31 @@ class StreamReader:
     return await self._aiohttp_stream_reader.read(n)
 
   def read(self, n=-1):
-    return _make_sync(self.read_async(n))
+    return make_sync(self.read_async(n))
 
   async def readany_async(self):
     return await self._aiohttp_stream_reader.readany()
 
   def readany(self):
-    return _make_sync(self.readany_async())
+    return make_sync(self.readany_async())
 
   async def readexactly_async(self, n):
     return await self._aiohttp_stream_reader.readexactly(n)
 
   def readexactly(self, n):
-    return _make_sync(self.readexactly_async(n))
+    return make_sync(self.readexactly_async(n))
 
   async def readline_async(self):
     return await self._aiohttp_stream_reader.readline()
 
   def readline(self):
-    return _make_sync(self.readline_async())
+    return make_sync(self.readline_async())
 
   async def readchunk_async(self):
     return await self._aiohttp_stream_reader.readchunk()
 
   def readchunk(self):
-    return _make_sync(self.readchunk_async())
+    return make_sync(self.readchunk_async())
 
 
 class Client:
@@ -275,7 +264,7 @@ class Client:
     When the client is not needed anymore it should be closed for releasing
     resources like TCP connections.
     """
-    return _make_sync(self.close_async( ))
+    return make_sync(self.close_async())
 
   def delete(self, path, *path_args):
     """Sends a DELETE request to a given API endpoint.
@@ -286,7 +275,7 @@ class Client:
     :type path: str
     :returns: An instance of :class:`ClientResponse`.
     """
-    return _make_sync(self.delete_async(path, *path_args))
+    return make_sync(self.delete_async(path, *path_args))
 
   async def delete_async(self, path, *path_args):
     """Like :func:`delete` but returns a coroutine."""
@@ -304,7 +293,7 @@ class Client:
     :type hash: str
     :type file: file-like object
     """
-    return _make_sync(self.download_file_async(hash, file))
+    return make_sync(self.download_file_async(hash, file))
 
   async def download_file_async(self, hash, file):
     """Like :func:`download_file` but returns a coroutine."""
@@ -350,7 +339,7 @@ class Client:
     :type params: dict
     :returns: An instance of :class:`ClientResponse`.
     """
-    return _make_sync(self.get_async(path, *path_args, params=params))
+    return make_sync(self.get_async(path, *path_args, params=params))
 
   async def get_async(self, path, *path_args, params=None):
     """Like :func:`get` but returns a coroutine."""
@@ -381,7 +370,7 @@ class Client:
       dict, list, string or some other Python type, depending on the endpoint
       called.
     """
-    return _make_sync(self.get_data_async(path, *path_args, params=params))
+    return make_sync(self.get_data_async(path, *path_args, params=params))
 
   async def get_data_async(self, path, *path_args, params=None):
     """Like :func:`get_data` but returns a coroutine."""
@@ -424,7 +413,7 @@ class Client:
     :returns:
       A dictionary with the backend's response.
     """
-    return _make_sync(self.get_json_async(path, *path_args, params=params))
+    return make_sync(self.get_json_async(path, *path_args, params=params))
 
   async def get_json_async(self, path, *path_args, params=None):
     """Like :func:`get_json` but returns a coroutine."""
@@ -448,7 +437,7 @@ class Client:
     :returns:
       An instance of :class:`Object`.
     """
-    return _make_sync(self.get_object_async(path, *path_args, params=params))
+    return make_sync(self.get_object_async(path, *path_args, params=params))
 
   async def get_object_async(self, path, *path_args, params=None):
     """Like :func:`get_object` but returns a coroutine."""
@@ -470,7 +459,7 @@ class Client:
     :type data: A string or bytes
     :returns: An instance of :class:`ClientResponse`.
     """
-    return _make_sync(self.patch_async(path, *path_args, data))
+    return make_sync(self.patch_async(path, *path_args, data))
 
   async def patch_async(self, path, *path_args, data=None):
     """Like :func:`patch` but returns a coroutine."""
@@ -494,7 +483,7 @@ class Client:
     :returns: An instance of :class:`Object` representing the same object after
       the changes has been applied.
     """
-    return _make_sync(self.patch_object_async(path, *path_args, obj=obj))
+    return make_sync(self.patch_object_async(path, *path_args, obj=obj))
 
   async def patch_object_async(self, path, *path_args, obj):
     """Like :func:`patch_object` but returns a coroutine."""
@@ -517,7 +506,7 @@ class Client:
     :type data: A string or bytes
     :returns: An instance of :class:`ClientResponse`.
     """
-    return _make_sync(self.post_async(path, *path_args, data=data))
+    return make_sync(self.post_async(path, *path_args, data=data))
 
   async def post_async(self, path, *path_args, data=None):
     """Like :func:`post` but returns a coroutine."""
@@ -541,7 +530,7 @@ class Client:
     :type obj: :class:`Object`
     :returns: An instance of :class:`Object` representing the new object.
     """
-    return _make_sync(self.post_object_async(path, *path_args, obj=obj))
+    return make_sync(self.post_object_async(path, *path_args, obj=obj))
 
   async def post_object_async(self, path, *path_args, obj):
     """Like :func:`post_object` but returns a coroutine."""
@@ -589,7 +578,7 @@ class Client:
     :type wait_for_completion: bool
     :returns: An instance of :class:`Object` of analysis type.
     """
-    return _make_sync(self.scan_file_async(
+    return make_sync(self.scan_file_async(
         file, wait_for_completion=wait_for_completion))
 
   async def scan_file_async(self, file, wait_for_completion=False):
@@ -636,7 +625,7 @@ class Client:
     :type wait_for_completion: bool
     :returns: An instance of :class:`Object` of analysis type.
     """
-    return _make_sync(self.scan_url_async(
+    return make_sync(self.scan_url_async(
         url, wait_for_completion=wait_for_completion))
 
   async def scan_url_async(self, url, wait_for_completion=False):

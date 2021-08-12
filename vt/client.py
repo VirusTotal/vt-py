@@ -15,6 +15,7 @@ import aiohttp
 import asyncio
 import base64
 import json
+import io
 
 from .error import APIError
 from .feed import Feed
@@ -596,6 +597,9 @@ class Client:
     #
     # AppEngine's upload handler doesn't like the filename*=UTF-8''foobar field
     # and fails with this Content-Disposition header.
+
+    if not isinstance(file, io.IOBase):
+      raise TypeError(f'Expected a file to be a file object, got {type(file)}')
 
     part = aiohttp.get_payload(file)
     filename = file.name if hasattr(file, 'name') else 'unknown'

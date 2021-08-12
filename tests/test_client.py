@@ -339,6 +339,13 @@ def test_scan_file(httpserver):
   assert analysis.type == 'analysis'
 
 
+def test_scan_file_valueerror(httpserver):
+  """Tests an exception is raised when calling scan_file using invalid args."""
+  with new_client(httpserver) as client:
+    with pytest.raises(TypeError):
+      client.scan_file('/Users/test/path/to/file.txt')
+
+
 def test_scan_url(httpserver):
 
   httpserver.expect_request(

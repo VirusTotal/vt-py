@@ -585,6 +585,9 @@ class Client:
   async def scan_file_async(self, file, wait_for_completion=False):
     """Like :func:`scan_file` but returns a coroutine."""
 
+    if not isinstance(file, io.IOBase):
+      raise TypeError(f'Expected a file to be a file object, got {type(file)}')
+
     # The snippet below could be replaced with this simpler code:
     #
     # form_data = aiohttp.FormData()
@@ -597,9 +600,6 @@ class Client:
     #
     # AppEngine's upload handler doesn't like the filename*=UTF-8''foobar field
     # and fails with this Content-Disposition header.
-
-    if not isinstance(file, io.IOBase):
-      raise TypeError(f'Expected a file to be a file object, got {type(file)}')
 
     part = aiohttp.get_payload(file)
     filename = file.name if hasattr(file, 'name') else 'unknown'

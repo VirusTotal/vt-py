@@ -15,6 +15,7 @@ import aiohttp
 import asyncio
 import base64
 import json
+import io
 
 from .error import APIError
 from .feed import Feed
@@ -583,6 +584,9 @@ class Client:
 
   async def scan_file_async(self, file, wait_for_completion=False):
     """Like :func:`scan_file` but returns a coroutine."""
+
+    if not isinstance(file, io.IOBase):
+      raise TypeError(f'Expected a file to be a file object, got {type(file)}')
 
     # The snippet below could be replaced with this simpler code:
     #

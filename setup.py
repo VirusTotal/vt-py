@@ -37,7 +37,7 @@ setuptools.setup(
     python_requires='>=3.6.0',
     install_requires=['aiohttp'],
     setup_requires=['pytest-runner'],
-    tests_require=['pytest', 'pytest_httpserver', 'pytest_asyncio'],
+    extras_require={'test': ['pytest', 'pytest_httpserver', 'pytest_asyncio']},
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: Apache Software License',

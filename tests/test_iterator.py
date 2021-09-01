@@ -11,6 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from collections import abc
+
 import pytest
 import pytest_httpserver
 
@@ -55,6 +57,14 @@ def iterator_response(httpserver):
           'attributes': {'order': 0}
           }]
   })
+
+
+def test_interface(httpserver):
+  """Tests iterator's interface. Checks if object is an actual iterator."""
+  with new_client(httpserver) as client:
+    it = client.iterator('/dummy_collection/foo')
+    assert isinstance(it, abc.Iterator)
+    assert isinstance(it, abc.AsyncIterator)
 
 
 def test_next(httpserver, iterator_response):

@@ -122,11 +122,11 @@ class Iterator:
       raise StopIteration()
 
   async def __anext__(self):
+    if self._limit and self._count == self._limit:
+      raise StopAsyncIteration()
     if not self._items and (self._server_cursor or self._count == 0):
       self._items, self._server_cursor = await self._get_batch_async()
       self._batch_cursor = 0
-    if self._limit and self._count == self._limit:
-      raise StopAsyncIteration()
     if not self._items and not self._server_cursor:
       raise StopAsyncIteration()
     item = self._items.pop(0)

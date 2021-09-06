@@ -145,15 +145,19 @@ class Feed:
       raise StopIteration()
 
   async def __anext__(self):
-    next_item = self._batch.readline() if self._batch else None
-    if not next_item:
-      await self._get_next_batch_async()
-      self._skip(self._batch_skip)
-      self._batch_skip = 0
+    while True:
+      if not self._batch:
+        await self._get_next_batch_async()
+        self._skip(self._batch_skip)
+        self._batch_skip = 0
       next_item = self._batch.readline()
-    self._batch_cursor += 1
-    self._count += 1
-    return Object.from_dict(json.loads(next_item.decode('utf-8')))
+
+      if next_item:
+        self._count += 1
+        self._batch_cursor += 1
+        return Object.from_dict(json.loads(next_item.decode('utf-8')))
+      else:
+        self._batch = None
 
   @property
   def cursor(self):

@@ -49,16 +49,30 @@ def feed_response_missing_package(httpserver):
       '/api/v3/feeds/files/200102030405',
       method='GET',
       headers={'X-Apikey': 'dummy_api_key'}
-  ).respond_with_json({
-      'error': {
-          'code': 'NotFoundError'}}, status=404)
+  ).respond_with_data(
+      bz2.compress(b'{\"type\": \"file\", \"id\": \"dummy_file_id_1\"}'))
 
   httpserver.expect_ordered_request(
       '/api/v3/feeds/files/200102030406',
       method='GET',
       headers={'X-Apikey': 'dummy_api_key'}
   ).respond_with_data(
-      bz2.compress(b'{\"type\": \"file\", \"id\": \"dummy_file_id_4\"}'))
+      bz2.compress(b'{\"type\": \"file\", \"id\": \"dummy_file_id_2\"}'))
+
+  httpserver.expect_ordered_request(
+      '/api/v3/feeds/files/200102030407',
+      method='GET',
+      headers={'X-Apikey': 'dummy_api_key'}
+  ).respond_with_json({
+      'error': {
+          'code': 'NotFoundError'}}, status=404)
+
+  httpserver.expect_ordered_request(
+      '/api/v3/feeds/files/200102030408',
+      method='GET',
+      headers={'X-Apikey': 'dummy_api_key'}
+  ).respond_with_data(
+      bz2.compress(b'{\"type\": \"file\", \"id\": \"dummy_file_id_3\"}'))
 
 
 def test_interface(httpserver):
@@ -127,12 +141,20 @@ def test_tolerance(httpserver, feed_response_missing_package, test_tolerance):
     feed = client.feed(FeedType.FILES, cursor='200102030405')
     feed._missing_batches_tolerancy = test_tolerance
 
+    obj = next(feed)
+    assert obj.id == 'dummy_file_id_1'
+
+    obj = next(feed)
+    assert obj.id == 'dummy_file_id_2'
+
+    # Next batch (200102030407) is missing
     if feed._missing_batches_tolerancy:
+      # The following one (200102030408) is then retrieved
       obj = next(feed)
-      assert obj.type == 'file'
-      assert obj.id == 'dummy_file_id_4'
-      assert feed._count == 1
+      assert obj.id == 'dummy_file_id_3'
+      assert feed._count == 3
     else:
+      # No tolerance, so an exception is raised after a single missing batch
       with pytest.raises(APIError) as e_info:
         obj = next(feed)
       assert e_info.value.args[0] == 'NotFoundError'

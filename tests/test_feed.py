@@ -44,7 +44,7 @@ def feed_response(httpserver):
 
 
 @pytest.fixture
-def feed_response_missing_package(httpserver):
+def feed_response_missing_packages(httpserver):
   httpserver.expect_ordered_request(
       '/api/v3/feeds/files/200102030405',
       method='GET',
@@ -56,8 +56,9 @@ def feed_response_missing_package(httpserver):
       '/api/v3/feeds/files/200102030406',
       method='GET',
       headers={'X-Apikey': 'dummy_api_key'}
-  ).respond_with_data(
-      bz2.compress(b'{\"type\": \"file\", \"id\": \"dummy_file_id_2\"}'))
+  ).respond_with_json({
+      'error': {
+          'code': 'NotFoundError'}}, status=404)
 
   httpserver.expect_ordered_request(
       '/api/v3/feeds/files/200102030407',
@@ -72,7 +73,7 @@ def feed_response_missing_package(httpserver):
       method='GET',
       headers={'X-Apikey': 'dummy_api_key'}
   ).respond_with_data(
-      bz2.compress(b'{\"type\": \"file\", \"id\": \"dummy_file_id_3\"}'))
+      bz2.compress(b'{\"type\": \"file\", \"id\": \"dummy_file_id_2\"}'))
 
 
 def test_interface(httpserver):
@@ -135,8 +136,11 @@ async def test_anext(httpserver, feed_response):
 
 
 @pytest.mark.parametrize("test_tolerance", [0, 1, 2])
-def test_tolerance(httpserver, feed_response_missing_package, test_tolerance):
+def test_tolerance(httpserver, feed_response_missing_packages, test_tolerance):
   """Tests feed's tolerance to missing packages."""
+
+  missing_batches = 2  # Consecutive missing batches in fixture
+
   with new_client(httpserver) as client:
     feed = client.feed(FeedType.FILES, cursor='200102030405')
     feed._missing_batches_tolerancy = test_tolerance
@@ -144,20 +148,16 @@ def test_tolerance(httpserver, feed_response_missing_package, test_tolerance):
     obj = next(feed)
     assert obj.id == 'dummy_file_id_1'
 
-    obj = next(feed)
-    assert obj.id == 'dummy_file_id_2'
-
-    # Next batch (200102030407) is missing
-    if feed._missing_batches_tolerancy:
-      # The following one (200102030408) is then retrieved
-      obj = next(feed)
-      assert obj.id == 'dummy_file_id_3'
-      assert feed._count == 3
-    else:
-      # No tolerance, so an exception is raised after a single missing batch
+    # The number of exceptions raised must equal the number of missing batches
+    # minus the tolerance
+    for _ in range(missing_batches - test_tolerance):
       with pytest.raises(APIError) as e_info:
         obj = next(feed)
       assert e_info.value.args[0] == 'NotFoundError'
+
+    obj = next(feed)
+    assert obj.id == 'dummy_file_id_2'
+    assert feed._count == 2
 
 
 @pytest.mark.parametrize("test_iters, expected_cursor",

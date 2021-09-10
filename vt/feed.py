@@ -19,12 +19,12 @@ from datetime import timedelta
 import enum
 import io
 import json
-import time
 import asyncio
 import bz2
 
 from .error import APIError
 from .object import Object
+from .utils import make_sync
 
 
 __all__ = [
@@ -68,10 +68,10 @@ class Feed:
     self._batch = None
     self._count = 0
 
-    # This class tolerates a given number of missing batches in the feed,
-    # if self._missing_batches_tolerancy is set to 0, there's no tolerancy
-    # for missing batches and even a single missing batch will cause an error.
-    # However, missing batches can occur from time to time.
+    # This class tolerates a given number of consecutive missing batches in
+    # the feed. If self._missing_batches_tolerancy is set to 0, there's no
+    # tolerancy for missing batches and even a single missing batch will
+    # cause an error. However, missing batches can occur from time to time.
     self._missing_batches_tolerancy = 1
 
     if cursor:
@@ -103,15 +103,12 @@ class Feed:
         raise error
     return io.BytesIO(bz2.decompress(await response.content.read_async()))
 
-  def _get_batch(self, *args, **kwargs):
-    return asyncio.get_event_loop().run_until_complete(
-        self._get_batch_async(*args, **kwargs))
-
   async def _get_next_batch_async(self):
     """Retrieves the next batch from the feed.
 
     This function tolerates a certain number of missing batches. If some batch
-    is missing the next one will be retrieved. If more than
+    is missing the next one will be retrieved. If the number of missing
+    batches is greater than the tolerancy set, the function raises an error.
     """
     missing_batches = 0
     while True:
@@ -130,46 +127,35 @@ class Feed:
         if missing_batches > self._missing_batches_tolerancy:
           raise error
 
-  def _get_next_batch(self):
-    return asyncio.get_event_loop().run_until_complete(
-        self._get_next_batch_async())
-
   def _skip(self, n):
     for _ in range(n):
       self._batch.readline()
       self._batch_cursor += 1
 
   def __iter__(self):
-    while True:
-      if self._batch:
-        next_item = self._batch.readline()
-      else:
-        self._get_next_batch()
-        self._skip(self._batch_skip)
-        self._batch_skip = 0
-        next_item = self._batch.readline()
-      self._batch_cursor += 1
-      self._count += 1
+    return self
 
-      if next_item:
-        yield Object.from_dict(json.loads(next_item.decode('utf-8')))
-      else:
-        self._batch = None
+  def __aiter__(self):
+    return self
 
-  async def __aiter__(self):
+  def __next__(self):
+    try:
+      return make_sync(self.__anext__())
+    except StopAsyncIteration:
+      raise StopIteration()
+
+  async def __anext__(self):
     while True:
-      if self._batch:
-        next_item = self._batch.readline()
-      else:
+      if not self._batch:
         await self._get_next_batch_async()
         self._skip(self._batch_skip)
         self._batch_skip = 0
-        next_item = self._batch.readline()
-      self._batch_cursor += 1
-      self._count += 1
+      next_item = self._batch.readline()
 
       if next_item:
-        yield Object.from_dict(json.loads(next_item.decode('utf-8')))
+        self._count += 1
+        self._batch_cursor += 1
+        return Object.from_dict(json.loads(next_item.decode('utf-8')))
       else:
         self._batch = None
 

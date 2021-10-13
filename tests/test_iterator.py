@@ -44,7 +44,7 @@ def iterator_response(httpserver):
           'type': 'dummy_type',
           'attributes': {'order': 0}
           }],
-      'meta': {'cursor': 3}
+      'meta': {'cursor': '3', 'total_hits': 200}
   })
   httpserver.expect_ordered_request(
       '/api/v3/dummy_collection/foo',
@@ -124,8 +124,15 @@ async def test_anext(httpserver, iterator_response):
   """Tests iterator's async next."""
   async with new_client(httpserver) as client:
     it = client.iterator('/dummy_collection/foo', limit=10, batch_size=3)
+
+    assert (await it.meta_async) == {'total_hits': 200}
+    # Accessing meta loads the first batch of items, nevertheless the cursor
+    # should be None until we start iterating.
+    assert it.cursor is None
+
     assert (await it.__anext__()).id == 'dummy_id_1'
     assert it._batch_cursor == 1
+    assert it.cursor
 
     # iteration must start right where the next stayed
     last, i = None, 0

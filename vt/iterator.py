@@ -73,6 +73,7 @@ class Iterator:
     self._count = 0
     self._server_cursor = None
     self._batch_cursor = 0
+    self._meta = None
 
     if 'cursor' in self._params:
       raise ValueError('Do not pass "cursor" as a path param')
@@ -102,7 +103,7 @@ class Iterator:
       raise ValueError(f'{self._path} is not a collection')
     meta = json_resp.get('meta', {})
     items = json_resp['data'][batch_cursor:]
-    return items, meta.get('cursor')
+    return items, meta
 
   async def _get_batch_async(self, batch_cursor=0):
     json_resp = await self._client.get_json_async(
@@ -124,8 +125,9 @@ class Iterator:
   async def __anext__(self):
     if self._limit and self._count == self._limit:
       raise StopAsyncIteration()
-    if not self._items and (self._server_cursor or self._count == 0):
-      self._items, self._server_cursor = await self._get_batch_async()
+    if not self._items and (self.cursor or self._count == 0):
+      self._items, self._meta = await self._get_batch_async()
+      self._server_cursor = self._meta.pop('cursor', None)
       self._batch_cursor = 0
     if not self._items and not self._server_cursor:
       raise StopAsyncIteration()
@@ -141,6 +143,23 @@ class Iterator:
     This cursor can be used for creating a new iterator that continues where
     the current one left.
     """
-    if not self._server_cursor:
+    if not self._server_cursor or not self._count:
       return None
     return self._server_cursor + '-' + str(self._batch_cursor)
+
+  @property
+  async def meta_async(self):
+    """Meta information.
+
+    The cursor is not included, as it's exposed as a property.
+    """
+    if self._meta is None:
+      # Load the first batch of items in order to retrieve the meta info.
+      self._items, self._meta = await self._get_batch_async()
+      self._server_cursor = self._meta.pop('cursor', None)
+      self._batch_cursor = 0
+    return self._meta
+
+  @property
+  def meta(self):
+    return make_sync(self.meta_async)

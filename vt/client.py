@@ -178,10 +178,13 @@ class Client:
     testing purposes.
   :param trust_env: Get proxies information from HTTP_PROXY/HTTPS_PROXY
     environment variables if the parameter is True (False by default).
+  :param timeout: A int that determines the number of seconds to wait for
+    a request to timeout (300 by default).
   :type apikey: str
   :type agent: str
   :type host: str
   :type trust_env: bool
+  :type timeout: int
   """
 
   def __init__(self, apikey, agent="unknown", host=None, trust_env=False,

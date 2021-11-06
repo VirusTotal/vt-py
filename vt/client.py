@@ -188,7 +188,7 @@ class Client:
   """
 
   def __init__(self, apikey, agent="unknown", host=None, trust_env=False,
-               timeout=300):
+               timeout=300, proxy=None):
     """Initialize the client with the provided API key."""
 
     if not isinstance(apikey, str):
@@ -203,6 +203,7 @@ class Client:
     self._session = None
     self._trust_env = trust_env
     self._timeout = timeout
+    self._proxy = proxy
 
   def _full_url(self, path, *args):
     try:

@@ -180,11 +180,14 @@ class Client:
     environment variables if the parameter is True (False by default).
   :param timeout: A int that determines the number of seconds to wait for
     a request to timeout (300 by default).
+  :param proxy: A string indicating the proxy to use for requests
+    made by the client (None by default).
   :type apikey: str
   :type agent: str
   :type host: str
   :type trust_env: bool
   :type timeout: int
+  :type proxy: str
   """
 
   def __init__(self, apikey, agent="unknown", host=None, trust_env=False,

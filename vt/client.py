@@ -178,14 +178,20 @@ class Client:
     testing purposes.
   :param trust_env: Get proxies information from HTTP_PROXY/HTTPS_PROXY
     environment variables if the parameter is True (False by default).
+  :param timeout: A int that determines the number of seconds to wait for
+    a request to timeout (300 by default).
+  :param proxy: A string indicating the proxy to use for requests
+    made by the client (None by default).
   :type apikey: str
   :type agent: str
   :type host: str
   :type trust_env: bool
+  :type timeout: int
+  :type proxy: str
   """
 
   def __init__(self, apikey, agent="unknown", host=None, trust_env=False,
-               timeout=300):
+               timeout=300, proxy=None):
     """Initialize the client with the provided API key."""
 
     if not isinstance(apikey, str):
@@ -200,6 +206,7 @@ class Client:
     self._session = None
     self._trust_env = trust_env
     self._timeout = timeout
+    self._proxy = proxy
 
   def _full_url(self, path, *args):
     try:
@@ -281,7 +288,8 @@ class Client:
   async def delete_async(self, path, *path_args):
     """Like :func:`delete` but returns a coroutine."""
     return ClientResponse(
-        await self._get_session().delete(self._full_url(path, *path_args)))
+        await self._get_session().delete(
+          self._full_url(path, *path_args), proxy=self._proxy))
 
   def download_file(self, hash, file):
     """Downloads a file given its hash (SHA-256, SHA-1 or MD5).
@@ -347,7 +355,7 @@ class Client:
     return ClientResponse(
         await self._get_session().get(
             self._full_url(path, *path_args),
-            params=params))
+            params=params, proxy=self._proxy))
 
   def get_data(self, path, *path_args, params=None):
     """Sends a GET request to a given API endpoint and returns response's data.
@@ -467,7 +475,7 @@ class Client:
     return ClientResponse(
         await self._get_session().patch(
             self._full_url(path, *path_args),
-            data=data))
+            data=data, proxy=self._proxy))
 
   def patch_object(self, path, *path_args, obj):
     """Sends a PATCH request for modifying an object.
@@ -514,7 +522,7 @@ class Client:
     return ClientResponse(
         await self._get_session().post(
             self._full_url(path, *path_args),
-            data=data))
+            data=data, proxy=self._proxy))
 
   def post_object(self, path, *path_args, obj):
     """Sends a POST request for creating an object.
@@ -610,7 +618,8 @@ class Client:
 
     upload_url = await self.get_data_async('/files/upload_url')
     response = ClientResponse(
-        await self._get_session().post(upload_url, data=form_data))
+        await self._get_session().post(
+          upload_url, data=form_data, proxy=self._proxy))
 
     analysis = await self._response_to_object(response)
 
@@ -638,7 +647,8 @@ class Client:
     form_data.add_field('url', url)
 
     response = ClientResponse(
-        await self._get_session().post(self._full_url('/urls'), data=form_data))
+        await self._get_session().post(
+          self._full_url('/urls'), data=form_data, proxy=self._proxy))
 
     analysis = await self._response_to_object(response)
 

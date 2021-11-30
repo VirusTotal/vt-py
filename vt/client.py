@@ -664,3 +664,108 @@ class Client:
         break
       await asyncio.sleep(20)
     return analysis
+
+  def create_collection_from_raw_text(self, name, raw_text, **kwargs):
+    """Creates a collection in VirusTotal from raw text.
+
+    The collection's IoCs will be extracted the given raw text.
+
+    Args:
+      name: Name of the collection.
+      raw: Raw text.
+      **kwargs: Other attributes that can be added to the collection,
+        like for example, the description.
+
+    Returns:
+      The new collection.
+
+    Raises:
+      ValueError: If the name is empty.
+      vt.error.APIError: If there are no IoCs in the raw text.
+    """
+    return make_sync(self.create_collection_from_raw_text_async(
+        name, raw_text, **kwargs))
+
+  async def create_collection_from_raw_text_async(
+      self, name, raw_text, **kwargs):
+    """Like :func:`create_collection_from_raw_text` but returns a coroutine."""
+    if not name:
+      raise ValueError('No name provided')
+    attributes = {'name': name}
+    attributes.update(kwargs)
+    payload = {
+        'attributes': attributes,
+        'type': 'collection',
+        'meta': {'raw': raw_text},
+        'id': '',
+    }
+    collection_obj = Object.from_dict(payload)
+    response = await self.post_object_async('/collections', obj=collection_obj)
+    return response
+
+  def create_collection_from_iocs(
+      self, name, files=None, urls=None, domains=None, ip_addresses=None,
+      **kwargs):
+    """Creates a collection in VirusTotal from list of IoCs.
+
+    Args:
+      name: Name of the collection.
+      files: List of file hashes.
+      urls: List of URLs.
+      domains: List of domains.
+      ip_addresses: List of IP addresses.
+      **kwargs: Other attributes that can be added to the collection,
+        like for example, the description.
+
+    Returns:
+      The new collection.
+
+    Raises:
+      ValueError: If the name is empty or there are no IoCs to add to the
+        collection.
+      vt.error.APIError: If any of the IoCs provided are not valid.
+    """
+    return make_sync(self.create_collection_from_iocs_async(
+        name, files, urls, domains, ip_addresses, **kwargs))
+
+  async def create_collection_from_iocs_async(
+      self, name, files=None, urls=None, domains=None, ip_addresses=None,
+      **kwargs):
+    """Like :func:`create_collection_from_iocs` but returns a coroutine."""
+    if not name:
+      raise ValueError('No name provided')
+    attributes = {'name': name}
+    attributes.update(kwargs)
+    relationships = {}
+    if files:
+      descriptors = []
+      for file_hash in files:
+        descriptors.append({'type': 'file', 'id': file_hash})
+      relationships['files'] = {'data': descriptors}
+    if urls:
+      descriptors = []
+      for url in urls:
+        descriptors.append({'type': 'url', 'url': url})
+      relationships['urls'] = {'data': descriptors}
+    if domains:
+      descriptors = []
+      for domain in domains:
+        descriptors.append({'type': 'domain', 'id': domain})
+      relationships['domains'] = {'data': descriptors}
+    if ip_addresses:
+      descriptors = []
+      for ip_address in ip_addresses:
+        descriptors.append({'type': 'ip_address', 'id': ip_address})
+      relationships['ip_addresses'] = {'data': descriptors}
+    if not relationships:
+      raise ValueError('No IoCs provided')
+
+    payload = {
+        'attributes': attributes,
+        'type': 'collection',
+        'relationships': relationships,
+        'id': '',
+    }
+    collection_obj = Object.from_dict(payload)
+    response = await self.post_object_async('/collections', obj=collection_obj)
+    return response

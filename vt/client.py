@@ -706,7 +706,7 @@ class Client:
   def create_collection_from_iocs(
       self, name, files=None, urls=None, domains=None, ip_addresses=None,
       **kwargs):
-    """Creates a collection in VirusTotal from list of IoCs.
+    """Creates a collection in VirusTotal from lists of IoCs.
 
     Args:
       name: Name of the collection.

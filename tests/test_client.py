@@ -364,3 +364,82 @@ def test_scan_url(httpserver):
     analysis = client.scan_url('https://www.dummy.url')
 
   assert analysis.type == 'analysis'
+
+
+def test_create_collection_from_raw_text(httpserver):
+
+  httpserver.expect_request(
+      '/api/v3/collections',
+      method='POST',
+      headers={'X-Apikey': 'dummy_api_key'},
+      json={
+          'data': {
+              'type': 'collection',
+              'attributes': {
+                  'name': 'test collection',
+                  'description': 'test',
+              },
+              'meta': {
+                  'raw': 'hello www.example.com',
+              }
+          }
+      }
+  ).respond_with_json({
+      'data': {
+          'id': 'dummy_id',
+          'type': 'collection',
+          'attributes': {
+              'name': 'test collection',
+              'description': 'test',
+              'domains_count': 1,
+          }
+      }
+  })
+
+  with new_client(httpserver) as client:
+    col_obj = client.create_collection_from_raw_text(
+        'test collection', 'hello www.example.com', description='test')
+
+  assert col_obj.type == 'collection'
+
+
+def test_create_collection_from_iocs(httpserver):
+
+  httpserver.expect_request(
+      '/api/v3/collections',
+      method='POST',
+      headers={'X-Apikey': 'dummy_api_key'},
+      json={
+          'data': {
+              'type': 'collection',
+              'attributes': {
+                  'name': 'test collection',
+                  'description': 'test',
+              },
+              'relationships': {
+                  'files': {'data': [{'type': 'file', 'id': 'cafe'}]},
+                  'urls': {'data': [{'type': 'url', 'url': 'http://1.com'}]},
+                  'domains': {'data': [{'type': 'domain', 'id': 'hooli.com'}]},
+                  'ip_addresses': {
+                      'data': [{'type': 'ip_address', 'id': '8.8.8.8'}]}
+              }
+          }
+      }
+  ).respond_with_json({
+      'data': {
+          'id': 'dummy_id',
+          'type': 'collection',
+          'attributes': {
+              'name': 'test collection',
+              'description': 'test',
+              'domains_count': 1,
+          }
+      }
+  })
+
+  with new_client(httpserver) as client:
+    col_obj = client.create_collection_from_iocs(
+        'test collection', files=['cafe'], urls=['http://1.com'],
+        domains=['hooli.com'], ip_addresses=['8.8.8.8'], description='test')
+
+  assert col_obj.type == 'collection'

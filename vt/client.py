@@ -742,7 +742,7 @@ class Client:
           'data': [{'type': 'file', 'id': h} for h in files]}
     if urls:
       relationships['urls'] = {
-          'data': [{'type': 'url', 'id': u} for u in urls]}
+          'data': [{'type': 'url', 'url': u} for u in urls]}
     if domains:
       relationships['domains'] = {
           'data': [{'type': 'domain', 'id': d} for d in domains]}

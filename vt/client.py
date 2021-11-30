@@ -668,7 +668,7 @@ class Client:
   def create_collection_from_raw_text(self, name, raw_text, **kwargs):
     """Creates a collection in VirusTotal from raw text.
 
-    The collection's IoCs will be extracted the given raw text.
+    The collection's IoCs will be extracted from the given raw text.
 
     Args:
       name: Name of the collection.

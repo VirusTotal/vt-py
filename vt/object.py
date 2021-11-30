@@ -80,9 +80,6 @@ class Object:
         },
         "attributes": {
           ...
-        },
-        "meta": {
-          ...
         }
       }
 
@@ -107,9 +104,6 @@ class Object:
 
     if 'relationships' in obj_dict:
       obj._relationships = obj_dict['relationships']
-
-    if 'meta' in obj_dict:
-      obj._meta = obj_dict['meta']
 
     return obj
 
@@ -179,12 +173,6 @@ class Object:
       return self._relationships
     return {}
 
-  @property
-  def meta(self):
-    if hasattr(self, '_meta'):
-      return self._meta
-    return {}
-
   def get(self, attr_name, default=None):
     """Returns an attribute by name.
 
@@ -218,8 +206,5 @@ class Object:
 
     if self.context_attributes:
       result['context_attributes'] = self.context_attributes
-
-    if self.meta:
-      result['meta'] = self.meta
 
     return result

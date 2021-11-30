@@ -738,25 +738,17 @@ class Client:
     attributes.update(kwargs)
     relationships = {}
     if files:
-      descriptors = []
-      for file_hash in files:
-        descriptors.append({'type': 'file', 'id': file_hash})
-      relationships['files'] = {'data': descriptors}
+      relationships['files'] = {
+          'data': [{'type': 'file', 'id': h} for h in files]}
     if urls:
-      descriptors = []
-      for url in urls:
-        descriptors.append({'type': 'url', 'url': url})
-      relationships['urls'] = {'data': descriptors}
+      relationships['urls'] = {
+          'data': [{'type': 'url', 'id': u} for u in urls]}
     if domains:
-      descriptors = []
-      for domain in domains:
-        descriptors.append({'type': 'domain', 'id': domain})
-      relationships['domains'] = {'data': descriptors}
+      relationships['domains'] = {
+          'data': [{'type': 'domain', 'id': d} for d in domains]}
     if ip_addresses:
-      descriptors = []
-      for ip_address in ip_addresses:
-        descriptors.append({'type': 'ip_address', 'id': ip_address})
-      relationships['ip_addresses'] = {'data': descriptors}
+      relationships['ip_addresses'] = {
+          'data': [{'type': 'ip_address', 'id': i} for i in ip_addresses]}
     if not relationships:
       raise ValueError('No IoCs provided')
 

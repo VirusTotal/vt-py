@@ -15,23 +15,24 @@
 
 import argparse
 import json
+import io
 import vt
 
 
-def create_collection(client, name, raw_text):
+def create_collection(client, name, file):
   """Creates a reference in VirusTotal.
 
   Args:
     client: VirusTotal client.
     name: Collection's name.
-    raw_text: Text containing the IOCs to add to the collection.
+    file: File containing the IOCs to add to the collection.
 
   Returns:
     The new collection object.
   """
 
   collection_obj = vt.Object('collection', obj_attributes={'name': name})
-  collection_obj.set_data('raw_items', raw_text)
+  collection_obj.set_data('raw_items', file.read())
   return client.post_object('/collections', obj=collection_obj)
 
 
@@ -47,8 +48,10 @@ def main():
 
   # Typical usage would be to create a collection from a text file with IOCs:
   # with open('iocs.txt') as f:
-  #   collection_obj = create_collection(client, args.name, f.read())
-  iocs = 'www.example.com\nhttps://www.hooli.com'
+  #   collection_obj = create_collection(client, args.name, f)
+
+  # Or using a string with the IOCs.
+  iocs = io.StringIO('www.example.com\nhttps://www.hooli.com')
   collection_obj = create_collection(client, args.name, iocs)
 
   client.close()

@@ -124,6 +124,7 @@ class Object:
         setattr(self, attr, value)
 
     self._modified_attrs = []
+    self._modified_data = {}
 
   def __on_attr_change(self, attr):
     if hasattr(self, '_modified_attrs'):
@@ -160,6 +161,10 @@ class Object:
   @property
   def type(self):
     return self._type
+
+  def set_data(self, key, value):
+    """Sets a field of the object's data."""
+    self._modified_data[key] = value
 
   @property
   def context_attributes(self):
@@ -206,5 +211,8 @@ class Object:
 
     if self.context_attributes:
       result['context_attributes'] = self.context_attributes
+
+    for key, val in self._modified_data.items():
+      result[key] = val
 
     return result

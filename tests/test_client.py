@@ -73,7 +73,7 @@ def test_object_date_attrs():
   assert obj.foo_date == datetime.datetime(1970, 1, 1, 0, 0, 0)
 
 
-def test_object_modified_attrs():
+def test_object_to_dict():
 
   obj = Object.from_dict({
       'type': 'dummy_type',
@@ -89,9 +89,13 @@ def test_object_modified_attrs():
           }
       }})
 
+  obj.set_data('data_key', {'some': 'value'})
+
   # No changes, attributes shouldn't appear in the dictionary.
   obj_dict = obj.to_dict(modified_attributes_only=True)
   assert 'attributes' not in obj_dict
+  # The new data field should appear in the dictionary.
+  assert obj_dict['data_key'] == {'some': 'value'}
 
   # attr1 set to its previous value, no changes yet.
   obj.attr1 = 'foo'

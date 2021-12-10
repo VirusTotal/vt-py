@@ -93,14 +93,14 @@ def test_object_to_dict():
 
   # No changes, attributes shouldn't appear in the dictionary.
   obj_dict = obj.to_dict(modified_attributes_only=True)
-  assert 'attributes' not in obj_dict
+  assert not obj_dict['attributes']
   # The new data field should appear in the dictionary.
   assert obj_dict['data_key'] == {'some': 'value'}
 
   # attr1 set to its previous value, no changes yet.
   obj.attr1 = 'foo'
   obj_dict = obj.to_dict(modified_attributes_only=True)
-  assert 'attributes' not in obj_dict
+  assert not obj_dict['attributes']
 
   # attr1 changed to 'bar', this should be the only attribute in the dictionary.
   obj.attr1 = 'bar'

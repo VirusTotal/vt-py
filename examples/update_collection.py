@@ -33,7 +33,6 @@ def update_collection(client, collection_id, file):
 
   collection_obj = vt.Object('collection', obj_id=collection_id)
   collection_obj.set_data('raw_items', file.read())
-  collection_obj.set_data('attributes', {})
   return client.patch_object('/collections/%s' % collection_id, obj=collection_obj)
 
 

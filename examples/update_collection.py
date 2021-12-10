@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""How to create a collection in VirusTotal."""
+"""How to update a collection in VirusTotal."""
 
 import argparse
 import json
@@ -19,21 +19,22 @@ import io
 import vt
 
 
-def create_collection(client, name, file):
-  """Creates a reference in VirusTotal.
+def update_collection(client, collection_id, file):
+  """Update a VirusTotal collection.
 
   Args:
     client: VirusTotal client.
-    name: Collection's name.
+    collection_id: Collection's id.
     file: File containing the IOCs to add to the collection.
 
   Returns:
     The new collection object.
   """
 
-  collection_obj = vt.Object('collection', obj_attributes={'name': name})
+  collection_obj = vt.Object('collection', obj_id=collection_id)
   collection_obj.set_data('raw_items', file.read())
-  return client.post_object('/collections', obj=collection_obj)
+  collection_obj.set_data('attributes', {})
+  return client.patch_object('/collections/%s' % collection_id, obj=collection_obj)
 
 
 def generate_ui_link(collection_id):
@@ -42,21 +43,21 @@ def generate_ui_link(collection_id):
 
 def main():
   parser = argparse.ArgumentParser(
-      description='Create a VirusTotal collection.')
+    description='Update a VirusTotal collection.')
 
   parser.add_argument('--apikey', required=True, help='your VirusTotal API key')
-  parser.add_argument('--name', required=True, help='collection\'s name')
+  parser.add_argument('--id', required=True, help='collection\'s id')
 
   args = parser.parse_args()
   client = vt.Client(args.apikey)
 
-  # Typical usage would be to create a collection from a text file with IOCs:
+  # Typical usage would be to update a collection from a text file with IOCs:
   # with open('iocs.txt') as f:
   #   collection_obj = create_collection(client, args.name, f)
 
   # Or using a string with the IOCs.
   iocs = io.StringIO('www.example.com\nhttps://www.hooli.com')
-  collection_obj = create_collection(client, args.name, iocs)
+  collection_obj = update_collection(client, args.id, iocs)
 
   client.close()
   print(json.dumps(collection_obj.to_dict(), indent=2))

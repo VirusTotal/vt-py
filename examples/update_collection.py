@@ -52,7 +52,7 @@ def main():
 
   # Typical usage would be to update a collection from a text file with IOCs:
   # with open('iocs.txt') as f:
-  #   collection_obj = create_collection(client, args.name, f)
+  #   collection_obj = update_collection(client, args.id, f)
 
   # Or using a string with the IOCs.
   iocs = io.StringIO('www.example.com\nhttps://www.hooli.com')

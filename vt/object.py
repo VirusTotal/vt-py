@@ -192,7 +192,7 @@ class Object:
     return self.__dict__.get(attr_name, default)
 
   def to_dict(self, modified_attributes_only=False):
-    result = {'type': self._type}
+    result = {'type': self._type, 'attributes': {}}
 
     if self._id:
       result['id'] = self._id

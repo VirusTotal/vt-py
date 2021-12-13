@@ -20,6 +20,7 @@ privileges for creating References.
 import argparse
 import json
 import vt
+import hashlib
 
 
 def create_reference(url, creation_date, title, author, client, iocs):
@@ -54,7 +55,18 @@ def create_reference(url, creation_date, title, author, client, iocs):
   add_iocs_to_reference_payload(iocs, payload)
 
   reference_obj = vt.Object.from_dict(payload)
-  return client.post_object('/references', obj=reference_obj)
+
+  try:
+    return client.post_object('/references', obj=reference_obj)
+  except vt.error.APIError as err:
+    if(err.code == 'AlreadyExistsError'):
+      print("Reference already exists, posting only relationship IOCs - Reference")
+      reference_sha256 = hashlib.sha256(url.encode('utf-8')).hexdigest()
+      for relationship_type, iocs in reference_obj.relationships.items():
+        if(iocs):
+          r = client.post_json(f'/references/{reference_sha256}/{relationship_type}', data=iocs)
+          if(r.status == 200):
+            print(f"Successfully created relationships {relationship_type} for reference {url}")
 
 
 def add_iocs_to_reference_payload(iocs, reference_payload):
@@ -147,7 +159,8 @@ def main():
   )
 
   client.close()
-  print(json.dumps(reference_obj.to_dict(), indent=2))
+  if(reference_obj):
+    print(json.dumps(reference_obj.to_dict(), indent=2))
 
 if __name__ == '__main__':
   main()

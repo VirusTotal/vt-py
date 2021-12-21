@@ -20,8 +20,7 @@ privileges for creating References.
 import argparse
 import json
 import vt
-import hashlib
-
+import base64
 
 def create_reference(url, creation_date, title, author, client, iocs):
   """Creates a reference in VirusTotal.
@@ -55,18 +54,21 @@ def create_reference(url, creation_date, title, author, client, iocs):
   add_iocs_to_reference_payload(iocs, payload)
 
   reference_obj = vt.Object.from_dict(payload)
+  ref_url = base64.b64encode(url.encode()).decode().strip("=")
+
+  response_get_reference = client.get(f'/references/{ref_url}')
+
+  exists = response_get_reference.status == 200
 
   try:
-    return client.post_object('/references', obj=reference_obj)
+    if exists:
+      print(f"Patching reference {url}...")
+      return client.patch_object('/references', obj=reference_obj)
+    else:
+      print(f"Posting reference {url}...")
+      return client.post_object('/references', obj=reference_obj)
   except vt.error.APIError as err:
-    if(err.code == 'AlreadyExistsError'):
-      print("Reference already exists, posting only relationship IOCs - Reference")
-      reference_sha256 = hashlib.sha256(url.encode('utf-8')).hexdigest()
-      for relationship_type, iocs in reference_obj.relationships.items():
-        if(iocs):
-          r = client.post_json(f'/references/{reference_sha256}/{relationship_type}', data=iocs)
-          if(r.status == 200):
-            print(f"Successfully created relationships {relationship_type} for reference {url}")
+      print(err)
 
 
 def add_iocs_to_reference_payload(iocs, reference_payload):

@@ -547,25 +547,6 @@ class Client:
     response = await self.post_async(path, *path_args, data=data)
     return await self._response_to_object(response)
 
-  def post_json(self, path, *path_args, data=None):
-    """Sends a POST request to a given API endpoint with data in JSON format.
-
-    :param path: Path to API endpoint, can contain format placeholders {}.
-    :param path_args: A variable number of arguments that are put into any
-      placeholders used in path.
-    :param data: Dict sent in the request body as JSON.
-    :type path: str
-    :returns: An instance of :class:`ClientResponse`.
-    """
-    return make_sync(self.post_json_async(path, *path_args, data=data))
-
-  async def post_json_async(self, path, *path_args, data=None):
-    """Like :func:`post` but returns a coroutine."""
-    return ClientResponse(
-        await self._get_session().post(
-            self._full_url(path, *path_args),
-            json=data, proxy=self._proxy))
-
   def iterator(self, path, *path_args, params=None, cursor=None,
                limit=None, batch_size=0):
     """Returns an iterator for the collection specified by the given path.

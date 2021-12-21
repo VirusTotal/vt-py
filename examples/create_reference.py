@@ -165,7 +165,7 @@ def main():
   )
 
   client.close()
-  if(reference_obj):
+  if reference_obj:
     print(json.dumps(reference_obj.to_dict(), indent=2))
 
 if __name__ == '__main__':

@@ -304,9 +304,13 @@ class Client:
     """
     return make_sync(self.download_file_async(hash, file))
 
-  async def download_file_async(self, hash, file):
-    """Like :func:`download_file` but returns a coroutine."""
-    response = await self.get_async(f'/files/{hash}/download')
+  async def __download_async(self, endpoint, file):
+    """Downloads a file and writes it to file.
+
+    :param endpoint: endpoint to download the file from.
+    :param file: A file object where the downloaded file will be written to.
+    """
+    response = await self.get_async(endpoint)
     error = await self.get_error_async(response)
     if error:
       raise error
@@ -315,6 +319,60 @@ class Client:
       if not chunk:
         break
       file.write(chunk)
+
+  async def download_file_async(self, hash, file):
+    """Like :func:`download_file` but returns a coroutine."""
+    await self.__download_async(f'/files/{hash}/download', file)
+
+  def download_zip_files(self, hashes, zipfile, password=None, sleep_time=20):
+    """Creates a bundle zip bundle containing one or multiple files.
+
+    The file identified by the hash will be written to the provided file
+    object. The file object must be opened in write binary mode ('wb').
+
+    :param hashes: list of file hashes (SHA-256, SHA-1 or MD5).
+    :param zipfile: A file object where the downloaded zip file
+      will be written to.
+    :param password: optional, a password to protect the zip file.
+    :param sleep_time: optional, seconds to sleep between each request.
+    """
+    return make_sync(
+        self.download_zip_files_async(hashes, zipfile, password, sleep_time))
+
+  async def download_zip_files_async(
+      self, hashes, zipfile, password=None, sleep_time=20):
+
+    data = {'hashes': hashes}
+    if password:
+      data['password'] = password
+
+    response = await self.post_async(
+        '/intelligence/zip_files', data=json.dumps({'data': data}))
+    error = await self.get_error_async(response)
+    if error:
+      raise error
+
+    res_data = (await response.json_async())['data']
+
+    # wait until the zip file is ready
+    while res_data['attributes']['status'] in ('creating', 'starting'):
+      await asyncio.sleep(sleep_time)
+      response = await self.get_async(
+          f'/intelligence/zip_files/{res_data["id"]}')
+      error = await self.get_error_async(response)
+      if error:
+        raise error
+      res_data = (await response.json_async())['data']
+
+    # check for errors creating the zip file
+    if res_data['attributes']['status'] != 'finished':
+      raise APIError(
+          'ServerError',
+          f'Error when creating zip file: {res_data["attributes"]["status"]}')
+
+    # download the zip file
+    await self.__download_async(
+        f'/intelligence/zip_files/{res_data["id"]}/download', zipfile)
 
   def feed(self, feed_type, cursor=None):
     """Returns an iterator for a VirusTotal feed.

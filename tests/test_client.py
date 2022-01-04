@@ -307,6 +307,97 @@ def test_download_file_with_error(httpserver):
   assert e_info.value.args[1] == "Resource not found."
 
 
+def test_download_zip_file(httpserver):
+  httpserver.expect_ordered_request(
+      '/api/v3/intelligence/zip_files',
+      method='POST',
+      headers={'X-Apikey': 'dummy_api_key'},
+      data=json.dumps({'data': {'hashes': ['h1', 'h2'], 'password': 'pass'}})
+  ).respond_with_json({
+        'data': {
+          'id': '1234',
+          'type': 'zip_file',
+          'attributes': {'status': 'starting'}
+        }})
+
+  httpserver.expect_ordered_request(
+      '/api/v3/intelligence/zip_files/1234',
+      method='GET',
+      headers={'x-apikey': 'dummy_api_key'}
+  ).respond_with_json(
+      {'data': {
+        'id': '1234',
+        'type': 'zip_file',
+        'attributes': {'status': 'creating'}
+      }})
+
+  httpserver.expect_ordered_request(
+      '/api/v3/intelligence/zip_files/1234',
+      method='GET',
+      headers={'x-apikey': 'dummy_api_key'}
+  ).respond_with_json({
+      'data': {
+        'id': '1234',
+        'type': 'zip_file',
+        'attributes': {'status': 'finished'}
+      }})
+
+  httpserver.expect_ordered_request(
+      '/api/v3/intelligence/zip_files/1234/download',
+      method='GET',
+      headers={'x-apikey': 'dummy_api_key'}
+  ).respond_with_data('filecontent')
+
+  with new_client(httpserver) as client:
+    with io.BytesIO() as f:
+      client.download_zip_files(['h1', 'h2'], f, 'pass', 1)
+      f.seek(0)
+      assert f.read() == b'filecontent'
+
+
+def test_download_zip_file_error_creating_file(httpserver):
+  httpserver.expect_ordered_request(
+      '/api/v3/intelligence/zip_files',
+      method='POST',
+      headers={'X-Apikey': 'dummy_api_key'},
+      data=json.dumps({'data': {'hashes': ['h1', 'h2'], 'password': 'pass'}})
+  ).respond_with_json({
+        'data': {
+          'id': '1234',
+          'type': 'zip_file',
+          'attributes': {'status': 'starting'}
+        }})
+
+  httpserver.expect_ordered_request(
+      '/api/v3/intelligence/zip_files/1234',
+      method='GET',
+      headers={'x-apikey': 'dummy_api_key'}
+  ).respond_with_json(
+      {'data': {
+        'id': '1234',
+        'type': 'zip_file',
+        'attributes': {'status': 'creating'}
+      }})
+
+  httpserver.expect_ordered_request(
+      '/api/v3/intelligence/zip_files/1234',
+      method='GET',
+      headers={'x-apikey': 'dummy_api_key'}
+  ).respond_with_json({
+      'data': {
+        'id': '1234',
+        'type': 'zip_file',
+        'attributes': {'status': 'timeout'}
+      }})
+
+  with new_client(httpserver) as client:
+    with io.BytesIO() as f:
+      with pytest.raises(APIError) as e_info:
+        client.download_zip_files(['h1', 'h2'], f, 'pass', 1)
+      assert e_info.value.args[0] == 'ServerError'
+      assert e_info.value.args[1] == 'Error when creating zip file: timeout'
+
+
 def test_scan_file(httpserver):
 
   upload_url = (

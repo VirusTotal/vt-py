@@ -355,7 +355,7 @@ class Client:
     res_data = (await response.json_async())['data']
 
     # wait until the zip file is ready
-    while res_data['attributes']['status'] in ['creating', 'starting']:
+    while res_data['attributes']['status'] in ('creating', 'starting'):
       await asyncio.sleep(sleep_time)
       response = await self.get_async(
           f'/intelligence/zip_files/{res_data["id"]}')

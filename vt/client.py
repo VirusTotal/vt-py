@@ -230,7 +230,7 @@ class Client:
       }
 
       if self._user_headers:
-        headers = {**headers, **self._user_headers}
+        headers.update(self._user_headers)
 
       self._session = aiohttp.ClientSession(
         connector=aiohttp.TCPConnector(ssl=False),

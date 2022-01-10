@@ -182,7 +182,7 @@ class Client:
     a request to timeout (300 by default).
   :param proxy: A string indicating the proxy to use for requests
     made by the client (None by default).
-  :param heaaders: Custom header defined by the user.
+  :param headers: List of headers defined by the user.
   :type apikey: str
   :type agent: str
   :type host: str

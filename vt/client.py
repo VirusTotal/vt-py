@@ -182,18 +182,18 @@ class Client:
     a request to timeout (300 by default).
   :param proxy: A string indicating the proxy to use for requests
     made by the client (None by default).
-  :param tool: Name of the tool that is using this lib.
+  :param heaaders: Custom header defined by the user.
   :type apikey: str
   :type agent: str
   :type host: str
   :type trust_env: bool
   :type timeout: int
   :type proxy: str
-  :type tool: str
+  :type headers: dict
   """
 
   def __init__(self, apikey, agent="unknown", host=None, trust_env=False,
-               timeout=300, proxy=None, tool=None):
+               timeout=300, proxy=None, headers=None):
     """Initialize the client with the provided API key."""
 
     if not isinstance(apikey, str):
@@ -209,7 +209,7 @@ class Client:
     self._trust_env = trust_env
     self._timeout = timeout
     self._proxy = proxy
-    self._tool = tool
+    self._user_headers = headers
 
   def _full_url(self, path, *args):
     try:
@@ -229,8 +229,8 @@ class Client:
               'agent': self._agent, 'version': __version__})
       }
 
-      if self._tool:
-        headers['x-tool'] = self._tool
+      if self._user_headers:
+        headers = {**headers, **self._user_headers}
 
       self._session = aiohttp.ClientSession(
         connector=aiohttp.TCPConnector(ssl=False),

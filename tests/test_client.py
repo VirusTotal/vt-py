@@ -459,3 +459,18 @@ def test_scan_url(httpserver):
     analysis = client.scan_url('https://www.dummy.url')
 
   assert analysis.type == 'analysis'
+
+def test_user_headers(httpserver):
+  user_headers = {'foo': 'bar'}
+
+  client = Client(
+      'dummy_api_key',
+      host='http://' + httpserver.host + ':' + str(httpserver.port),
+      timeout=500, headers=user_headers)
+
+  headers = client._get_session().headers
+
+  assert 'X-Apikey' in headers
+  assert 'Accept-Encoding' in headers
+  assert 'User-Agent' in headers
+  assert 'foo' in headers

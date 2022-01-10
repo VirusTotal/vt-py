@@ -182,16 +182,18 @@ class Client:
     a request to timeout (300 by default).
   :param proxy: A string indicating the proxy to use for requests
     made by the client (None by default).
+  :param headers: Dict of headers defined by the user.
   :type apikey: str
   :type agent: str
   :type host: str
   :type trust_env: bool
   :type timeout: int
   :type proxy: str
+  :type headers: dict
   """
 
   def __init__(self, apikey, agent="unknown", host=None, trust_env=False,
-               timeout=300, proxy=None):
+               timeout=300, proxy=None, headers=None):
     """Initialize the client with the provided API key."""
 
     if not isinstance(apikey, str):
@@ -207,6 +209,7 @@ class Client:
     self._trust_env = trust_env
     self._timeout = timeout
     self._proxy = proxy
+    self._user_headers = headers
 
   def _full_url(self, path, *args):
     try:
@@ -219,13 +222,19 @@ class Client:
 
   def _get_session(self):
     if not self._session:
+      headers = {
+          'X-Apikey': self._apikey,
+          'Accept-Encoding': 'gzip',
+          'User-Agent': _USER_AGENT_FMT.format_map({
+              'agent': self._agent, 'version': __version__})
+      }
+
+      if self._user_headers:
+        headers.update(self._user_headers)
+
       self._session = aiohttp.ClientSession(
         connector=aiohttp.TCPConnector(ssl=False),
-        headers={
-            'X-Apikey': self._apikey,
-            'Accept-Encoding': 'gzip',
-            'User-Agent': _USER_AGENT_FMT.format_map({
-                'agent': self._agent, 'version': __version__})},
+        headers=headers,
         trust_env=self._trust_env,
         timeout=aiohttp.ClientTimeout(total=self._timeout))
     return self._session

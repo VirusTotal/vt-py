@@ -62,7 +62,7 @@ class HuntingNotificationToNetworkInfrastructureHandler:
           filter_tag)
       files = client.iterator(url, limit=max_files)
       async for f in files:
-        if f.context_attributes['hunting_notification_date'] > date_filter:
+        if f.context_attributes['notification_date'] > date_filter:
           await self.files_queue.put(f.sha256)
 
   async def get_file_async(self, hash, relationships=None):

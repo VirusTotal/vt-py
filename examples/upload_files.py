@@ -22,12 +22,15 @@ async def get_files_to_upload(queue, path):
   """Finds which files will be uploaded to VirusTotal."""
   if os.path.isfile(path):
     await queue.put(path)
-    return
+    return 1
 
+  n_files = 0
   with os.scandir(path) as it:
     for entry in it:
         if not entry.name.startswith('.') and entry.is_file():
             await queue.put(entry.path)
+            n_files += 1
+  return n_files
 
 
 async def upload_hashes(queue, apikey):
@@ -35,12 +38,20 @@ async def upload_hashes(queue, apikey):
   async with vt.Client(apikey) as client:
     while not queue.empty():
       file_path = await queue.get()
-      await client.scan_file_async(file=file_path)
-      print(f'File {file_path} uploaded.')
-      queue.task_done()
+      with open(file_path) as f:
+        analysis = await client.scan_file_async(file=f)
+        print(f'File {file_path} uploaded.')
+        queue.task_done()
+  return (analysis, file_path)
 
 
-def main():
+async def process_analysis_results(apikey, analysis, file_path):
+  async with vt.Client(apikey) as client:
+    completed_analysis = await client._wait_for_analysis_completion(analysis)
+    print(f'{file_path}: {completed_analysis.stats}')
+
+
+async def main():
 
   parser = argparse.ArgumentParser(description='Upload files to VirusTotal.')
 
@@ -55,19 +66,19 @@ def main():
     print(f'ERROR: file {args.path} not found.')
     sys.exit(1)
 
-  loop = asyncio.get_event_loop()
-  queue = asyncio.Queue(loop=loop)
-  loop.create_task(get_files_to_upload(queue, args.path))
+  queue = asyncio.Queue()
+  n_files = await get_files_to_upload(queue, args.path)
 
   _worker_tasks = []
-  for i in range(args.workers):
-    _worker_tasks.append(
-        loop.create_task(upload_hashes(queue, args.apikey)))
+  for _ in range(min(args.workers, n_files)):
+    _worker_tasks.append(asyncio.create_task(upload_hashes(queue, args.apikey)))
 
   # Wait until all worker tasks has completed.
-  loop.run_until_complete(asyncio.gather(*_worker_tasks))
-  loop.close()
+  analyses = await asyncio.gather(*_worker_tasks)
+  await asyncio.gather(*[
+      asyncio.create_task(
+          process_analysis_results(args.apikey, a, f)) for a, f in analyses])
 
 
 if __name__ == '__main__':
-  main()
+  asyncio.run(main())

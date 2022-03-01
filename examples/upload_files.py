@@ -13,6 +13,7 @@
 
 import argparse
 import asyncio
+import itertools
 import os
 import sys
 import vt
@@ -35,6 +36,8 @@ async def get_files_to_upload(queue, path):
 
 async def upload_hashes(queue, apikey):
   """Uploads selected files to VirusTotal."""
+  return_values = []
+
   async with vt.Client(apikey) as client:
     while not queue.empty():
       file_path = await queue.get()
@@ -42,7 +45,9 @@ async def upload_hashes(queue, apikey):
         analysis = await client.scan_file_async(file=f)
         print(f'File {file_path} uploaded.')
         queue.task_done()
-  return (analysis, file_path)
+        return_values.append((analysis, file_path))
+
+  return return_values
 
 
 async def process_analysis_results(apikey, analysis, file_path):
@@ -74,7 +79,7 @@ async def main():
     _worker_tasks.append(asyncio.create_task(upload_hashes(queue, args.apikey)))
 
   # Wait until all worker tasks has completed.
-  analyses = await asyncio.gather(*_worker_tasks)
+  analyses = itertools.chain.from_iterable(await asyncio.gather(*_worker_tasks))
   await asyncio.gather(*[
       asyncio.create_task(
           process_analysis_results(args.apikey, a, f)) for a, f in analyses])

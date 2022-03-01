@@ -28,9 +28,9 @@ async def get_files_to_upload(queue, path):
   n_files = 0
   with os.scandir(path) as it:
     for entry in it:
-        if not entry.name.startswith('.') and entry.is_file():
-            await queue.put(entry.path)
-            n_files += 1
+      if not entry.name.startswith('.') and entry.is_file():
+        await queue.put(entry.path)
+        n_files += 1
   return n_files
 
 

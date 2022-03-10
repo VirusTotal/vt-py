@@ -19,19 +19,21 @@ import io
 import vt
 
 
-def create_collection(client, name, file):
+def create_collection(client, name, description, file):
   """Creates a reference in VirusTotal.
 
   Args:
     client: VirusTotal client.
     name: Collection's name.
+    description: Collection's description.
     file: File containing the IOCs to add to the collection.
 
   Returns:
     The new collection object.
   """
 
-  collection_obj = vt.Object('collection', obj_attributes={'name': name})
+  collection_obj = vt.Object(
+      'collection', obj_attributes={'name': name, 'description': description})
   collection_obj.set_data('raw_items', file.read())
   return client.post_object('/collections', obj=collection_obj)
 
@@ -46,17 +48,19 @@ def main():
 
   parser.add_argument('--apikey', required=True, help='your VirusTotal API key')
   parser.add_argument('--name', required=True, help='collection\'s name')
+  parser.add_argument(
+      '--description', required=True, help='collection\'s description')
 
   args = parser.parse_args()
   client = vt.Client(args.apikey)
 
   # Typical usage would be to create a collection from a text file with IOCs:
   # with open('iocs.txt') as f:
-  #   collection_obj = create_collection(client, args.name, f)
+  #   collection_obj = create_collection(client, args.name, args.description, f)
 
   # Or using a string with the IOCs.
   iocs = io.StringIO('www.example.com\nhttps://www.hooli.com')
-  collection_obj = create_collection(client, args.name, iocs)
+  collection_obj = create_collection(client, args.name, args.description, iocs)
 
   client.close()
   print(json.dumps(collection_obj.to_dict(), indent=2))

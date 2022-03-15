@@ -55,7 +55,10 @@ def iterator_response(httpserver):
           'id': 'dummy_id_4',
           'type': 'dummy_type',
           'attributes': {'order': 0}
-          }]
+          }, {
+          'id': 'dummy_id_5',
+          'type': 'dummy_type',
+          'error': {'code': 'NotFoundError', 'message': 'item not found.'}}]
   })
 
 
@@ -79,11 +82,16 @@ def test_next(httpserver, iterator_response):
     last = None
     for i, obj in enumerate(it):
       assert obj.id == f'dummy_id_{i+3}'
+      if obj.id == 'dummy_id_5':
+        assert obj.error['code'] == 'NotFoundError'
+      else:
+        assert obj.order == 0
+        assert obj.error is None
       last = obj
 
-    assert last.id == 'dummy_id_4'
-    assert it._count == 4
-    assert it._batch_cursor == 1
+    assert last.id == 'dummy_id_5'
+    assert it._count == 5
+    assert it._batch_cursor == 2
 
     with pytest.raises(StopIteration):
       # there shouldn't be more available elements after the for loop
@@ -141,9 +149,9 @@ async def test_anext(httpserver, iterator_response):
       last = obj
       i += 1
 
-    assert last.id == 'dummy_id_4'
-    assert it._count == 4
-    assert it._batch_cursor == 1
+    assert last.id == 'dummy_id_5'
+    assert it._count == 5
+    assert it._batch_cursor == 2
 
     with pytest.raises(StopAsyncIteration):
       # there shouldn't be more available elements after the for loop

@@ -105,6 +105,9 @@ class Object:
     if 'relationships' in obj_dict:
       obj._relationships = obj_dict['relationships']
 
+    if 'error' in obj_dict:
+      obj._error = obj_dict['error']
+
     return obj
 
   def __init__(self, obj_type, obj_id=None, obj_attributes=None):
@@ -125,6 +128,7 @@ class Object:
 
     self._modified_attrs = []
     self._modified_data = {}
+    self._error = None
 
   def __on_attr_change(self, attr):
     if hasattr(self, '_modified_attrs'):
@@ -177,6 +181,10 @@ class Object:
     if hasattr(self, '_relationships'):
       return self._relationships
     return {}
+
+  @property
+  def error(self):
+    return self._error
 
   def get(self, attr_name, default=None):
     """Returns an attribute by name.

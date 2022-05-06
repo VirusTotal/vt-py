@@ -19,8 +19,13 @@ def make_sync(future):
   """Utility function that waits for an async call, making it sync."""
   try:
     event_loop = asyncio.get_event_loop()
+    '''
+        Closed event loop is not NX loop, so Runtime exceptiion will be never thrown.
+    '''
+    if event_loop.is_closed():
+      raise RuntimeError("event loop is closed")
   except RuntimeError:
-    # Generate an event loop if there isn't any.
+    # Generate an event loop if there isn't any or event loop is closed.
     event_loop = asyncio.new_event_loop()
     asyncio.set_event_loop(event_loop)
   return event_loop.run_until_complete(future)

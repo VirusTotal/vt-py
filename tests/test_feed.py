@@ -11,6 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Tests features defined at vt/feed.py."""
+
 import bz2
 from collections import abc
 
@@ -24,8 +26,8 @@ def new_client(httpserver):
                 host='http://' + httpserver.host + ':' + str(httpserver.port))
 
 
-@pytest.fixture
-def feed_response(httpserver):
+@pytest.fixture(name='feed_response')
+def fixture_feed_response(httpserver):
   httpserver.expect_ordered_request(
       '/api/v3/feeds/files/200102030405',
       method='GET',
@@ -43,8 +45,8 @@ def feed_response(httpserver):
       bz2.compress(b'{\"type\": \"file\", \"id\": \"dummy_file_id_4\"}'))
 
 
-@pytest.fixture
-def feed_response_missing_packages(httpserver):
+@pytest.fixture(name='feed_response_missing_packages')
+def fixture_feed_response_missing_packages(httpserver):
   httpserver.expect_ordered_request(
       '/api/v3/feeds/files/200102030405',
       method='GET',
@@ -85,7 +87,7 @@ def test_interface(httpserver):
   assert isinstance(feed, abc.AsyncIterator)
 
 
-def test_next(httpserver, feed_response):
+def test_next(httpserver, feed_response):  # pylint: disable=unused-argument
   """Tests feed's next."""
   with new_client(httpserver) as client:
     feed = client.feed(FeedType.FILES, cursor='200102030405')
@@ -106,24 +108,24 @@ def test_next(httpserver, feed_response):
     for obj in feed:
       assert obj.type == 'file'
       assert obj.id == 'dummy_file_id_4'
-      assert feed._count == 4
+      assert feed._count == 4  # pylint: disable=protected-access
       break  # Exit loop as the feed iteration doesn't stop
 
 
 @pytest.mark.asyncio
-async def test_anext(httpserver, feed_response):
+async def test_anext(httpserver, feed_response):  # pylint: disable=unused-argument
   """Tests feed's async next."""
   async with new_client(httpserver) as client:
     feed = client.feed(FeedType.FILES, cursor='200102030405')
-    obj = await feed.__anext__()
+    obj = await feed.__anext__()  # pylint: disable=unnecessary-dunder-call
     assert obj.type == 'file'
     assert obj.id == 'dummy_file_id_1'
 
-    obj = await feed.__anext__()
+    obj = await feed.__anext__()  # pylint: disable=unnecessary-dunder-call
     assert obj.type == 'file'
     assert obj.id == 'dummy_file_id_2'
 
-    obj = await feed.__anext__()
+    obj = await feed.__anext__()  # pylint: disable=unnecessary-dunder-call
     assert obj.type == 'file'
     assert obj.id == 'dummy_file_id_3'
 
@@ -131,41 +133,41 @@ async def test_anext(httpserver, feed_response):
     async for obj in feed:
       assert obj.type == 'file'
       assert obj.id == 'dummy_file_id_4'
-      assert feed._count == 4
+      assert feed._count == 4  # pylint: disable=protected-access
       break  # Exit loop as the feed iteration doesn't stop
 
 
-@pytest.mark.parametrize("test_tolerance", [0, 1, 2])
-def test_tolerance(httpserver, feed_response_missing_packages, test_tolerance):
+@pytest.mark.parametrize('tolerance', [0, 1, 2])
+def test_tolerance(httpserver, feed_response_missing_packages, tolerance):  # pylint: disable=unused-argument
   """Tests feed's tolerance to missing packages."""
 
   missing_batches = 2  # Consecutive missing batches in fixture
 
   with new_client(httpserver) as client:
     feed = client.feed(FeedType.FILES, cursor='200102030405')
-    feed._missing_batches_tolerancy = test_tolerance
+    feed._missing_batches_tolerancy = tolerance  # pylint: disable=protected-access
 
     obj = next(feed)
     assert obj.id == 'dummy_file_id_1'
 
     # The number of exceptions raised must equal the number of missing batches
     # minus the tolerance
-    for _ in range(missing_batches - test_tolerance):
+    for _ in range(missing_batches - tolerance):
       with pytest.raises(APIError) as e_info:
         obj = next(feed)
       assert e_info.value.args[0] == 'NotFoundError'
 
     obj = next(feed)
     assert obj.id == 'dummy_file_id_2'
-    assert feed._count == 2
+    assert feed._count == 2  # pylint: disable=protected-access
 
 
-@pytest.mark.parametrize("test_iters, expected_cursor",
+@pytest.mark.parametrize('test_iters, expected_cursor',
                          [(1, '200102030405-1'),
                           (2, '200102030405-2'),
                           (3, '200102030405-3'),
                           (4, '200102030406-1')])
-def test_cursor(httpserver, feed_response, test_iters, expected_cursor):
+def test_cursor(httpserver, feed_response, test_iters, expected_cursor):  # pylint: disable=unused-argument
   """Tests feed's cursor."""
   with new_client(httpserver) as client:
     feed = client.feed(FeedType.FILES, cursor='200102030405')
@@ -176,14 +178,14 @@ def test_cursor(httpserver, feed_response, test_iters, expected_cursor):
     assert feed.cursor == expected_cursor
 
 
-@pytest.mark.parametrize("test_cursor, expected_file_id",
+@pytest.mark.parametrize('cursor, expected_file_id',
                          [('200102030405-0', 'dummy_file_id_1'),
                           ('200102030405-1', 'dummy_file_id_2'),
                           ('200102030405-2', 'dummy_file_id_3'),
                           ('200102030405-3', 'dummy_file_id_4')])
-def test_skip(httpserver, feed_response, test_cursor, expected_file_id):
+def test_skip(httpserver, feed_response, cursor, expected_file_id):  # pylint: disable=unused-argument
   """Tests feed's skip, used to continue where a previous object left."""
   with new_client(httpserver) as client:
-    feed = client.feed(FeedType.FILES, cursor=test_cursor)
+    feed = client.feed(FeedType.FILES, cursor=cursor)
     obj = next(feed)
     assert obj.id == expected_file_id

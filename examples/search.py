@@ -27,7 +27,7 @@ import vt
 def main():
 
   parser = argparse.ArgumentParser(
-      description='Make a VirusTotal Intelligence search and prints the matching objects.')
+      description='Make a VirusTotal Intelligence search and prints the matching objects.')  # pylint: disable=line-too-long
 
   parser.add_argument('query',
       type=str,
@@ -51,7 +51,7 @@ def main():
         params={'query': ' '.join(args.query)},
         limit=args.limit)
     for obj in it:
-      print(f"{obj.type}:{obj.id}")
+      print(f'{obj.type}:{obj.id}')
 
 
 if __name__ == '__main__':

@@ -37,7 +37,7 @@ def iterate(data, path):
 
 def get_all(data, path):
   """Returns a list with all values in data matching the given JsonPath."""
-  return [x for x in iterate(data, path)]
+  return list(iterate(data, path))
 
 
 def get(data, path, default=None):
@@ -57,5 +57,5 @@ def get(data, path, default=None):
   if not result:
     return default
   if len(result) > 1:
-    raise Exception('JsonPath %s returning more than one value', path)
+    raise Exception(f'JsonPath {path} returning more than one value')
   return result[0]

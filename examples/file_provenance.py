@@ -25,13 +25,15 @@ import vt
 import sys
 
 
-async def get_provenance_info(apikey, hash):
+async def get_provenance_info(apikey, hash_):
   async with vt.Client(apikey) as client:
-    file_obj = await client.get_object_async(f'/files/{hash}')
+    file_obj = await client.get_object_async(f'/files/{hash_}')
 
   return (
-      getattr(file_obj, 'monitor_info', None), getattr(file_obj, 'nsrl_info', None),
-      getattr(file_obj, 'signature_info', None), getattr(file_obj, 'tags', []),
+      getattr(file_obj, 'monitor_info', None),
+      getattr(file_obj, 'nsrl_info', None),
+      getattr(file_obj, 'signature_info', None),
+      getattr(file_obj, 'tags', []),
       getattr(file_obj, 'trusted_verdict', None))
 
 

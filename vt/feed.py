@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Processes items from VT API feeds."""
 
 from datetime import datetime
 from datetime import timedelta
@@ -92,8 +93,8 @@ class Feed:
     this format, the seconds in the datetime are ignored.
     """
     while True:
-      response = await self._client.get_async('/feeds/{}/{}'.format(
-          self._type.value, batch_time.strftime('%Y%m%d%H%M')))
+      response = await self._client.get_async(
+          f'/feeds/{self._type.value}/{batch_time.strftime("%Y%m%d%H%M")}')
       error = await self._client.get_error_async(response)
       if not error:
         break
@@ -141,8 +142,8 @@ class Feed:
   def __next__(self):
     try:
       return make_sync(self.__anext__())
-    except StopAsyncIteration:
-      raise StopIteration()
+    except StopAsyncIteration as exc:
+      raise StopIteration() from exc
 
   async def __anext__(self):
     while True:

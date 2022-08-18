@@ -33,11 +33,12 @@ def update_collection(client, collection_id, file):
 
   collection_obj = vt.Object('collection', obj_id=collection_id)
   collection_obj.set_data('raw_items', file.read())
-  return client.patch_object('/collections/%s' % collection_id, obj=collection_obj)
+  return client.patch_object(
+      f'/collections/{collection_id}', obj=collection_obj)
 
 
 def generate_ui_link(collection_id):
-  return "https://www.virustotal.com/gui/collection/%s" % collection_id
+  return f'https://www.virustotal.com/gui/collection/{collection_id}'
 
 
 def main():
@@ -61,7 +62,7 @@ def main():
   client.close()
   print(json.dumps(collection_obj.to_dict(), indent=2))
 
-  print("Link:\n%s" % generate_ui_link(collection_obj.id))
+  print(f'Link:\n{generate_ui_link(collection_obj.id)}')
 
 
 if __name__ == '__main__':

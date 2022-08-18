@@ -39,7 +39,7 @@ def create_collection(client, name, description, file):
 
 
 def generate_ui_link(collection_id):
-  return "https://www.virustotal.com/gui/collection/%s" % collection_id
+  return f'https://www.virustotal.com/gui/collection/{collection_id}'
 
 
 def main():
@@ -65,7 +65,7 @@ def main():
   client.close()
   print(json.dumps(collection_obj.to_dict(), indent=2))
 
-  print("Link:\n%s" % generate_ui_link(collection_obj.id))
+  print(f'Link:\n{generate_ui_link(collection_obj.id)}')
 
 
 if __name__ == '__main__':

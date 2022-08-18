@@ -60,11 +60,11 @@ def main():
       # Write the file's metadata into a JSON-encoded file. The name of the
       # JSON file will be <SHA-256>.json
       file_path = os.path.join(args.output, file_obj.id)
-      with open(file_path + '.json', mode='w') as f:
+      with open(file_path + '.json', mode='w', encoding='utf-8') as f:
         f.write(json.dumps(file_obj.to_dict()))
       if args.download_files:
-        # Download the file and write it to the output directory with the SHA-256
-        # as its name.
+        # Download the file and write it to the output directory with the
+        # SHA-256 as its name.
         download_url = file_obj.context_attributes['download_url']
         response = client.get(download_url)
         with open(file_path, mode='wb') as f:

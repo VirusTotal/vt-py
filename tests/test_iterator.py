@@ -11,10 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Tests features defined in vt/iterator.py."""
+
 from collections import abc
 
 import pytest
-import pytest_httpserver
 
 from vt import Client
 
@@ -24,8 +25,8 @@ def new_client(httpserver):
       host='http://' + httpserver.host + ':' + str(httpserver.port))
 
 
-@pytest.fixture
-def iterator_response(httpserver):
+@pytest.fixture(name='iterator_response')
+def fixture_iterator_response(httpserver):
   httpserver.expect_ordered_request(
       '/api/v3/dummy_collection/foo',
       method='GET',
@@ -70,13 +71,13 @@ def test_interface(httpserver):
     assert isinstance(it, abc.AsyncIterator)
 
 
-def test_next(httpserver, iterator_response):
+def test_next(httpserver, iterator_response):  # pylint: disable=unused-argument
   """Tests iterator's next with a limit higher than the total of elements."""
   with new_client(httpserver) as client:
     it = client.iterator('/dummy_collection/foo', limit=10, batch_size=3)
     assert next(it).id == 'dummy_id_1'
     assert next(it).id == 'dummy_id_2'
-    assert it._batch_cursor == 2
+    assert it._batch_cursor == 2  # pylint: disable=protected-access
 
     # iteration must start right where the next stayed
     last = None
@@ -90,8 +91,8 @@ def test_next(httpserver, iterator_response):
       last = obj
 
     assert last.id == 'dummy_id_5'
-    assert it._count == 5
-    assert it._batch_cursor == 2
+    assert it._count == 5  # pylint: disable=protected-access
+    assert it._batch_cursor == 2  # pylint: disable=protected-access
 
     with pytest.raises(StopIteration):
       # there shouldn't be more available elements after the for loop
@@ -102,7 +103,7 @@ def test_next(httpserver, iterator_response):
       pytest.fail('Iteration should already be finished')
 
 
-def test_next_limit(httpserver, iterator_response):
+def test_next_limit(httpserver, iterator_response):  # pylint: disable=unused-argument
   """Tests iterator's next with a limit smaller than the total of elements."""
   with new_client(httpserver) as client:
     it = client.iterator('/dummy_collection/foo', limit=3)
@@ -117,7 +118,7 @@ def test_next_limit(httpserver, iterator_response):
 
     # last element must be the one marked by the limit
     assert last.id == 'dummy_id_3'
-    assert it._count == 3
+    assert it._count == 3  # pylint: disable=protected-access
 
     with pytest.raises(StopIteration):
       # there shouldn't be more available elements after the for loop
@@ -128,7 +129,7 @@ def test_next_limit(httpserver, iterator_response):
       pytest.fail('Iteration should already be finished')
 
 @pytest.mark.asyncio
-async def test_anext(httpserver, iterator_response):
+async def test_anext(httpserver, iterator_response):  # pylint: disable=unused-argument
   """Tests iterator's async next."""
   async with new_client(httpserver) as client:
     it = client.iterator('/dummy_collection/foo', limit=10, batch_size=3)
@@ -138,8 +139,8 @@ async def test_anext(httpserver, iterator_response):
     # should be None until we start iterating.
     assert it.cursor is None
 
-    assert (await it.__anext__()).id == 'dummy_id_1'
-    assert it._batch_cursor == 1
+    assert (await it.__anext__()).id == 'dummy_id_1'  # pylint: disable=unnecessary-dunder-call
+    assert it._batch_cursor == 1  # pylint: disable=protected-access
     assert it.cursor
 
     # iteration must start right where the next stayed
@@ -150,12 +151,12 @@ async def test_anext(httpserver, iterator_response):
       i += 1
 
     assert last.id == 'dummy_id_5'
-    assert it._count == 5
-    assert it._batch_cursor == 2
+    assert it._count == 5  # pylint: disable=protected-access
+    assert it._batch_cursor == 2  # pylint: disable=protected-access
 
     with pytest.raises(StopAsyncIteration):
       # there shouldn't be more available elements after the for loop
-      await it.__anext__()
+      await it.__anext__()  # pylint: disable=unnecessary-dunder-call
 
     # trying to iterate over next element must not work
     async for obj in it:

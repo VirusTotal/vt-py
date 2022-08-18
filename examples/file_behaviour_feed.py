@@ -20,8 +20,6 @@ Set an env-var e.g. $VT_API_KEY
 """
 
 import argparse
-import json
-import os
 import vt
 
 
@@ -39,7 +37,7 @@ def process_item(item):
 
   if ('executes-dropped-file' in tags or
       'powershell.exe' in '\n'.join(processes_created)):
-      print(item.id.split('_')[0])
+    print(item.id.split('_')[0])
 
 
 def main():

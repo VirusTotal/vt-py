@@ -124,7 +124,6 @@ async def main():
   numfiles = int(args.numfiles)
   workers = int(args.workers)
   api_key = args.apikey
-  loop = asyncio.get_event_loop()
   handler = DownloadTopNFilesHandler(api_key, numfiles)
 
   logging.info('Starting VirusTotal Intelligence downloader')
@@ -132,22 +131,18 @@ async def main():
   logging.info('* Number of files to download: %s', numfiles)
 
   files_path = handler.create_download_folder(storage_path)
-  enqueue_files_task = loop.create_task(handler.queue_file_hashes(search))
+  enqueue_files_task = asyncio.create_task(handler.queue_file_hashes(search))
 
   download_tasks = []
-  for i in range(workers):
-    download_tasks.append(loop.create_task(handler.download_files(files_path)))
+  for _ in range(workers):
+    download_tasks.append(
+        asyncio.create_task(handler.download_files(files_path)))
 
   await asyncio.gather(enqueue_files_task)
   # Wait until all the files have been queued and downloaded, then cancel
   # download tasks that are idle
   await handler.queue.join()
 
-  for w in download_tasks:
-    w.cancel()
-
 
 if __name__ == '__main__':
-  loop = asyncio.get_event_loop()
-  loop.run_until_complete(main())
-  loop.close()
+  asyncio.run(main())

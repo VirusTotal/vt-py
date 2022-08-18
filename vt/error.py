@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Defines a class to handle errors returned by the VT API."""
 
 class APIError(Exception):
   """Class that encapsules errors returned by the VirusTotal API."""
@@ -22,3 +23,4 @@ class APIError(Exception):
   def __init__(self, code, message):
     self.code = code
     self.message = message
+    super().__init__(code, message)

@@ -44,16 +44,16 @@ def get_detection_rate(stats):
   return f'{stats["malicious"]}/{sum(stats.values())}'
 
 
-def print_results(results, netloc):
+def print_results(res, netloc):
   """Print results for a given netloc.
 
   Results are only printed if there's a suspicious sighting.
   """
-  if any(x is not None for x, _, _ in results):
+  if any(x is not None for x, _, _ in res):
     n_spaces = 50 - len(netloc)
     print(
         f'{netloc}{" " * n_spaces}'
-        f'{"  ".join(f"{n} detected {t} [max:{m}]" for m, n, t in results if m)}')
+        f'{"  ".join(f"{n} detected {t} [max:{m}]" for m, n, t in res if m)}')
 
 
 async def get_netloc_relationship(apikey, netloc, rel_type):
@@ -66,7 +66,7 @@ async def get_netloc_relationship(apikey, netloc, rel_type):
         if f.last_analysis_stats['malicious']]
 
     if stats:
-      text = rel_type.replace("_", " ")[:-1 if len(stats) <= 1 else None]
+      text = rel_type.replace('_', ' ')[:-1 if len(stats) <= 1 else None]
       return max(stats), len(stats), text
     else:
       return None, 0, ''
@@ -78,12 +78,11 @@ async def get_netloc_report_relationships(loop, apikey, netloc):
     return
 
   tasks = []
-  async with vt.Client(apikey) as client:
-    for rel_type in [
-        'urls', 'downloaded_files', 'communicating_files', 'referrer_files']:
+  for rel_type in [
+      'urls', 'downloaded_files', 'communicating_files', 'referrer_files']:
 
-      tasks.append(loop.create_task(
-          get_netloc_relationship(apikey, netloc, rel_type)))
+    tasks.append(loop.create_task(
+        get_netloc_relationship(apikey, netloc, rel_type)))
 
   results = await asyncio.gather(*tasks, return_exceptions=True)
   print_results(results, netloc)
@@ -113,4 +112,3 @@ def main():
 
 if __name__ == '__main__':
   main()
-

@@ -38,8 +38,8 @@ async def get_rules_files(queue, path):
 
   with os.scandir(path) as it:
     for entry in it:
-        if not entry.name.startswith('.') and entry.is_file():
-            await queue.put(entry.path)
+      if not entry.name.startswith('.') and entry.is_file():
+        await queue.put(entry.path)
 
 
 async def upload_rules(queue, apikey, enable):
@@ -47,7 +47,7 @@ async def upload_rules(queue, apikey, enable):
   async with vt.Client(apikey) as client:
     while not queue.empty():
       file_path = await queue.get()
-      with open(file_path) as f:
+      with open(file_path, encoding='utf-8') as f:
         ruleset = vt.Object(
             obj_type='hunting_ruleset',
             obj_attributes={
@@ -87,13 +87,13 @@ def main():
   queue = asyncio.Queue(loop=loop)
   loop.create_task(get_rules_files(queue, args.path))
 
-  _worker_tasks = []
-  for i in range(args.workers):
-    _worker_tasks.append(
+  worker_tasks = []
+  for _ in range(args.workers):
+    worker_tasks.append(
         loop.create_task(upload_rules(queue, args.apikey, args.enable)))
 
   # Wait until all worker tasks has completed.
-  loop.run_until_complete(asyncio.gather(*_worker_tasks))
+  loop.run_until_complete(asyncio.gather(*worker_tasks))
   loop.close()
 
 

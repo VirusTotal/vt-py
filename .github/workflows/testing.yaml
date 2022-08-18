@@ -19,7 +19,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest pylint
+          pip install pytest pylint aiohttp
       - name: Lint
         run: |
           pylint --rcfile pylintrc vt/ tests examples/

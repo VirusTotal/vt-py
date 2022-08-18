@@ -252,7 +252,7 @@ class Client:
     self.close()
 
   def _extract_data_from_json(self, json_response):
-    if not 'data' in json_response:
+    if 'data' not in json_response:
       raise ValueError('response does not returns a data field')
     return json_response['data']
 

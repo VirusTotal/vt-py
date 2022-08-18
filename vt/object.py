@@ -26,7 +26,7 @@ class WhistleBlowerDict(dict):
   """
   def __init__(self, initial_dict, on_change_callback):
     self._on_change_callback = on_change_callback
-    for k,v in initial_dict.items():
+    for k, v in initial_dict.items():
       if isinstance(v, dict):
         initial_dict[k] = WhistleBlowerDict(v, on_change_callback)
     super().__init__(initial_dict)
@@ -136,8 +136,8 @@ class Object:
 
   def __getattribute__(self, attr):
     value = super().__getattribute__(attr)
-    for re in Object.DATE_ATTRIBUTES:
-      if re.match(attr):
+    for r in Object.DATE_ATTRIBUTES:
+      if r.match(attr):
         value = datetime.datetime.utcfromtimestamp(value)
         break
     return value

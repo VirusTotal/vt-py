@@ -30,7 +30,7 @@ setuptools.setup(
     version=main_ns['__version__'],
     description='The official Python client library for VirusTotal',
     license='Apache 2',
-    license_files = ('LICENSE'),
+    license_files=('LICENSE'),
     long_description=long_description,
     long_description_content_type="text/markdown",
     url='https://github.com/VirusTotal/vt-py',

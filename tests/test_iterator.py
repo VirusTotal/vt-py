@@ -14,13 +14,13 @@
 from collections import abc
 
 import pytest
-import pytest_httpserver
 
 from vt import Client
 
 
 def new_client(httpserver):
-  return Client('dummy_api_key',
+  return Client(
+      'dummy_api_key',
       host='http://' + httpserver.host + ':' + str(httpserver.port))
 
 
@@ -126,6 +126,7 @@ def test_next_limit(httpserver, iterator_response):
     # trying to iterate over next elements must not work
     for obj in it:
       pytest.fail('Iteration should already be finished')
+
 
 @pytest.mark.asyncio
 async def test_anext(httpserver, iterator_response):

@@ -64,17 +64,17 @@ class HuntingNotificationToNetworkInfrastructureHandler:
         if f.context_attributes['notification_date'] > date_filter:
           await self.files_queue.put(f.sha256)
 
-  async def get_file_async(self, hash_, relationships=None):
+  async def get_file_async(self, file_hash, relationships=None):
     """Get a file object from VT.
 
     :param hash: SHA-256, SHA-1 or MD5 hash that describes the
     :param relationships: relationships to be retrieved alongside with the file.
     Different relationship names should be separated by a comma.
-    :type hash_: str
+    :type file_hash: str
     :type relationships: str
     :return: `class:Object` containing the file information.
     """
-    url = f'/files/{hash_}'
+    url = f'/files/{file_hash}'
     async with vt.Client(self.apikey) as client:
       if isinstance(relationships, str) and relationships:
         url += f'?relationships={relationships}'
@@ -86,9 +86,9 @@ class HuntingNotificationToNetworkInfrastructureHandler:
     """Process a file and get its network infrastructure."""
 
     while True:
-      hash_ = await self.files_queue.get()
+      file_hash = await self.files_queue.get()
       file_obj = await self.get_file_async(
-        hash_, 'contacted_domains,contacted_ips,contacted_urls')
+        file_hash, 'contacted_domains,contacted_ips,contacted_urls')
       relationships = file_obj.relationships
       contacted_domains = relationships['contacted_domains']['data']
       contacted_ips = relationships['contacted_ips']['data']
@@ -96,18 +96,18 @@ class HuntingNotificationToNetworkInfrastructureHandler:
       await self.queue.put(
           {'contacted_addresses': contacted_domains,
            'type': 'domains',
-           'file': hash_})
+           'file': file_hash})
       await self.queue.put(
           {'contacted_addresses': contacted_ips,
            'type': 'ips',
-           'file': hash_})
+           'file': file_hash})
       await self.queue.put(
           {'contacted_addresses': contacted_urls,
            'type': 'urls',
-           'file': hash_})
-      self.networking_infrastructure[hash_]['domains'] = contacted_domains
-      self.networking_infrastructure[hash_]['ips'] = contacted_ips
-      self.networking_infrastructure[hash_]['urls'] = contacted_urls
+           'file': file_hash})
+      self.networking_infrastructure[file_hash]['domains'] = contacted_domains
+      self.networking_infrastructure[file_hash]['ips'] = contacted_ips
+      self.networking_infrastructure[file_hash]['urls'] = contacted_urls
       self.files_queue.task_done()
 
   async def build_network_infrastructure(self):
@@ -115,13 +115,13 @@ class HuntingNotificationToNetworkInfrastructureHandler:
 
     while True:
       item = await self.queue.get()
-      type_ = item['type']
+      item_type = item['type']
       for contacted_address in item['contacted_addresses']:
-        if type_ in ('domains', 'ips'):
+        if item_type in ('domains', 'ips'):
           address = contacted_address['id']
         else:
           address = contacted_address['context_attributes']['url']
-        self.networking_counters[type_][address] += 1
+        self.networking_counters[item_type][address] += 1
       self.queue.task_done()
 
   def print_results(self):

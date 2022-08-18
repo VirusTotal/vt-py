@@ -247,13 +247,13 @@ class Client:
   async def __aenter__(self):
     return self
 
-  async def __aexit__(self, type_, value, traceback):
+  async def __aexit__(self, item_type, value, traceback):
     await self.close_async()
 
   def __enter__(self):
     return self
 
-  def __exit__(self, type_, value, traceback):
+  def __exit__(self, item_type, value, traceback):
     self.close()
 
   def _extract_data_from_json(self, json_response):
@@ -305,18 +305,18 @@ class Client:
         await self._get_session().delete(
           self._full_url(path, *path_args), proxy=self._proxy))
 
-  def download_file(self, hash_, file):
+  def download_file(self, file_hash, file):
     """Downloads a file given its _ (SHA-256, SHA-1 or MD5).
 
     The file identified by the hash will be written to the provided file
     object. The file object must be opened in write binary mode ('wb').
 
-    :param hash_: File hash.
+    :param file_hash: File hash.
     :param file: A file object where the downloaded file will be written to.
-    :type hash_: str
+    :type file_hash: str
     :type file: file-like object
     """
-    return make_sync(self.download_file_async(hash_, file))
+    return make_sync(self.download_file_async(file_hash, file))
 
   async def __download_async(self, endpoint, file):
     """Downloads a file and writes it to file.
@@ -334,9 +334,9 @@ class Client:
         break
       file.write(chunk)
 
-  async def download_file_async(self, hash_, file):
+  async def download_file_async(self, file_hash, file):
     """Like :func:`download_file` but returns a coroutine."""
-    await self.__download_async(f'/files/{hash_}/download', file)
+    await self.__download_async(f'/files/{file_hash}/download', file)
 
   def download_zip_files(self, hashes, zipfile, password=None, sleep_time=20):
     """Creates a bundle zip bundle containing one or multiple files.
@@ -737,3 +737,6 @@ class Client:
         break
       await asyncio.sleep(20)
     return analysis
+
+  async def wait_for_analysis_completion(self, analysis):
+    return self._wait_for_analysis_completion(analysis)

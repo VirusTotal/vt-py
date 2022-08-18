@@ -138,13 +138,13 @@ class RetroHuntJobToNetworkInfrastructureHandler:
 
     while True:
       item = await self.networking_queue.get()
-      type_ = item['type']
+      item_type = item['type']
       for contacted_address in item['contacted_addresses']:
-        if type_ in ('domains', 'ips'):
+        if item_type in ('domains', 'ips'):
           address = contacted_address['id']
         else:
           address = contacted_address['context_attributes']['url']
-        self.networking_counters[type_][address] += 1
+        self.networking_counters[item_type][address] += 1
       self.networking_queue.task_done()
 
   def print_results(self):

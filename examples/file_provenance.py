@@ -25,9 +25,9 @@ import vt
 import sys
 
 
-async def get_provenance_info(apikey, hash_):
+async def get_provenance_info(apikey, file_hash):
   async with vt.Client(apikey) as client:
-    file_obj = await client.get_object_async(f'/files/{hash_}')
+    file_obj = await client.get_object_async(f'/files/{file_hash}')
 
   return (
       getattr(file_obj, 'monitor_info', None),

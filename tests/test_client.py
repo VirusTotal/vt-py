@@ -290,11 +290,11 @@ def test_download_file_with_error(httpserver):
     headers={'X-Apikey': 'dummy_api_key'}
   ).respond_with_data(
     status=404,
-    content_type="application/json",
+    content_type='application/json',
     response_data=json.dumps({
-      "error": {
-        "code": "NotFoundError",
-        "message": "Resource not found."
+      'error': {
+        'code': 'NotFoundError',
+        'message': 'Resource not found.'
       }
     })
   )
@@ -303,8 +303,8 @@ def test_download_file_with_error(httpserver):
     with new_client(httpserver) as client:
       with io.BytesIO() as f:
         client.download_file('01020304050607080900a0b0c0ddead', f)
-  assert e_info.value.args[0] == "NotFoundError"
-  assert e_info.value.args[1] == "Resource not found."
+  assert e_info.value.args[0] == 'NotFoundError'
+  assert e_info.value.args[1] == 'Resource not found.'
 
 
 def test_download_zip_file(httpserver):
@@ -468,7 +468,7 @@ def test_user_headers(httpserver):
       host='http://' + httpserver.host + ':' + str(httpserver.port),
       timeout=500, headers=user_headers)
 
-  headers = client._get_session().headers
+  headers = client._get_session().headers  # pylint: disable=protected-access
 
   assert 'X-Apikey' in headers
   assert 'Accept-Encoding' in headers

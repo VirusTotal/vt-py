@@ -78,12 +78,12 @@ async def search_files(
         params={'query': search, 'relationships': 'itw_urls,contacted_urls'},
         limit=numfiles)
 
-    async for file_obj in it:
+    async for f in it:
       print(
-          f'{file_obj.sha256}\t{file_obj.last_analysis_date.strftime("%Y-%m-%d")}\t'
-          f'{detection_rate_str(file_obj)}')
+          f'{f.sha256}\t{f.last_analysis_date.strftime("%Y-%m-%d")}\t'
+          f'{detection_rate_str(f)}')
 
-      for rel in file_obj.relationships.values():
+      for rel in f.relationships.values():
         for r in rel['data']:
           urls.add(r['context_attributes']['url'])
 
@@ -109,8 +109,6 @@ async def main():
     print('ERROR: Input file is not a PE.')
     sys.exit(1)
 
-  loop = asyncio.get_event_loop()
-
   tasks = []
   print('Files having same imphash or rich PE header hash:')
   for hash_type, hash_val in [
@@ -120,7 +118,7 @@ async def main():
       if hash_val is None:
         continue
 
-      tasks.append(loop.create_task(
+      tasks.append(asyncio.create_task(
           search_files(
               args.apikey, args.numfiles, hash_type, hash_val,
               search_type, search_value
@@ -134,6 +132,4 @@ async def main():
 
 
 if __name__ == '__main__':
-  loop = asyncio.get_event_loop()
-  loop.run_until_complete(main())
-  loop.close()
+  asyncio.run(main())

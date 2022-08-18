@@ -11,6 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Shows how to upload files to VT using vt-py."""
+
 import argparse
 import asyncio
 import itertools
@@ -41,7 +43,7 @@ async def upload_hashes(queue, apikey):
   async with vt.Client(apikey) as client:
     while not queue.empty():
       file_path = await queue.get()
-      with open(file_path) as f:
+      with open(file_path, encoding='utf-8') as f:
         analysis = await client.scan_file_async(file=f)
         print(f'File {file_path} uploaded.')
         queue.task_done()
@@ -52,7 +54,7 @@ async def upload_hashes(queue, apikey):
 
 async def process_analysis_results(apikey, analysis, file_path):
   async with vt.Client(apikey) as client:
-    completed_analysis = await client._wait_for_analysis_completion(analysis)
+    completed_analysis = await client.wait_for_analysis_completion(analysis)
     print(f'{file_path}: {completed_analysis.stats}')
 
 
@@ -74,12 +76,12 @@ async def main():
   queue = asyncio.Queue()
   n_files = await get_files_to_upload(queue, args.path)
 
-  _worker_tasks = []
+  worker_tasks = []
   for _ in range(min(args.workers, n_files)):
-    _worker_tasks.append(asyncio.create_task(upload_hashes(queue, args.apikey)))
+    worker_tasks.append(asyncio.create_task(upload_hashes(queue, args.apikey)))
 
   # Wait until all worker tasks has completed.
-  analyses = itertools.chain.from_iterable(await asyncio.gather(*_worker_tasks))
+  analyses = itertools.chain.from_iterable(await asyncio.gather(*worker_tasks))
   await asyncio.gather(*[
       asyncio.create_task(
           process_analysis_results(args.apikey, a, f)) for a, f in analyses])

@@ -58,38 +58,37 @@ class HuntingNotificationToNetworkInfrastructureHandler:
         raise ValueError('Value to filtering with must be a string')
 
       filter_tag = search_filter.lower()
-      url = '/intelligence/hunting_notification_files?filter={}'.format(
-          filter_tag)
+      url = f'/intelligence/hunting_notification_files?filter={filter_tag}'
       files = client.iterator(url, limit=max_files)
       async for f in files:
         if f.context_attributes['notification_date'] > date_filter:
           await self.files_queue.put(f.sha256)
 
-  async def get_file_async(self, hash, relationships=None):
+  async def get_file_async(self, file_hash, relationships=None):
     """Get a file object from VT.
 
     :param hash: SHA-256, SHA-1 or MD5 hash that describes the
     :param relationships: relationships to be retrieved alongside with the file.
     Different relationship names should be separated by a comma.
-    :type hash: str
+    :type file_hash: str
     :type relationships: str
     :return: `class:Object` containing the file information.
     """
-    url = '/files/{}'
+    url = f'/files/{file_hash}'
     async with vt.Client(self.apikey) as client:
       if isinstance(relationships, str) and relationships:
         url += f'?relationships={relationships}'
 
-      file_obj = await client.get_object_async(url.format(hash))
+      file_obj = await client.get_object_async(url)
     return file_obj
 
   async def get_network_infrastructure(self):
     """Process a file and get its network infrastructure."""
 
     while True:
-      hash = await self.files_queue.get()
+      file_hash = await self.files_queue.get()
       file_obj = await self.get_file_async(
-        hash, 'contacted_domains,contacted_ips,contacted_urls')
+        file_hash, 'contacted_domains,contacted_ips,contacted_urls')
       relationships = file_obj.relationships
       contacted_domains = relationships['contacted_domains']['data']
       contacted_ips = relationships['contacted_ips']['data']
@@ -97,18 +96,18 @@ class HuntingNotificationToNetworkInfrastructureHandler:
       await self.queue.put(
           {'contacted_addresses': contacted_domains,
            'type': 'domains',
-           'file': hash})
+           'file': file_hash})
       await self.queue.put(
           {'contacted_addresses': contacted_ips,
            'type': 'ips',
-           'file': hash})
+           'file': file_hash})
       await self.queue.put(
           {'contacted_addresses': contacted_urls,
            'type': 'urls',
-           'file': hash})
-      self.networking_infrastructure[hash]['domains'] = contacted_domains
-      self.networking_infrastructure[hash]['ips'] = contacted_ips
-      self.networking_infrastructure[hash]['urls'] = contacted_urls
+           'file': file_hash})
+      self.networking_infrastructure[file_hash]['domains'] = contacted_domains
+      self.networking_infrastructure[file_hash]['ips'] = contacted_ips
+      self.networking_infrastructure[file_hash]['urls'] = contacted_urls
       self.files_queue.task_done()
 
   async def build_network_infrastructure(self):
@@ -116,13 +115,13 @@ class HuntingNotificationToNetworkInfrastructureHandler:
 
     while True:
       item = await self.queue.get()
-      type = item['type']
+      item_type = item['type']
       for contacted_address in item['contacted_addresses']:
-        if type in ('domains', 'ips'):
+        if item_type in ('domains', 'ips'):
           address = contacted_address['id']
         else:
           address = contacted_address['context_attributes']['url']
-        self.networking_counters[type][address] += 1
+        self.networking_counters[item_type][address] += 1
       self.queue.task_done()
 
   def print_results(self):
@@ -157,9 +156,9 @@ class HuntingNotificationToNetworkInfrastructureHandler:
             print(f'\t{network_inf[0]}')
             for address in network_inf[1]:
               if address['type'] in ('domain', 'ip_address'):
-                print('\t\t{}'.format(address['id']))
+                print(f'\t\t{address["id"]}')
               else:
-                print('\t\t{}'.format(address['context_attributes']['url']))
+                print(f'\t\t{address["context_attributes"]["url"]}')
 
 
 async def main():
@@ -187,29 +186,22 @@ async def main():
       limit_date, datetime.datetime.min.time())
   timestamp_to_compare = datetime.datetime.timestamp(limit_datetime)
 
-  loop = asyncio.get_event_loop()
   handler = HuntingNotificationToNetworkInfrastructureHandler(
       args.apikey)
 
-  enqueue_files_task = loop.create_task(
+  enqueue_files_task = asyncio.create_task(
       handler.get_hunting_notification_files(
           args.filter, timestamp_to_compare, limit))
-  network_inf_task = loop.create_task(handler.get_network_infrastructure())
-  build_network_inf_task = loop.create_task(
-      handler.build_network_infrastructure())
+  _ = asyncio.create_task(handler.get_network_infrastructure())
+  _ = asyncio.create_task(handler.build_network_infrastructure())
 
   await asyncio.gather(enqueue_files_task)
 
   await handler.files_queue.join()
   await handler.queue.join()
 
-  network_inf_task.cancel()
-  build_network_inf_task.cancel()
-
   handler.print_results()
 
 
 if __name__ == '__main__':
-  loop = asyncio.get_event_loop()
-  loop.run_until_complete(main())
-  loop.close()
+  asyncio.run(main())

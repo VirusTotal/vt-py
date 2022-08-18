@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Defines an iterator to loop through VT API collections."""
 
 from .object import Object
 from .utils import make_sync
@@ -19,6 +20,7 @@ __all__ = ['Iterator']
 
 
 class Iterator:
+  # pylint: disable=line-too-long
   """Iterator allows iterating over object collections.
 
   Some endpoints in the VirusTotal API represent a collection of objects, for
@@ -56,6 +58,7 @@ class Iterator:
   >>>  import asyncio
   >>>  asyncio.get_event_loop().run_until_complete(print_comments)
   """
+  # pylint: disable=line-too-long
 
   def __init__(self, client, path, params=None, cursor=None,
                limit=None, batch_size=0):
@@ -87,8 +90,8 @@ class Iterator:
         raise ValueError('invalid cursor')
       try:
         self._batch_cursor = int(batch_cursor)
-      except ValueError:
-        raise ValueError('invalid cursor')
+      except ValueError as exc:
+        raise ValueError('invalid cursor') from exc
 
   def _build_params(self):
     params = self._params.copy()
@@ -119,8 +122,8 @@ class Iterator:
   def __next__(self):
     try:
       return make_sync(self.__anext__())
-    except StopAsyncIteration:
-      raise StopIteration()
+    except StopAsyncIteration as exc:
+      raise StopIteration() from exc
 
   async def __anext__(self):
     if self._limit and self._count == self._limit:

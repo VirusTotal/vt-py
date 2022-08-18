@@ -130,9 +130,9 @@ class VTISearchToNetworkInfrastructureHandler:
       if any(contacted_addr):
         for inf in item[1].items():
           for key in inf[1]:
-            print('{}: {}'.format(
-                key['type'].upper(),
-                key.get('context_attributes', {}).get('url') or key.get('id')))
+            k = key['type'].upper()
+            v = key.get('context_attributes', {}).get('url') or key.get('id')
+            print(f'{k}: {v}')
 
 
 async def main():
@@ -145,16 +145,13 @@ async def main():
   parser.add_argument('--limit', default=10, help='Limit of files to process.')
 
   args = parser.parse_args()
-
-  loop = asyncio.get_event_loop()
   handler = VTISearchToNetworkInfrastructureHandler(args.apikey)
 
   try:
-    enqueue_files_task = loop.create_task(
+    enqueue_files_task = asyncio.create_task(
         handler.get_matching_files(args.query, int(args.limit)))
-    network_task = loop.create_task(handler.get_network())
-    build_network_task = loop.create_task(
-        handler.build_network())
+    _ = asyncio.create_task(handler.get_network())
+    _ = asyncio.create_task(handler.build_network())
 
     await asyncio.gather(enqueue_files_task)
 
@@ -162,14 +159,9 @@ async def main():
     await handler.queue.join()
 
     handler.print_results()
-  except Exception as e:
+  except Exception as e:  # pylint: disable=broad-except
     print(f'ERROR: {e}')
-  finally:
-    network_task.cancel()
-    build_network_task.cancel()
 
 
 if __name__ == '__main__':
-  loop = asyncio.get_event_loop()
-  loop.run_until_complete(main())
-  loop.close()
+  asyncio.run(main())

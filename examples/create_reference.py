@@ -53,7 +53,7 @@ def create_reference(url, creation_date, title, author, client, iocs):
   # Add IOCs to Reference.
   add_iocs_to_reference_payload(iocs, payload)
 
-  ref_url = base64.b64encode(url.encode()).decode().strip("=")
+  ref_url = base64.b64encode(url.encode()).decode().strip('=')
 
   # Reference endpoint accepts both reference id or url encoded in base64.
   response_get_reference = client.get(f'/references/{ref_url}')
@@ -61,15 +61,15 @@ def create_reference(url, creation_date, title, author, client, iocs):
   exists = response_get_reference.status == 200
 
   if exists:
-    payload["id"] = response_get_reference.json()["data"]['id']
+    payload['id'] = response_get_reference.json()['data']['id']
 
   reference_obj = vt.Object.from_dict(payload)
 
   if exists:
-    print(f"Patching reference {url}...")
+    print(f'Patching reference {url}...')
     return client.patch_object(f'/references/{ref_url}', obj=reference_obj)
   else:
-    print(f"Posting reference {url}...")
+    print(f'Posting reference {url}...')
     return client.post_object('/references', obj=reference_obj)
 
 

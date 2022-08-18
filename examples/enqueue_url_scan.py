@@ -11,10 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Analyses URLs from a given file in VirusTotal."""
+
 import argparse
 import asyncio
-import os
-import sys
 import vt
 
 
@@ -24,8 +24,8 @@ async def get_urls_to_enqueue(queue, path, url):
     await queue.put(url)
     return
 
-  for url in path:
-    await queue.put(url.strip())
+  for u in path:
+    await queue.put(u.strip())
 
 
 async def enqueue_urls(queue, apikey):
@@ -55,13 +55,13 @@ def main():
   queue = asyncio.Queue(loop=loop)
   loop.create_task(get_urls_to_enqueue(queue, args.path, args.url))
 
-  _worker_tasks = []
-  for i in range(args.workers):
-    _worker_tasks.append(
+  worker_tasks = []
+  for _ in range(args.workers):
+    worker_tasks.append(
         loop.create_task(enqueue_urls(queue, args.apikey)))
 
   # Wait until all worker tasks has completed.
-  loop.run_until_complete(asyncio.gather(*_worker_tasks))
+  loop.run_until_complete(asyncio.gather(*worker_tasks))
   loop.close()
 
 

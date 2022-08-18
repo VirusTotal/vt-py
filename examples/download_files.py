@@ -11,6 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Download files from VirusTotal given a list of hashes."""
+
 import argparse
 import asyncio
 import os
@@ -35,7 +37,10 @@ async def download_files(queue, args):
       file_hash = await queue.get()
       file_path = os.path.join(args.output, file_hash)
       with open(file_path, 'wb') as f:
-        await client.download_file_async(file_hash, f)
+        try:
+          await client.download_file_async(file_hash, f)
+        except vt.error.APIError as e:
+          print(f'ERROR: {e}')
       print(file_hash)
       queue.task_done()
 
@@ -68,7 +73,7 @@ def main():
     os.makedirs(args.output)
 
   if args.input:
-    input_file = open(args.input)
+    input_file = open(args.input, encoding='utf-8')  # pylint: disable=consider-using-with
   else:
     input_file = sys.stdin
 
@@ -76,14 +81,16 @@ def main():
   queue = asyncio.Queue(loop=loop)
   loop.create_task(read_hashes(queue, input_file))
 
-  _worker_tasks = []
-  for i in range(args.workers):
-    _worker_tasks.append(
+  worker_tasks = []
+  for _ in range(args.workers):
+    worker_tasks.append(
         loop.create_task(download_files(queue, args)))
 
   # Wait until all worker tasks has completed.
-  loop.run_until_complete(asyncio.gather(*_worker_tasks))
+  loop.run_until_complete(asyncio.gather(*worker_tasks))
   loop.close()
+  if input_file != sys.stdin:
+    input_file.close()
 
 
 if __name__ == '__main__':

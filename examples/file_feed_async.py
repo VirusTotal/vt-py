@@ -24,8 +24,6 @@ privileges for using the VirusTotal Feed API.
 
 import argparse
 import asyncio
-import aiohttp
-import functools
 import json
 import os
 import signal
@@ -33,6 +31,7 @@ import vt
 
 
 class FeedReader:
+  """Reads and processes a VirusTotal file feed batch."""
 
   def __init__(self, apikey, output_dir, num_workers=4,
                download_files=False,cursor=None):
@@ -68,7 +67,7 @@ class FeedReader:
         file_path = os.path.join(self._output_dir, file_obj.id)
         # Write a file <sha256>.json with file's metadata and another file
         # named <sha256> with the file's content.
-        with open(file_path + '.json', mode='w') as f:
+        with open(file_path + '.json', mode='w', encoding='utf-8') as f:
           f.write(json.dumps(file_obj.to_dict()))
         if self._download_files:
           # The URL for downloading the file comes as a context attribute named
@@ -106,7 +105,7 @@ class FeedReader:
     # Create multiple tasks that read file object's from the queue, download
     # the file's content, and create the output files.
     self._worker_tasks = []
-    for i in range(self._num_workers):
+    for _ in range(self._num_workers):
       self._worker_tasks.append(
           loop.create_task(self._process_files_from_queue()))
 
@@ -164,7 +163,7 @@ def main():
 
   feed_reader.run()
 
-  print(f"\ncontinuation cursor: {feed_reader.cursor()}")
+  print(f'\ncontinuation cursor: {feed_reader.cursor()}')
 
 
 if __name__ == '__main__':

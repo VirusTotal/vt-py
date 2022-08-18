@@ -11,6 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Defines a VT object and other helper classes."""
+
 import datetime
 import functools
 import re
@@ -76,7 +78,7 @@ class Object:
         "type": <object type>,
         "id": <object id>,
         "links": {
-          "self": "https://www.virustotal.com/api/v3/<collection name>/<object id>"
+          "self": "https://www.virustotal.com/api/v3/<collection name>/<obj id>"
         },
         "attributes": {
           ...
@@ -136,8 +138,8 @@ class Object:
 
   def __getattribute__(self, attr):
     value = super().__getattribute__(attr)
-    for re in Object.DATE_ATTRIBUTES:
-      if re.match(attr):
+    for r in Object.DATE_ATTRIBUTES:
+      if r.match(attr):
         value = datetime.datetime.utcfromtimestamp(value)
         break
     return value

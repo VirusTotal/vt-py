@@ -19,3 +19,5 @@ vt_py.egg-info
 # IntelliJ
 *.iml
 /.idea
+
+.vscode/

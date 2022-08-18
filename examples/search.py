@@ -29,26 +29,22 @@ def main():
   parser = argparse.ArgumentParser(
       description='Make a VirusTotal Intelligence search and prints the matching objects.')
 
-  parser.add_argument('query',
-      type=str,
-      nargs='+',
+  parser.add_argument(
+      'query', type=str, nargs='+',
       help='a VirusTotal Intelligence search query.')
 
-  parser.add_argument('--apikey',
-      required=True,
-      help='your VirusTotal API key')
+  parser.add_argument(
+      '--apikey', required=True, help='your VirusTotal API key')
 
-  parser.add_argument('--limit',
-      type=int,
-      required=False,
-      help='maximum number of objects that will be retrieved',
-      default=50)
+  parser.add_argument(
+      '--limit', type=int, required=False,
+      help='maximum number of objects that will be retrieved', default=50)
 
   args = parser.parse_args()
 
   with vt.Client(args.apikey) as client:
-    it = client.iterator('/intelligence/search',
-        params={'query': ' '.join(args.query)},
+    it = client.iterator(
+        '/intelligence/search', params={'query': ' '.join(args.query)},
         limit=args.limit)
     for obj in it:
       print(f"{obj.type}:{obj.id}")

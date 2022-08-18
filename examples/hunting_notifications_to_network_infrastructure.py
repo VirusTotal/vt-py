@@ -130,20 +130,20 @@ class HuntingNotificationToNetworkInfrastructureHandler:
 
     print('TOP CONTACTED DOMAINS')
     print('Num. Requests\tDomain')
-    sorted_domains = sorted(self.networking_counters['domains'].items(),
-        key=lambda x: -x[1])
+    sorted_domains = sorted(
+        self.networking_counters['domains'].items(), key=lambda x: -x[1])
     for domain_tuple in sorted_domains:
       print(f'{domain_tuple[1]:>12}\t{domain_tuple[0]:>5}')
     print('TOP CONTACTED IPs')
     print('Num. Requests\tIP')
-    sorted_ips = sorted(self.networking_counters['domains'].items(),
-        key=lambda x: -x[1])
+    sorted_ips = sorted(
+        self.networking_counters['domains'].items(), key=lambda x: -x[1])
     for ip_tuple in sorted_ips:
       print(f'{ip_tuple[1]:>12}\t{ip_tuple[0]:>12}')
     print('TOP CONTACTED URLs')
     print('Num. Requests\tURL')
-    sorted_urls = sorted(self.networking_counters['domains'].items(),
-      key=lambda x: -x[1])
+    sorted_urls = sorted(
+        self.networking_counters['domains'].items(), key=lambda x: -x[1])
     for url_tuple in sorted_urls:
       print(f'{url_tuple[1]:>12}\t{url_tuple[0]:>12}')
 
@@ -167,17 +167,18 @@ async def main():
   parser = argparse.ArgumentParser(
       description='Get files matching a Hunting Ruleset in VirusTotal.')
 
-  parser.add_argument('--apikey',
-      required=True, help='your VirusTotal API key')
+  parser.add_argument(
+      '--apikey', required=True, help='your VirusTotal API key')
 
-  parser.add_argument('--filter',
-      default='', help='Name of the ruleset to filter with')
+  parser.add_argument(
+      '--filter', default='', help='Name of the ruleset to filter with')
 
-  parser.add_argument('-l', '--limit',
-      default=None, help='Limit of files to be analyzed')
+  parser.add_argument(
+      '-l', '--limit', default=None, help='Limit of files to be analyzed')
 
-  parser.add_argument('-n', '--num-days',
-      default=None, help='Number of days to be analyzed (backward)')
+  parser.add_argument(
+      '-n', '--num-days', default=None,
+      help='Number of days to be analyzed (backward)')
 
   args = parser.parse_args()
   limit = int(args.limit)

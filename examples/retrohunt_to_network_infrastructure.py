@@ -107,17 +107,17 @@ class RetroHuntJobToNetworkInfrastructureHandler:
     """
     file_hash = file_obj.sha256
     file_dict = file_obj.to_dict()
-    file_signers = dictpath.get_all(file_dict,
-        '$.attributes.signature_info["signers details"][*].name')
-    creation_dates = dictpath.get_all(file_dict,
-        '$.attributes.creation_date')
+    file_signers = dictpath.get_all(
+        file_dict, '$.attributes.signature_info["signers details"][*].name')
+    creation_dates = dictpath.get_all(
+        file_dict, '$.attributes.creation_date')
     creation_dates = map(lambda x: datetime.fromtimestamp(x), creation_dates)
-    imphashes = dictpath.get_all(file_dict,
-        '$.attributes.pe_info.imphash')
-    signed_dates = dictpath.get_all(file_dict,
-        '$.attributes.signature_info.["signing date"]')
-    file_versions = dictpath.get_all(file_dict,
-        '$.attributes.signature_info.["file version"]')
+    imphashes = dictpath.get_all(
+        file_dict, '$.attributes.pe_info.imphash')
+    signed_dates = dictpath.get_all(
+        file_dict, '$.attributes.signature_info.["signing date"]')
+    file_versions = dictpath.get_all(
+        file_dict, '$.attributes.signature_info.["file version"]')
 
     for file_signer in file_signers:
       self.files_commonalities['Signers'][file_signer].append(file_hash)
@@ -148,22 +148,25 @@ class RetroHuntJobToNetworkInfrastructureHandler:
         self.networking_counters[type][address] += 1
       self.networking_queue.task_done()
 
-  def print_results(self):
+  def print_results(self):  # noqa: C901
     """Print results of network infrastructure and commonalities analysis."""
 
     print('TOP CONTACTED DOMAINS')
     print('Num. Requests\tDomain')
-    for domain_tuple in sorted(self.networking_counters['domains'].items(),
+    for domain_tuple in sorted(
+        self.networking_counters['domains'].items(),
         key=lambda x: -x[1]):
       print(f'{domain_tuple[1]:>12}\t{domain_tuple[0]:>5}')
     print('TOP CONTACTED IPs')
     print('Num. Requests\tIP')
-    for ip_tuple in sorted(self.networking_counters['ips'].items(),
+    for ip_tuple in sorted(
+        self.networking_counters['ips'].items(),
         key=lambda x: -x[1]):
       print(f'{ip_tuple[1]:>12}\t{ip_tuple[0]:>12}')
     print('TOP CONTACTED URLs')
     print('Num. Requests\tURL')
-    for url_tuple in sorted(self.networking_counters['urls'].items(),
+    for url_tuple in sorted(
+        self.networking_counters['urls'].items(),
         key=lambda x: -x[1]):
       print(f'{url_tuple[1]:>12}\t{url_tuple[0]:>12}')
 
@@ -199,14 +202,15 @@ async def main():
   parser = argparse.ArgumentParser(
       description='Get files from the VirusTotal feed.')
 
-  parser.add_argument('--apikey',
-      required=True, help='your VirusTotal API key')
+  parser.add_argument(
+      '--apikey', required=True, help='your VirusTotal API key')
 
-  parser.add_argument('-l', '--limit',
-      default=None, help='Limit of files to be analyzed')
+  parser.add_argument(
+      '-l', '--limit', default=None, help='Limit of files to be analyzed')
 
-  parser.add_argument('-r', '--retrohunt-job',
-      default=None, help='Identifier of the RetroHunt job to analyze')
+  parser.add_argument(
+      '-r', '--retrohunt-job', default=None,
+      help='Identifier of the RetroHunt job to analyze')
 
   args = parser.parse_args()
   limit = int(args.limit)

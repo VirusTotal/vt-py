@@ -460,6 +460,7 @@ def test_scan_url(httpserver):
 
   assert analysis.type == 'analysis'
 
+
 def test_user_headers(httpserver):
   user_headers = {'foo': 'bar'}
 

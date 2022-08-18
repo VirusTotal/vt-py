@@ -20,8 +20,6 @@ Set an env-var e.g. $VT_API_KEY
 """
 
 import argparse
-import json
-import os
 import vt
 
 
@@ -40,10 +38,11 @@ def main():
       description='Get URLs from the VirusTotal feed. '
       'For each URL in the feed, print its detection ratio.')
 
-  parser.add_argument('--apikey',
-      required=True, help='your VirusTotal API key')
+  parser.add_argument(
+      '--apikey', required=True, help='your VirusTotal API key')
 
-  parser.add_argument('--cursor',
+  parser.add_argument(
+      '--cursor',
       required=False,
       help='cursor indicating where to start')
 

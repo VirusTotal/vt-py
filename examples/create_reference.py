@@ -22,6 +22,7 @@ import json
 import vt
 import base64
 
+
 def create_reference(url, creation_date, title, author, client, iocs):
   """Creates a reference in VirusTotal.
 
@@ -71,7 +72,6 @@ def create_reference(url, creation_date, title, author, client, iocs):
   else:
     print(f"Posting reference {url}...")
     return client.post_object('/references', obj=reference_obj)
-
 
 
 def add_iocs_to_reference_payload(iocs, reference_payload):
@@ -166,6 +166,7 @@ def main():
   client.close()
   if reference_obj:
     print(json.dumps(reference_obj.to_dict(), indent=2))
+
 
 if __name__ == '__main__':
   main()

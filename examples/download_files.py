@@ -24,6 +24,7 @@ The list of hashes is read from the INPUT file, one hash per line. If no INPUT
 file is specified hashes are read from the standard input.
 '''
 
+
 async def read_hashes(queue, input_file):
   for file_hash in input_file:
     await queue.put(file_hash.strip('\n'))
@@ -45,18 +46,22 @@ def main():
   parser = argparse.ArgumentParser(
       description=program_description)
 
-  parser.add_argument('--apikey',
+  parser.add_argument(
+      '--apikey',
       required=True,
       help='your VirusTotal API key')
 
-  parser.add_argument('--input',
+  parser.add_argument(
+      '--input',
       help='path to a file containing the hashes')
 
-  parser.add_argument('--output',
+  parser.add_argument(
+      '--output',
       default='./file-feed',
       help='path to output directory')
 
-  parser.add_argument('--workers',
+  parser.add_argument(
+      '--workers',
       type=int,
       required=False,
       default=4,
@@ -77,7 +82,7 @@ def main():
   loop.create_task(read_hashes(queue, input_file))
 
   _worker_tasks = []
-  for i in range(args.workers):
+  for _ in range(args.workers):
     _worker_tasks.append(
         loop.create_task(download_files(queue, args)))
 

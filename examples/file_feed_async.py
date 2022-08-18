@@ -24,8 +24,6 @@ privileges for using the VirusTotal Feed API.
 
 import argparse
 import asyncio
-import aiohttp
-import functools
 import json
 import os
 import signal
@@ -35,7 +33,7 @@ import vt
 class FeedReader:
 
   def __init__(self, apikey, output_dir, num_workers=4,
-               download_files=False,cursor=None):
+               download_files=False, cursor=None):
     self._apikey = apikey
     self._aborted = False
     self._cursor = cursor
@@ -129,26 +127,21 @@ def main():
       'directory containing information about the file. Additionally you can '
       'download the actual file with the --download-files option.')
 
-  parser.add_argument('--apikey',
-      required=True,
-      help='your VirusTotal API key')
+  parser.add_argument(
+      '--apikey', required=True, help='your VirusTotal API key')
 
-  parser.add_argument('--cursor',
-      required=False,
-      help='cursor indicating where to start')
+  parser.add_argument(
+      '--cursor', required=False, help='cursor indicating where to start')
 
-  parser.add_argument('--output',
-      default='./file-feed',
-      help='path to output directory')
+  parser.add_argument(
+      '--output', default='./file-feed', help='path to output directory')
 
-  parser.add_argument('--download-files',
-      action='store_true', help='download files')
+  parser.add_argument(
+      '--download-files', action='store_true', help='download files')
 
-  parser.add_argument('--num_workers',
-      type=int,
-      required=False,
-      help='number of concurrent workers',
-      default=4)
+  parser.add_argument(
+      '--num_workers', type=int, required=False,
+      help='number of concurrent workers', default=4)
 
   args = parser.parse_args()
 

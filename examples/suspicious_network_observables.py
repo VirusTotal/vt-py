@@ -78,12 +78,11 @@ async def get_netloc_report_relationships(loop, apikey, netloc):
     return
 
   tasks = []
-  async with vt.Client(apikey) as client:
-    for rel_type in [
-        'urls', 'downloaded_files', 'communicating_files', 'referrer_files']:
+  for rel_type in [
+      'urls', 'downloaded_files', 'communicating_files', 'referrer_files']:
 
-      tasks.append(loop.create_task(
-          get_netloc_relationship(apikey, netloc, rel_type)))
+    tasks.append(loop.create_task(
+        get_netloc_relationship(apikey, netloc, rel_type)))
 
   results = await asyncio.gather(*tasks, return_exceptions=True)
   print_results(results, netloc)
@@ -113,4 +112,3 @@ def main():
 
 if __name__ == '__main__':
   main()
-

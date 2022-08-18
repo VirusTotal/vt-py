@@ -13,8 +13,6 @@
 
 import argparse
 import asyncio
-import os
-import sys
 import vt
 
 
@@ -46,8 +44,9 @@ def main():
   parser.add_argument('--workers', type=int, required=False, default=4,
                       help='number of concurrent workers')
   group = parser.add_mutually_exclusive_group(required=True)
-  group.add_argument('--path', type=argparse.FileType('r'),
-                      help='path to a file containing a list of URLs to scan.')
+  group.add_argument(
+      '--path', type=argparse.FileType('r'),
+      help='path to a file containing a list of URLs to scan.')
   group.add_argument('--url', help='URL to scan.')
   args = parser.parse_args()
 

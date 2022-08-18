@@ -35,18 +35,17 @@ def main():
       'directory containing information about the file. Additionally you can '
       'download the actual file with the --download-files option.')
 
-  parser.add_argument('--apikey',
-      required=True, help='your VirusTotal API key')
+  parser.add_argument(
+      '--apikey', required=True, help='your VirusTotal API key')
 
-  parser.add_argument('--output',
-      default='./file-feed', help='path to output directory')
+  parser.add_argument(
+      '--output', default='./file-feed', help='path to output directory')
 
-  parser.add_argument('--download-files',
-      action='store_true', help='download files')
+  parser.add_argument(
+      '--download-files', action='store_true', help='download files')
 
-  parser.add_argument('--cursor',
-      required=False,
-      help='cursor indicating where to start')
+  parser.add_argument(
+      '--cursor', required=False, help='cursor indicating where to start')
 
   args = parser.parse_args()
 

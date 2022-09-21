@@ -230,6 +230,7 @@ class Client:
       headers = {
           'X-Apikey': self._apikey,
           'Accept-Encoding': 'gzip',
+          'Content-Type': 'application/json',
           'User-Agent': _USER_AGENT_FMT.format_map({
               'agent': self._agent, 'version': __version__})
       }

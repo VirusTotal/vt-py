@@ -45,7 +45,7 @@ async def download_files(queue, args):
       queue.task_done()
 
 
-def main():
+async def main():
 
   parser = argparse.ArgumentParser(
       description=program_description)
@@ -77,21 +77,19 @@ def main():
   else:
     input_file = sys.stdin
 
-  loop = asyncio.get_event_loop()
-  queue = asyncio.Queue(loop=loop)
-  loop.create_task(read_hashes(queue, input_file))
+  queue = asyncio.Queue()
+  asyncio.create_task(read_hashes(queue, input_file))
 
   worker_tasks = []
   for _ in range(args.workers):
     worker_tasks.append(
-        loop.create_task(download_files(queue, args)))
+        asyncio.create_task(download_files(queue, args)))
 
   # Wait until all worker tasks has completed.
-  loop.run_until_complete(asyncio.gather(*worker_tasks))
-  loop.close()
+  await asyncio.gather(*worker_tasks)
   if input_file != sys.stdin:
     input_file.close()
 
 
 if __name__ == '__main__':
-  main()
+  asyncio.run(main())

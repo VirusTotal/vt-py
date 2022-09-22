@@ -233,7 +233,6 @@ class Client:
       headers = {
           'X-Apikey': self._apikey,
           'Accept-Encoding': 'gzip',
-          'Content-Type': 'application/json',
           'User-Agent': _USER_AGENT_FMT.format_map({
               'agent': self._agent, 'version': __version__})
       }
@@ -577,6 +576,11 @@ class Client:
   async def patch_object_async(self, path, *path_args, obj):
     """Like :func:`patch_object` but returns a coroutine."""
     data = json.dumps({'data': obj.to_dict(modified_attributes_only=True)})
+
+    if self._user_headers is None:
+      self._user_headers = {}
+    self._user_headers['Content-Type'] = 'application/json'
+
     response = await self.patch_async(path, *path_args, data=data)
     return await self._response_to_object(response)
 
@@ -624,6 +628,11 @@ class Client:
   async def post_object_async(self, path, *path_args, obj):
     """Like :func:`post_object` but returns a coroutine."""
     data = json.dumps({'data': obj.to_dict()})
+
+    if self._user_headers is None:
+      self._user_headers = {}
+    self._user_headers['Content-Type'] = 'application/json'
+
     response = await self.post_async(path, *path_args, data=data)
     return await self._response_to_object(response)
 

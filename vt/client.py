@@ -188,6 +188,7 @@ class Client:
   :param proxy: A string indicating the proxy to use for requests
     made by the client (None by default).
   :param headers: Dict of headers defined by the user.
+  :param verify_ssl: Whether to verify the certificate in SSL connections.
   :type apikey: str
   :type agent: str
   :type host: str
@@ -195,10 +196,11 @@ class Client:
   :type timeout: int
   :type proxy: str
   :type headers: dict
+  :type verify_ssl: bool
   """
 
   def __init__(self, apikey, agent='unknown', host=None, trust_env=False,
-               timeout=300, proxy=None, headers=None):
+               timeout=300, proxy=None, headers=None, verify_ssl=True):
     """Initialize the client with the provided API key."""
 
     if not isinstance(apikey, str):
@@ -215,6 +217,7 @@ class Client:
     self._timeout = timeout
     self._proxy = proxy
     self._user_headers = headers
+    self._verify_ssl = verify_ssl
 
   def _full_url(self, path, *args):
     try:
@@ -239,7 +242,7 @@ class Client:
         headers.update(self._user_headers)
 
       self._session = aiohttp.ClientSession(
-        connector=aiohttp.TCPConnector(ssl=False),
+        connector=aiohttp.TCPConnector(ssl=self._verify_ssl),
         headers=headers,
         trust_env=self._trust_env,
         timeout=aiohttp.ClientTimeout(total=self._timeout))

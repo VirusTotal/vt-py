@@ -18,7 +18,6 @@ import asyncio
 import base64
 import json
 import io
-import os
 
 from .error import APIError
 from .feed import Feed

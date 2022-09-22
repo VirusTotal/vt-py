@@ -530,10 +530,6 @@ class Client:
 
   async def get_object_async(self, path, *path_args, params=None):
     """Like :func:`get_object` but returns a coroutine."""
-    if self._user_headers is None:
-      self._user_headers = {}
-    self._user_headers['Content-Type'] = 'application/json'
-
     response = await self.get_async(path, *path_args, params=params)
     return await self._response_to_object(response)
 

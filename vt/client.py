@@ -532,7 +532,7 @@ class Client:
     response = await self.get_async(path, *path_args, params=params)
     return await self._response_to_object(response)
 
-  def patch(self, path, *path_args, data=None, json=None):
+  def patch(self, path, *path_args, data=None, json_data=None):
     """Sends a PATCH request to a given API endpoint.
 
     This is a low-level function that returns a raw HTTP response, no error
@@ -543,20 +543,20 @@ class Client:
     :param path_args: A variable number of arguments that are put into any
       placeholders used in path.
     :param data: Data sent in the request body.
-    :param json: dict containing data to send in the request body as JSON.
+    :param json_data: dict containing data to send in the request body as JSON.
     :type path: str
     :type data: A string or bytes
-    :type json: dict
+    :type json_data: dict
     :returns: An instance of :class:`ClientResponse`.
     """
-    return make_sync(self.patch_async(path, *path_args, data, json))
+    return make_sync(self.patch_async(path, *path_args, data, json_data))
 
-  async def patch_async(self, path, *path_args, data=None, json=None):
+  async def patch_async(self, path, *path_args, data=None, json_data=None):
     """Like :func:`patch` but returns a coroutine."""
     return ClientResponse(
         await self._get_session().patch(
             self._full_url(path, *path_args),
-            data=data, json=json, proxy=self._proxy))
+            data=data, json=json_data, proxy=self._proxy))
 
   def patch_object(self, path, *path_args, obj):
     """Sends a PATCH request for modifying an object.
@@ -579,10 +579,10 @@ class Client:
     """Like :func:`patch_object` but returns a coroutine."""
     data = {'data': obj.to_dict(modified_attributes_only=True)}
 
-    response = await self.patch_async(path, *path_args, json=data)
+    response = await self.patch_async(path, *path_args, json_data=data)
     return await self._response_to_object(response)
 
-  def post(self, path, *path_args, data=None, json=None):
+  def post(self, path, *path_args, data=None, json_data=None):
     """Sends a POST request to a given API endpoint.
 
     This is a low-level function that returns a raw HTTP response, no error
@@ -593,20 +593,21 @@ class Client:
     :param path_args: A variable number of arguments that are put into any
       placeholders used in path.
     :param data: Data sent in the request body.
-    :param json: dict containing data to send in the request body as JSON.
+    :param json_data: dict containing data to send in the request body as JSON.
     :type path: str
     :type data: A string or bytes
-    :type json: dict
+    :type json_data: dict
     :returns: An instance of :class:`ClientResponse`.
     """
-    return make_sync(self.post_async(path, *path_args, data=data, json=json))
+    return make_sync(
+        self.post_async(path, *path_args, data=data, json_data=json_data))
 
-  async def post_async(self, path, *path_args, data=None, json=None):
+  async def post_async(self, path, *path_args, data=None, json_data=None):
     """Like :func:`post` but returns a coroutine."""
     return ClientResponse(
         await self._get_session().post(
             self._full_url(path, *path_args),
-            data=data, json=json, proxy=self._proxy))
+            data=data, json=json_data, proxy=self._proxy))
 
   def post_object(self, path, *path_args, obj):
     """Sends a POST request for creating an object.
@@ -629,7 +630,7 @@ class Client:
     """Like :func:`post_object` but returns a coroutine."""
     data = {'data': obj.to_dict()}
 
-    response = await self.post_async(path, *path_args, json=data)
+    response = await self.post_async(path, *path_args, json_data=data)
     return await self._response_to_object(response)
 
   def iterator(self, path, *path_args, params=None, cursor=None,

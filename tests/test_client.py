@@ -189,8 +189,8 @@ def test_patch_object(httpserver):
   httpserver.expect_request(
       '/api/v3/dummy_types/dummy_id',
       method='PATCH',
-      headers={'X-Apikey': 'dummy_api_key'},
-      data=json.dumps({'data': obj.to_dict(modified_attributes_only=True)}),
+      headers={'X-Apikey': 'dummy_api_key', 'Content-Type': 'application/json'},
+      json={'data': obj.to_dict(modified_attributes_only=True)},
   ).respond_with_json({
       'data': {
           'id': 'dummy_id',
@@ -213,8 +213,8 @@ def test_post_object(httpserver):
   httpserver.expect_request(
       '/api/v3/dummy_types',
       method='POST',
-      headers={'X-Apikey': 'dummy_api_key'},
-      data=json.dumps({'data': obj.to_dict()}),
+      headers={'X-Apikey': 'dummy_api_key', 'Content-Type': 'application/json'},
+      json={'data': obj.to_dict()},
   ).respond_with_json({
       'data': {
           'id': 'dummy_id',

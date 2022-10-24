@@ -29,8 +29,9 @@ def main():
   parser = argparse.ArgumentParser(
       description='Make a VirusTotal Intelligence search and prints the matching objects.')  # pylint: disable=line-too-long
 
-  parser.add_argument('query',
+  parser.add_argument('--query',
       type=str,
+      required=True,
       nargs='+',
       help='a VirusTotal Intelligence search query.')
 

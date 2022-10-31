@@ -203,12 +203,6 @@ class Client:
                timeout=300, proxy=None, headers=None, verify_ssl=True):
     """Initialize the client with the provided API key."""
 
-    if not isinstance(apikey, str):
-      raise ValueError('API key must be a string')
-
-    if not apikey:
-      raise ValueError('API key can not be an empty string')
-
     self._host = host or _API_HOST
     self._apikey = apikey
     self._agent = agent
@@ -218,6 +212,12 @@ class Client:
     self._proxy = proxy
     self._user_headers = headers
     self._verify_ssl = verify_ssl
+
+    if not isinstance(apikey, str):
+      raise ValueError('API key must be a string')
+
+    if not apikey:
+      raise ValueError('API key can not be an empty string')
 
   def _full_url(self, path, *args):
     try:

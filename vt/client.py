@@ -282,8 +282,14 @@ class Client:
 
   async def close_async(self):
     """Like :func:`close` but returns a coroutine."""
-    if self._session:
-      await self._session.close()
+    # Using getattr(self, '_session', None) instead of self._session because
+    # close_async can be called from __del__ when the object is not yet
+    # inialized and therefore the object doesn't have a _session. Calling
+    # self._session in that case would raise AttributeError. See:
+    # https://github.com/VirusTotal/vt-py/issues/125#issue-1449917146
+    session = getattr(self, '_session', None)
+    if session:
+      await session.close()
       self._session = None
 
   def close(self):

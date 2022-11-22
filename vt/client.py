@@ -295,8 +295,11 @@ class Client:
   def close(self):
     """Closes the client.
 
-    When the client is not needed anymore it should be closed for releasing
+    When the client is not needed anymore it must be closed for releasing
     resources like TCP connections.
+
+    Not closing the client after it's used might show error tracebacks
+    indicating it was not properly closed.
     """
     return make_sync(self.close_async())
 

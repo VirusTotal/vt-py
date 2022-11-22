@@ -221,3 +221,12 @@ Let's enable the ruleset:
 >>> rs = client.patch_object("/intelligence/hunting_rulesets/{}", rs.id, obj=rs)
 >>> rs.enabled
 True
+
+Closing
+-------
+
+Once you're done using the client, call `client.close()` at the end of your
+script, to make sure the client is properly closed. Otherwise you might see
+tracebacks indicating the client was never closed.
+
+>>> client.close()

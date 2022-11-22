@@ -230,3 +230,11 @@ script, to make sure the client is properly closed. Otherwise you might see
 tracebacks indicating the client was never closed.
 
 >>> client.close()
+
+If you use a `context manager<https://docs.python.org/3/reference/datamodel.html#context-managers>`,
+the client is automatically closed after exiting, so there's no need to call close:
+
+>>> with vt.Client('<apikey>') as client:
+...     file = client.get_object("/files/44d88612fea8a8f36de82e1278abb02f")
+...     print(file.type_tag)
+text

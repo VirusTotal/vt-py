@@ -24,7 +24,4 @@ def make_sync(future):
     # Generate an event loop if there isn't any.
     event_loop = asyncio.new_event_loop()
     asyncio.set_event_loop(event_loop)
-  if event_loop.is_running():
-    return event_loop.create_task(future)
-  else:
-    return event_loop.run_until_complete(future)
+  return event_loop.run_until_complete(future)

@@ -176,7 +176,6 @@ def test_apierror_iterator(httpserver):
 
     with pytest.raises(APIError) as e:
       for i in it:
-        1/0
         result.append(i)
 
       print(dir(e))

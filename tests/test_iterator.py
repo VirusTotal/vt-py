@@ -18,6 +18,7 @@ from collections import abc
 import pytest
 
 from vt import Client
+from vt.error import APIError
 
 
 def new_client(httpserver):
@@ -161,3 +162,21 @@ async def test_anext(httpserver, iterator_response):  # pylint: disable=unused-a
     # trying to iterate over next element must not work
     async for obj in it:
       pytest.fail('Iteration should already be finished')
+
+
+def test_apierror_iterator(httpserver):
+  """Tests errors are handled gracefully when iterating over a collecti{on."""
+  httpserver.expect_request('/api/v3/dummy_collection/foo').respond_with_json(
+      {'data': {'error': 'InvalidArgumentError', 'message': 'Invalid args'}},
+      status=400)
+
+  result = []
+  with new_client(httpserver) as client:
+    it = client.iterator('/dummy_collection/foo', limit=10, batch_size=3)
+
+    with pytest.raises(APIError) as e:
+      for i in it:
+        1/0
+        result.append(i)
+
+      print(dir(e))

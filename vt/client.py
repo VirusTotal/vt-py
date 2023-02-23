@@ -259,9 +259,6 @@ class Client:
   def __exit__(self, item_type, value, traceback):
     self.close()
 
-  def __del__(self):
-    self.close()
-
   def _extract_data_from_json(self, json_response):
     if not 'data' in json_response:
       raise ValueError('response does not returns a data field')

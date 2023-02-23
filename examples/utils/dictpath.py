@@ -19,6 +19,10 @@ import jsonpath_ng
 _PARSED_PATH_CACHE = {}
 
 
+class DictPathException(Exception):
+  """Represents exceptions raised by the dictpath module."""
+
+
 def iterate(data, path):
   """Generator that returns values in data matching the given JsonPath."""
 
@@ -57,5 +61,5 @@ def get(data, path, default=None):
   if not result:
     return default
   if len(result) > 1:
-    raise Exception(f'JsonPath {path} returning more than one value')
+    raise DictPathException(f'JsonPath {path} returning more than one value')
   return result[0]

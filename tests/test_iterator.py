@@ -17,12 +17,11 @@ from collections import abc
 import json
 import pytest
 
-from vt import Client
-from vt.error import APIError
+import vt
 
 
 def new_client(httpserver):
-  return Client('dummy_api_key',
+  return vt.Client('dummy_api_key',
       host='http://' + httpserver.host + ':' + str(httpserver.port))
 
 
@@ -165,7 +164,7 @@ async def test_anext(httpserver, iterator_response):  # pylint: disable=unused-a
 
 
 def test_apierror_iterator(httpserver):
-  """Tests errors are handled gracefully when iterating over a collecti{on."""
+  """Tests errors are handled gracefully when iterating over a collection."""
   expected_error = {
       'data': {'error': 'InvalidArgumentError', 'message': 'Invalid args'}}
 
@@ -176,7 +175,7 @@ def test_apierror_iterator(httpserver):
   with new_client(httpserver) as client:
     it = client.iterator('/dummy_collection/foo', limit=10, batch_size=3)
 
-    with pytest.raises(APIError) as e:
+    with pytest.raises(vt.APIError) as e:
       for i in it:
         result.append(i)
 

@@ -14,14 +14,14 @@
 """Tests features defined in vt/iterator.py."""
 
 from collections import abc
-
+import json
 import pytest
 
-from vt import Client
+import vt
 
 
 def new_client(httpserver):
-  return Client('dummy_api_key',
+  return vt.Client('dummy_api_key',
       host='http://' + httpserver.host + ':' + str(httpserver.port))
 
 
@@ -161,3 +161,23 @@ async def test_anext(httpserver, iterator_response):  # pylint: disable=unused-a
     # trying to iterate over next element must not work
     async for obj in it:
       pytest.fail('Iteration should already be finished')
+
+
+def test_apierror_iterator(httpserver):
+  """Tests errors are handled gracefully when iterating over a collection."""
+  expected_error = {
+      'data': {'error': 'InvalidArgumentError', 'message': 'Invalid args'}}
+
+  httpserver.expect_request('/api/v3/dummy_collection/foo').respond_with_json(
+      expected_error, status=400)
+
+  result = []
+  with new_client(httpserver) as client:
+    it = client.iterator('/dummy_collection/foo', limit=10, batch_size=3)
+
+    with pytest.raises(vt.APIError) as e:
+      for i in it:
+        result.append(i)
+
+    assert e.value.code == 'ClientError'
+    assert json.loads(e.value.message)['data'] == expected_error['data']

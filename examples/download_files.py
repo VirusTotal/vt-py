@@ -15,6 +15,7 @@
 
 import argparse
 import asyncio
+import io
 import os
 import sys
 import vt
@@ -36,13 +37,16 @@ async def download_files(queue, args):
     while not queue.empty():
       file_hash = await queue.get()
       file_path = os.path.join(args.output, file_hash)
-      with open(file_path, 'wb') as f:
-        try:
-          await client.download_file_async(file_hash, f)
-        except vt.error.APIError as e:
-          print(f'ERROR: {e}')
-      print(file_hash)
-      queue.task_done()
+      file_content = io.BytesIO()
+      try:
+        await client.download_file_async(file_hash, file_content)
+        with open(file_path, 'wb') as f:
+          f.write(file_content.getbuffer())
+      except vt.error.APIError as e:
+        print(f'ERROR writing {file_hash}: {e}')
+      finally:
+        print(file_hash)
+        queue.task_done()
 
 
 async def main():

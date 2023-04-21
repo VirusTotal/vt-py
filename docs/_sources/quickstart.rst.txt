@@ -66,7 +66,7 @@ While retrieving a file any of its hashes can be used as the file identifier,
 but with URLs is a bit more complicated. You must use :func:`vt.url_id` for
 generating the appropriate identifier. You can find more information about why
 this is necessary in:
-`<https://developers.virustotal.com/v3.0/reference#section-url-identifiers>`_.
+`<https://developers.virustotal.com/v3.0/reference#url>`_.
 
 Also notice how we are using a placeholder `{}` in the path. The placeholder
 will be replaced with the value of `url_id`. This works exactly like Python's
@@ -119,7 +119,7 @@ until the analysis has been completed.
 Scan an URL
 -----------
 
-Scanning a URL is very similar to `scanning a file <scan-a-file>`_, you just
+Scanning a URL is very similar to `scanning a file <#scan-a-file>`_, you just
 need to use :meth:`vt.Client.scan_url` instead of :meth:`vt.Client.scan_file`:
 
 >>> analysis = client.scan_url('https://somedomain.com/foo/bar')
@@ -221,3 +221,20 @@ Let's enable the ruleset:
 >>> rs = client.patch_object("/intelligence/hunting_rulesets/{}", rs.id, obj=rs)
 >>> rs.enabled
 True
+
+Closing
+-------
+
+Once you're done using the client, call `client.close()` at the end of your
+script, to make sure the client is properly closed. Otherwise you might see
+tracebacks indicating the client was never closed.
+
+>>> client.close()
+
+If you use a `context manager<https://docs.python.org/3/reference/datamodel.html#context-managers>`,
+the client is automatically closed after exiting, so there's no need to call close:
+
+>>> with vt.Client('<apikey>') as client:
+...     file = client.get_object("/files/44d88612fea8a8f36de82e1278abb02f")
+...     print(file.type_tag)
+text

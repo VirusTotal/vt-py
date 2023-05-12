@@ -19,7 +19,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'vt-py'
-copyright = '2019, VirusTotal'
+copyright = '2023, VirusTotal'
 author = 'VirusTotal'
 
 # The short X.Y version
@@ -41,6 +41,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
+    'sphinx.ext.autosummary',
 ]
 
 # Add any paths that contain templates here, relative to this directory.

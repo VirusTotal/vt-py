@@ -1,84 +1,43 @@
-
-
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>vt.feed &mdash; vt-py  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
-
-  
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../../index.html" class="icon icon-home"> vt-py
           
-
-          
+          <a href="../../index.html" class="icon icon-home">
+            vt-py
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../howtoinstall.html">How to install</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
@@ -86,69 +45,32 @@
 <li class="toctree-l1"><a class="reference internal" href="../../apireference.html">API reference</a></li>
 </ul>
 
-            
-          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">vt-py</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
-        
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-        
-      <li>vt.feed</li>
-    
-    
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">vt.feed</li>
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for vt.feed</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/local/bin/python</span>
-<span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="c1"># Copyright © 2019 The vt-py authors. All Rights Reserved.</span>
 <span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
 <span class="c1"># you may not use this file except in compliance with the License.</span>
@@ -162,19 +84,20 @@
 <span class="c1"># See the License for the specific language governing permissions and</span>
 <span class="c1"># limitations under the License.</span>
 
+<span class="sd">&quot;&quot;&quot;Processes items from VT API feeds.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">timedelta</span>
 
 <span class="kn">import</span> <span class="nn">enum</span>
 <span class="kn">import</span> <span class="nn">io</span>
 <span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">asyncio</span>
 <span class="kn">import</span> <span class="nn">bz2</span>
 
-<span class="kn">from</span> <span class="nn">.error</span> <span class="k">import</span> <span class="n">APIError</span>
-<span class="kn">from</span> <span class="nn">.object</span> <span class="k">import</span> <span class="n">Object</span>
+<span class="kn">from</span> <span class="nn">.error</span> <span class="kn">import</span> <span class="n">APIError</span>
+<span class="kn">from</span> <span class="nn">.object</span> <span class="kn">import</span> <span class="n">Object</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">make_sync</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -183,13 +106,14 @@
 
 
 <div class="viewcode-block" id="FeedType"><a class="viewcode-back" href="../../api/feed.html#vt.FeedType">[docs]</a><span class="k">class</span> <span class="nc">FeedType</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Feed types.&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Feed types.&quot;&quot;&quot;</span>
   <span class="n">FILES</span> <span class="o">=</span> <span class="s1">&#39;files&#39;</span>
-  <span class="n">URLS</span> <span class="o">=</span> <span class="s1">&#39;urls&#39;</span></div>
+  <span class="n">URLS</span> <span class="o">=</span> <span class="s1">&#39;urls&#39;</span>
+  <span class="n">FILE_BEHAVIOURS</span> <span class="o">=</span> <span class="s1">&#39;file-behaviours&#39;</span></div>
 
 
 <div class="viewcode-block" id="Feed"><a class="viewcode-back" href="../../api/feed.html#vt.Feed">[docs]</a><span class="k">class</span> <span class="nc">Feed</span><span class="p">:</span>
-  <span class="sd">&quot;&quot;&quot;Feed represents a stream of objects received from VirusTotal in real-time.</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Feed represents a stream of objects received from VirusTotal in real-time.</span>
 
 <span class="sd">  For more information about VirusTotal Feeds see:</span>
 <span class="sd">  https://developers.virustotal.com/v3.0/reference#feeds</span>
@@ -206,8 +130,8 @@
 <span class="sd">  :func:`vt.Client.feed` method instead.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">feed_type</span><span class="p">,</span> <span class="n">cursor</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Initializes a Feed object.</span>
+  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">feed_type</span><span class="p">,</span> <span class="n">cursor</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initializes a Feed object.</span>
 
 <span class="sd">    This function is not intended to be called directly. Client.feed() is</span>
 <span class="sd">    the preferred way for creating a feed.</span>
@@ -217,10 +141,10 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="c1"># This class tolerates a given number of missing batches in the feed,</span>
-    <span class="c1"># if self._missing_batches_tolerancy is set to 0, there&#39;s no tolerancy</span>
-    <span class="c1"># for missing batches and even a single missing batch will cause an error.</span>
-    <span class="c1"># However, missing batches can occur from time to time.</span>
+    <span class="c1"># This class tolerates a given number of consecutive missing batches in</span>
+    <span class="c1"># the feed. If self._missing_batches_tolerancy is set to 0, there&#39;s no</span>
+    <span class="c1"># tolerancy for missing batches and even a single missing batch will</span>
+    <span class="c1"># cause an error. However, missing batches can occur from time to time.</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_missing_batches_tolerancy</span> <span class="o">=</span> <span class="mi">1</span>
 
     <span class="k">if</span> <span class="n">cursor</span><span class="p">:</span>
@@ -234,15 +158,15 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_next_batch_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch_time</span>
 
   <span class="k">async</span> <span class="k">def</span> <span class="nf">_get_batch_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_time</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;&quot;Retrieves a specific batch from the backend.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;&quot;Retrieves a specific batch from the backend.</span>
 
 <span class="sd">    There&#39;s one batch per minute, each identified by the date in YYYYMMDDhhmm</span>
 <span class="sd">    format. The batch_time argument is a datetime object that is converted to</span>
 <span class="sd">    this format, the seconds in the datetime are ignored.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-      <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">get_async</span><span class="p">(</span><span class="s1">&#39;/feeds/</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">batch_time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">%H%M&#39;</span><span class="p">)))</span>
+      <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">get_async</span><span class="p">(</span>
+          <span class="sa">f</span><span class="s1">&#39;/feeds/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">batch_time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">%H%M&quot;</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
       <span class="n">error</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">get_error_async</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
       <span class="k">if</span> <span class="ow">not</span> <span class="n">error</span><span class="p">:</span>
         <span class="k">break</span>
@@ -252,15 +176,12 @@
         <span class="k">raise</span> <span class="n">error</span>
     <span class="k">return</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">bz2</span><span class="o">.</span><span class="n">decompress</span><span class="p">(</span><span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">read_async</span><span class="p">()))</span>
 
-  <span class="k">def</span> <span class="nf">_get_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_get_batch_async</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
-
   <span class="k">async</span> <span class="k">def</span> <span class="nf">_get_next_batch_async</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Retrieves the next batch from the feed.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieves the next batch from the feed.</span>
 
 <span class="sd">    This function tolerates a certain number of missing batches. If some batch</span>
-<span class="sd">    is missing the next one will be retrieved. If more than</span>
+<span class="sd">    is missing the next one will be retrieved. If the number of missing</span>
+<span class="sd">    batches is greater than the tolerancy set, the function raises an error.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">missing_batches</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
@@ -279,52 +200,41 @@
         <span class="k">if</span> <span class="n">missing_batches</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_missing_batches_tolerancy</span><span class="p">:</span>
           <span class="k">raise</span> <span class="n">error</span>
 
-  <span class="k">def</span> <span class="nf">_get_next_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_get_next_batch_async</span><span class="p">())</span>
-
   <span class="k">def</span> <span class="nf">_skip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
     <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_batch_cursor</span> <span class="o">+=</span> <span class="mi">1</span>
 
-  <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span><span class="p">:</span>
-        <span class="n">next_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_get_next_batch</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_skip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_batch_skip</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_batch_skip</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">next_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_batch_cursor</span> <span class="o">+=</span> <span class="mi">1</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">+=</span> <span class="mi">1</span>
+  <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span>
 
-      <span class="k">if</span> <span class="n">next_item</span><span class="p">:</span>
-        <span class="k">yield</span> <span class="n">Object</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">next_item</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)))</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span> <span class="o">=</span> <span class="kc">None</span>
+  <span class="k">def</span> <span class="fm">__aiter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span>
 
-  <span class="k">async</span> <span class="k">def</span> <span class="nf">__aiter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="fm">__anext__</span><span class="p">())</span>
+    <span class="k">except</span> <span class="ne">StopAsyncIteration</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">StopIteration</span><span class="p">()</span> <span class="kn">from</span> <span class="nn">exc</span>
+
+  <span class="k">async</span> <span class="k">def</span> <span class="fm">__anext__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span><span class="p">:</span>
-        <span class="n">next_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
-      <span class="k">else</span><span class="p">:</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span><span class="p">:</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_next_batch_async</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_skip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_batch_skip</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_batch_skip</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">next_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_batch_cursor</span> <span class="o">+=</span> <span class="mi">1</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">+=</span> <span class="mi">1</span>
+      <span class="n">next_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
 
       <span class="k">if</span> <span class="n">next_item</span><span class="p">:</span>
-        <span class="k">yield</span> <span class="n">Object</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">next_item</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_batch_cursor</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">Object</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">next_item</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)))</span>
       <span class="k">else</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_batch</span> <span class="o">=</span> <span class="kc">None</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">cursor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns a cursor indicating the last item retrieved from the feed.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a cursor indicating the last item retrieved from the feed.</span>
 
 <span class="sd">    This cursor can be used for creating a new Feed object that continues where</span>
 <span class="sd">    a previous one left.</span>
@@ -333,42 +243,30 @@
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &copy; Copyright 2019, VirusTotal
-
-    </p>
+    <p>&#169; Copyright 2023, VirusTotal.</p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

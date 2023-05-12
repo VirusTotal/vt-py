@@ -82,6 +82,64 @@
              
   <section id="object">
 <h1>Object<a class="headerlink" href="#object" title="Permalink to this heading"></a></h1>
+<p>VT module.</p>
+<dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">vt.</span></span><span class="sig-name descname"><span class="pre">Object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj_attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/object.html#Object"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>This class encapsulates any type of object in the VirusTotal API.</p>
+<p>Instances of this class are usually obtained from calls to
+<a class="reference internal" href="client.html#vt.Client.get_object" title="vt.Client.get_object"><code class="xref py py-meth docutils literal notranslate"><span class="pre">vt.Client.get_object()</span></code></a>, however, you need to instantiante this class
+yourself for creating new objects that will be sent to the backend in a call
+to <a class="reference internal" href="client.html#vt.Client.post_object" title="vt.Client.post_object"><code class="xref py py-meth docutils literal notranslate"><span class="pre">vt.Client.post_object()</span></code></a>.</p>
+<p>Learn more about objects in the VirusTotal API in:
+<a class="reference external" href="https://developers.virustotal.com/v3.0/reference#objects">https://developers.virustotal.com/v3.0/reference#objects</a></p>
+<dl class="py method">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/object.html#Object.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Creates an object from its dictionary representation.</p>
+<p>The dictionary representation of a VirusTotal API object has the following
+structure:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="nb">object</span> <span class="nb">type</span><span class="o">&gt;</span><span class="p">,</span>
+  <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="nb">object</span> <span class="nb">id</span><span class="o">&gt;</span><span class="p">,</span>
+  <span class="s2">&quot;links&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;self&quot;</span><span class="p">:</span> <span class="s2">&quot;https://www.virustotal.com/api/v3/&lt;collection name&gt;/&lt;obj id&gt;&quot;</span>
+  <span class="p">},</span>
+  <span class="s2">&quot;attributes&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="o">...</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>At least <cite>type</cite> and <cite>id</cite> are required to be present in the dictionary, if
+not, an exception is raised.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/object.html#Object.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Returns an attribute by name.</p>
+<p>If the attribute is not present in the object, it returns None
+or the value specified in the “default” argument.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attr_name</strong> (<em>str</em>) – Name of the attribute.</p></li>
+<li><p><strong>default</strong> – An optional value that will be returned if the
+attribute is not present in the object.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/object.html#Object.set_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Sets a field of the object’s data.</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 
@@ -95,7 +153,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019, VirusTotal.</p>
+    <p>&#169; Copyright 2023, VirusTotal.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -86,6 +86,54 @@
 <p class="admonition-title">Note</p>
 <p>This feature is available only for premium users.</p>
 </div>
+<p>VT module.</p>
+<dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">vt.</span></span><span class="sig-name descname"><span class="pre">Feed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feed_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cursor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/feed.html#Feed"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Feed represents a stream of objects received from VirusTotal in real-time.</p>
+<p>For more information about VirusTotal Feeds see:
+<a class="reference external" href="https://developers.virustotal.com/v3.0/reference#feeds">https://developers.virustotal.com/v3.0/reference#feeds</a></p>
+<p>In the example below the loop iterates forever, retrieving file objects as
+they are processed by VirusTotal. For a more elaborate example see the file
+examples/file_feed.py in this repository.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">vt</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span><span class="o">&lt;</span><span class="n">apikey</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">file_obj</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">vt</span><span class="o">.</span><span class="n">FeedType</span><span class="o">.</span><span class="n">FILES</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>  <span class="nb">print</span><span class="p">(</span><span class="n">file_obj</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Instances of this class are not created directly, you should use the
+<a class="reference internal" href="client.html#vt.Client.feed" title="vt.Client.feed"><code class="xref py py-func docutils literal notranslate"><span class="pre">vt.Client.feed()</span></code></a> method instead.</p>
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cursor</span></span></dt>
+<dd><p>Returns a cursor indicating the last item retrieved from the feed.</p>
+<p>This cursor can be used for creating a new Feed object that continues where
+a previous one left.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">vt.</span></span><span class="sig-name descname"><span class="pre">FeedType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/feed.html#FeedType"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Feed types.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FILES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'files'</span></em></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FILE_BEHAVIOURS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'file-behaviours'</span></em></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">URLS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'urls'</span></em></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </section>
 
 
@@ -99,7 +147,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019, VirusTotal.</p>
+    <p>&#169; Copyright 2023, VirusTotal.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

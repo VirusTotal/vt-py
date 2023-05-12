@@ -82,6 +82,57 @@
              
   <section id="iterator">
 <h1>Iterator<a class="headerlink" href="#iterator" title="Permalink to this heading"></a></h1>
+<p>VT module.</p>
+<dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">vt.</span></span><span class="sig-name descname"><span class="pre">Iterator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cursor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/iterator.html#Iterator"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Iterator allows iterating over object collections.</p>
+<p>Some endpoints in the VirusTotal API represent a collection of objects, for
+example:</p>
+<p><a class="reference external" href="https://developers.virustotal.com/v3.0/reference#files-comments-get">/files/{id}/comments</a></p>
+<p><a class="reference external" href="https://developers.virustotal.com/v3.0/reference#intelligence-search">/intelligence/search</a></p>
+<p>These collections can be iterated using an instance of this class.</p>
+<p>Learn more about collections in the VirusTotal API in:
+<a class="reference external" href="https://developers.virustotal.com/v3.0/reference#collections">https://developers.virustotal.com/v3.0/reference#collections</a></p>
+<p>The following example iterates over the most recent 200 comments, retrieving
+them in batches of 20:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">vt</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span><span class="o">&lt;</span><span class="n">apikey</span><span class="o">&gt;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">it</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">iterator</span><span class="p">(</span><span class="s1">&#39;/comments&#39;</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">comment</span> <span class="ow">in</span> <span class="n">it</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>  <span class="nb">print</span><span class="p">(</span><span class="n">comment</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">it</span><span class="o">.</span><span class="n">cursor</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>When the iteration is done, it print the iterator’s cursor. The cursor can be
+used for creating another iterator that continues at the point where the
+previous iterator left.</p>
+<p>The Iterator class also exposes an async iterator:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="c1"># Define an async coroutine that iterates over the comments.</span>
+<span class="gp">&gt;&gt;&gt; </span> <span class="k">async</span> <span class="k">def</span> <span class="nf">print_comments</span><span class="p">():</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="k">async</span> <span class="k">for</span> <span class="n">comment</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">iterator</span><span class="p">(</span><span class="s1">&#39;/comments&#39;</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">200</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>     <span class="nb">print</span><span class="p">(</span><span class="n">comment</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span> <span class="c1"># Run the print_comments coroutine using asyncio</span>
+<span class="gp">&gt;&gt;&gt; </span> <span class="kn">import</span> <span class="nn">asyncio</span>
+<span class="gp">&gt;&gt;&gt; </span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">print_comments</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cursor</span></span></dt>
+<dd><p>Cursor indicating the last returned object.</p>
+<p>This cursor can be used for creating a new iterator that continues where
+the current one left.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">meta_async</span></span></dt>
+<dd><p>Meta information.</p>
+<p>The cursor is not included, as it’s exposed as a property.</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 
@@ -95,7 +146,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019, VirusTotal.</p>
+    <p>&#169; Copyright 2023, VirusTotal.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

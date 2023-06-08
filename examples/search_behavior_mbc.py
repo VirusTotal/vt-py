@@ -28,8 +28,6 @@ except ModuleNotFoundError:
   sys.exit(1)
 
 
-DEFAULT_PATH = 'behavior_reports'
-
 LOGGING_LEVEL = logging.INFO  # Modify if you just want to focus on errors
 logging.basicConfig(level=LOGGING_LEVEL,
                     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -37,7 +35,7 @@ logging.basicConfig(level=LOGGING_LEVEL,
                     stream=sys.stdout)
 
 
-class FetchMBCHandeler:
+class FetchMBCHandler:
   """Handler for Downloading files from VT."""
 
   def __init__(self, apikey, num_files):
@@ -134,7 +132,7 @@ async def main():
   numfiles = int(args.numfiles)
   workers = int(args.workers)
   api_key = args.apikey
-  handler = FetchMBCHandeler(api_key, numfiles)
+  handler = FetchMBCHandler(api_key, numfiles)
 
   logging.info('Starting MBC Fetch example')
   logging.info('* VirusTotal Intelligence search: %s', search)

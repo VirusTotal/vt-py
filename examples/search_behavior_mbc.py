@@ -55,15 +55,12 @@ class FetchMBCHandeler:
       return
 
     for sig_match in signature_matches:
-
       if sig_match.get('format') != 'SIG_FORMAT_CAPA':
         logging.info('unexpected rule format %s', sig_match)
         continue
       rule_src = sig_match.get('rule_src')
       capa_rule = yaml.safe_load(rule_src)
       mbc_entries = capa_rule.get('rule', {}).get('meta', {}).get('mbc', [])
-      if not mbc_entries:
-        continue
       for mbc in mbc_entries:
         print(f'sha256: {file_hash}  mbc:{mbc}')
 
@@ -97,29 +94,25 @@ class FetchMBCHandeler:
 
 
 async def main():
-  """Download the top-n results of a given Intelligence search."""
+  """Search behaviour reports with MBC."""
 
   usage = 'usage: prog [options] <intelligence_query/local_file_with_hashes>'
   parser = argparse.ArgumentParser(
       usage=usage,
-      description='Allows you to download the top-n files returned by a given'
+      description='Allows you to search the top-n files returned by a given'
       'VirusTotal Intelligence search. Example: '
-      'python %prog type:"peexe" positives:5+ -n 10 --apikey=<your api key>')
+      'python %prog sandbox_name:CAPA -n 10 --apikey=<your api key>')
 
   parser.add_argument(
       '-q', '--query', type=str, nargs='+',
       help='a VirusTotal Intelligence search query.')
-
   parser.add_argument(
       '-n', '--numfiles', dest='numfiles', default=10,
-      help='Number of files to download')
-
+      help='Number of reports to download')
   parser.add_argument('--apikey', required=True, help='Your VirusTotal API key')
-
   parser.add_argument(
       '-w', '--workers', dest='workers', default=4,
-      help='Concurrent workers for downloading files')
-
+      help='Concurrent workers for downloading reports')
   args = parser.parse_args()
 
 
@@ -145,7 +138,7 @@ async def main():
 
   logging.info('Starting MBC Fetch example')
   logging.info('* VirusTotal Intelligence search: %s', search)
-  logging.info('* Number of files to fetch: %s', numfiles)
+  logging.info('* Number of reports to fetch: %s', numfiles)
 
   enqueue_files_task = asyncio.create_task(handler.queue_file_hashes(search))
 
@@ -155,8 +148,8 @@ async def main():
         asyncio.create_task(handler.fetch_behavior_reports()))
 
   await asyncio.gather(enqueue_files_task)
-  # Wait until all the files have been queued and downloaded, then cancel
-  # download tasks that are idle
+  # Wait until all the reports have been queued and downloaded, then cancel
+  # tasks that are idle
   await handler.queue.join()
 
 

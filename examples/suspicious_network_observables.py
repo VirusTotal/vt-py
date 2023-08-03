@@ -20,11 +20,9 @@ The scripts receives a file as input having a domain/IP address per line.
 
 import argparse
 import asyncio
+import ipaddress
 import re
 import vt
-
-
-IP_REGEX = re.compile(r'\d+\.\d+\.\d+\.\d+')
 
 
 def is_ip_address(netloc):
@@ -36,7 +34,12 @@ def is_ip_address(netloc):
   Returns:
     True or false
   """
-  return IP_REGEX.match(netloc) is not None
+  try:
+    ipaddress.ip_address(netloc)
+  except ValueError:
+    return False
+  else:
+    return True
 
 
 def get_detection_rate(stats):

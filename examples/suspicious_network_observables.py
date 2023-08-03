@@ -36,7 +36,7 @@ def is_ip_address(netloc):
   """
   try:
     ipaddress.ip_address(netloc)
-  except:
+  except ValueError:
     return False
   else:
     return True

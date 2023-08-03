@@ -21,7 +21,6 @@ The scripts receives a file as input having a domain/IP address per line.
 import argparse
 import asyncio
 import ipaddress
-import re
 import vt
 
 

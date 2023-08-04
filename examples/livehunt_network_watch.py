@@ -26,7 +26,6 @@ https://developers.virustotal.com/docs/nethunt
 import argparse
 import asyncio
 import copy
-import logging
 import os
 import re
 import vt
@@ -34,7 +33,7 @@ import sys
 
 
 API_KEY_ENV_VAR = 'VT_API_KEY'
-RULESET_PREFIX = "auto_network_watch_"
+RULESET_PREFIX = 'auto_network_watch_'
 
 
 def extract_domains_from_rule(rules):
@@ -166,7 +165,7 @@ def main():
 
 
   if os.environ.get(API_KEY_ENV_VAR) is None:
-    logging.critical(f'Please set {API_KEY_ENV_VAR} environment variable')
+    print(f'Please set {API_KEY_ENV_VAR} environment variable')
     return
 
   rulesets = get_rulesets()

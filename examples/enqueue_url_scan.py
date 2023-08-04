@@ -19,51 +19,57 @@ import vt
 
 
 async def get_urls_to_enqueue(queue, path, url):
-  """Finds which URLs will be enqueued to scan in VirusTotal."""
-  if url:
-    await queue.put(url)
-    return
+    """Finds which URLs will be enqueued to scan in VirusTotal."""
+    if url:
+        await queue.put(url)
+        return
 
-  for u in path:
-    await queue.put(u.strip())
+    for u in path:
+        await queue.put(u.strip())
 
 
 async def enqueue_urls(queue, apikey):
-  """Enqueues URLs in VirusTotal."""
-  async with vt.Client(apikey) as client:
-    while not queue.empty():
-      url = await queue.get()
-      await client.scan_url_async(url)
-      print(f'URL {url} enqueued for scanning.')
-      queue.task_done()
+    """Enqueues URLs in VirusTotal."""
+    async with vt.Client(apikey) as client:
+        while not queue.empty():
+            url = await queue.get()
+            await client.scan_url_async(url)
+            print(f"URL {url} enqueued for scanning.")
+            queue.task_done()
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Enqueue URLs to be scanned.")
 
-  parser = argparse.ArgumentParser(description='Enqueue URLs to be scanned.')
+    parser.add_argument("--apikey", required=True, help="your VirusTotal API key")
+    parser.add_argument(
+        "--workers",
+        type=int,
+        required=False,
+        default=4,
+        help="number of concurrent workers",
+    )
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument(
+        "--path",
+        type=argparse.FileType("r"),
+        help="path to a file containing a list of URLs to scan.",
+    )
+    group.add_argument("--url", help="URL to scan.")
+    args = parser.parse_args()
 
-  parser.add_argument('--apikey', required=True, help='your VirusTotal API key')
-  parser.add_argument('--workers', type=int, required=False, default=4,
-                      help='number of concurrent workers')
-  group = parser.add_mutually_exclusive_group(required=True)
-  group.add_argument('--path', type=argparse.FileType('r'),
-                      help='path to a file containing a list of URLs to scan.')
-  group.add_argument('--url', help='URL to scan.')
-  args = parser.parse_args()
+    loop = asyncio.get_event_loop()
+    queue = asyncio.Queue(loop=loop)
+    loop.create_task(get_urls_to_enqueue(queue, args.path, args.url))
 
-  loop = asyncio.get_event_loop()
-  queue = asyncio.Queue(loop=loop)
-  loop.create_task(get_urls_to_enqueue(queue, args.path, args.url))
+    worker_tasks = []
+    for _ in range(args.workers):
+        worker_tasks.append(loop.create_task(enqueue_urls(queue, args.apikey)))
 
-  worker_tasks = []
-  for _ in range(args.workers):
-    worker_tasks.append(
-        loop.create_task(enqueue_urls(queue, args.apikey)))
-
-  # Wait until all worker tasks has completed.
-  loop.run_until_complete(asyncio.gather(*worker_tasks))
-  loop.close()
+    # Wait until all worker tasks has completed.
+    loop.run_until_complete(asyncio.gather(*worker_tasks))
+    loop.close()
 
 
-if __name__ == '__main__':
-  main()
+if __name__ == "__main__":
+    main()

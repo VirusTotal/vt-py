@@ -4,5 +4,5 @@ meta:
   target_entity = "url"
 condition:
   vt.net.url.new_url and
-  vt.net.domain.raw == "${domain}"
+  vt.net.domain.root == "${domain}"
 }

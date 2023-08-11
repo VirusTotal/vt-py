@@ -57,7 +57,7 @@ async def process_analysis_results(apikey, analysis, file_path):
     completed_analysis = await client.wait_for_analysis_completion(analysis)
     analysis_result = await completed_analysis
     print(f'{file_path}: {analysis_result.stats}')
-    print(analysis_result.id)
+    print(f'analysis_id: {analysis_result.id}')
 
 
 async def main():

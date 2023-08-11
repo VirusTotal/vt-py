@@ -55,9 +55,8 @@ async def upload_hashes(queue, apikey):
 async def process_analysis_results(apikey, analysis, file_path):
   async with vt.Client(apikey) as client:
     completed_analysis = await client.wait_for_analysis_completion(analysis)
-    analysis_result = await completed_analysis
-    print(f'{file_path}: {analysis_result.stats}')
-    print(f'analysis_id: {analysis_result.id}')
+    print(f'{file_path}: {completed_analysis.stats}')
+    print(f'analysis id: {completed_analysis.id}')
 
 
 async def main():

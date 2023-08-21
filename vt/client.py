@@ -758,4 +758,4 @@ class Client:
     return analysis
 
   async def wait_for_analysis_completion(self, analysis):
-    return self._wait_for_analysis_completion(analysis)
+    return await self._wait_for_analysis_completion(analysis)

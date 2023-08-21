@@ -21,3 +21,5 @@ vt_py.egg-info
 /.idea
 
 .vscode/
+
+.DS_Store

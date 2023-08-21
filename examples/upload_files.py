@@ -56,6 +56,7 @@ async def process_analysis_results(apikey, analysis, file_path):
   async with vt.Client(apikey) as client:
     completed_analysis = await client.wait_for_analysis_completion(analysis)
     print(f'{file_path}: {completed_analysis.stats}')
+    print(f'analysis id: {completed_analysis.id}')
 
 
 async def main():

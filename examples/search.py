@@ -25,35 +25,39 @@ import vt
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        description="Make a VirusTotal Intelligence search and prints the matching objects."
+    )  # pylint: disable=line-too-long
 
-  parser = argparse.ArgumentParser(
-      description='Make a VirusTotal Intelligence search and prints the matching objects.')  # pylint: disable=line-too-long
+    parser.add_argument(
+        "--query",
+        type=str,
+        required=True,
+        nargs="+",
+        help="a VirusTotal Intelligence search query.",
+    )
 
-  parser.add_argument('--query',
-      type=str,
-      required=True,
-      nargs='+',
-      help='a VirusTotal Intelligence search query.')
+    parser.add_argument("--apikey", required=True, help="your VirusTotal API key")
 
-  parser.add_argument('--apikey',
-      required=True,
-      help='your VirusTotal API key')
+    parser.add_argument(
+        "--limit",
+        type=int,
+        required=False,
+        help="maximum number of objects that will be retrieved",
+        default=50,
+    )
 
-  parser.add_argument('--limit',
-      type=int,
-      required=False,
-      help='maximum number of objects that will be retrieved',
-      default=50)
+    args = parser.parse_args()
 
-  args = parser.parse_args()
-
-  with vt.Client(args.apikey) as client:
-    it = client.iterator('/intelligence/search',
-        params={'query': ' '.join(args.query)},
-        limit=args.limit)
-    for obj in it:
-      print(f'{obj.type}:{obj.id}')
+    with vt.Client(args.apikey) as client:
+        it = client.iterator(
+            "/intelligence/search",
+            params={"query": " ".join(args.query)},
+            limit=args.limit,
+        )
+        for obj in it:
+            print(f"{obj.type}:{obj.id}")
 
 
-if __name__ == '__main__':
-  main()
+if __name__ == "__main__":
+    main()

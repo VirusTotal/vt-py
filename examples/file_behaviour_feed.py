@@ -24,52 +24,53 @@ import vt
 
 
 def process_item(item):
-  """Processes a fetched item from the feed."""
-  try:
-    tags = item.tags
-  except AttributeError:
-    tags = []
+    """Processes a fetched item from the feed."""
+    try:
+        tags = item.tags
+    except AttributeError:
+        tags = []
 
-  try:
-    processes_created = item.processes_created
-  except AttributeError:
-    processes_created = []
+    try:
+        processes_created = item.processes_created
+    except AttributeError:
+        processes_created = []
 
-  if ('executes-dropped-file' in tags or
-      'powershell.exe' in '\n'.join(processes_created)):
-    print(item.id.split('_')[0])
+    if "executes-dropped-file" in tags or "powershell.exe" in "\n".join(
+        processes_created
+    ):
+        print(item.id.split("_")[0])
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        description="Get file behaviour reports from the VirusTotal feed. "
+        "Print documents dropping an executable or launching a Powershell."
+    )
 
-  parser = argparse.ArgumentParser(
-      description='Get file behaviour reports from the VirusTotal feed. '
-      'Print documents dropping an executable or launching a Powershell.')
+    parser.add_argument("--apikey", required=True, help="your VirusTotal API key")
 
-  parser.add_argument('--apikey',
-      required=True, help='your VirusTotal API key')
+    parser.add_argument(
+        "--cursor", required=False, help="cursor indicating where to start"
+    )
 
-  parser.add_argument('--cursor',
-      required=False,
-      help='cursor indicating where to start')
+    args = parser.parse_args()
 
-  args = parser.parse_args()
+    with vt.Client(args.apikey) as client:
+        # Iterate over the file behaviour feed, one file at a time.
+        # This loop doesn't finish, when the feed is consumed it will keep waiting
+        # for more files.
 
-  with vt.Client(args.apikey) as client:
-    # Iterate over the file behaviour feed, one file at a time.
-    # This loop doesn't finish, when the feed is consumed it will keep waiting
-    # for more files.
-
-    try:
-      for behaviour_obj in client.feed(
-          vt.FeedType.FILE_BEHAVIOURS, cursor=args.cursor):
-        # process the behaviour_obj
-        process_item(behaviour_obj)
-    except KeyboardInterrupt:
-      print('\nKeyboard interrupt. Closing.')
-    finally:
-      client.close()
+        try:
+            for behaviour_obj in client.feed(
+                vt.FeedType.FILE_BEHAVIOURS, cursor=args.cursor
+            ):
+                # process the behaviour_obj
+                process_item(behaviour_obj)
+        except KeyboardInterrupt:
+            print("\nKeyboard interrupt. Closing.")
+        finally:
+            client.close()
 
 
-if __name__ == '__main__':
-  main()
+if __name__ == "__main__":
+    main()

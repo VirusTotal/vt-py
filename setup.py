@@ -12,25 +12,25 @@
 # limitations under the License.
 
 from distutils.util import convert_path
-import setuptools
 import sys
+import setuptools
 
 main_ns = {}
 with open(convert_path("vt/version.py")) as ver_file:
-    exec(ver_file.read(), main_ns)
+  exec(ver_file.read(), main_ns)
 
 with open("README.md") as fh:
-    long_description = fh.read()
+  long_description = fh.read()
 
 if sys.version_info < (3, 6, 0):
-    raise RuntimeError("vt-py requires Python 3.6.0+")
+  raise RuntimeError("vt-py requires Python 3.6.0+")
 
 setuptools.setup(
     name="vt-py",
     version=main_ns["__version__"],
     description="The official Python client library for VirusTotal",
     license="Apache 2",
-    license_files=("LICENSE"),
+    license_files="LICENSE",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/VirusTotal/vt-py",

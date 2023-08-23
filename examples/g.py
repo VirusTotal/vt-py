@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-Console 1-click tool to download files from VT. It could be extremely handy to
-malware analysts in their day-to-day job.
+"""Console 1-click tool to download files from VT.
+
+It could be extremely handy to malware analysts in their day-to-day job.
 
 Setup:
 1) Put script in your Path directory and set execution permission
@@ -31,12 +31,11 @@ MD5, SHA1, SHA256 - supported file checksums.
 
 2) g 123.txt - will read list of hashes from 123.txt file, one per line and
    download them in CWD.
-
 """
 
 import argparse
-import os
 import logging
+import os
 import vt
 
 
@@ -47,45 +46,47 @@ logging.basicConfig(format="%(message)s", level=logging.INFO)
 
 
 def download_from_vt(file_id):
-    if len(file_id) not in SUPPORTED_CHECKSUM_LENS:
-        logging.warning("Unsupported checksum length - %d", len(file_id))
-        return
+  if len(file_id) not in SUPPORTED_CHECKSUM_LENS:
+    logging.warning("Unsupported checksum length - %d", len(file_id))
+    return
 
-    with open(file_id, "wb") as f:
-        try:
-            with vt.Client(os.environ.get(API_KEY_ENV_VAR)) as vt_client:
-                vt_client.download_file(file_id, f)
-        except Exception as e:  # pylint: disable=broad-exception-caught
-            logging.error(
-                "Exception while downloading file with a hash %s: %s", file_id, e
-            )
-        else:
-            logging.info("Successfully downloaded %s", file_id)
+  with open(file_id, "wb") as f:
+    try:
+      with vt.Client(os.environ.get(API_KEY_ENV_VAR)) as vt_client:
+        vt_client.download_file(file_id, f)
+    except Exception as e:  # pylint: disable=broad-exception-caught
+      logging.error(
+          "Exception while downloading file with a hash %s: %s", file_id, e
+      )
+    else:
+      logging.info("Successfully downloaded %s", file_id)
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "user_input",
-        help="File checksum (SHA-256, SHA-1, MD5) or text file containing "
-        "list of checksums",
-    )
-    args = parser.parse_args()
+  parser = argparse.ArgumentParser()
+  parser.add_argument(
+      "user_input",
+      help=(
+          "File checksum (SHA-256, SHA-1, MD5) or text file containing "
+          "list of checksums"
+      ),
+  )
+  args = parser.parse_args()
 
-    if os.environ.get(API_KEY_ENV_VAR) is None:
-        logging.critical("Please set %s environment variable", API_KEY_ENV_VAR)
-        return
+  if os.environ.get(API_KEY_ENV_VAR) is None:
+    logging.critical("Please set %s environment variable", API_KEY_ENV_VAR)
+    return
 
-    if os.path.isfile(args.user_input):
-        logging.info("Treating input as a file, going to extract hashes...")
-        with open(args.user_input, encoding="utf-8") as f:
-            for line in f:
-                download_from_vt(file_id=line.rstrip())
+  if os.path.isfile(args.user_input):
+    logging.info("Treating input as a file, going to extract hashes...")
+    with open(args.user_input, encoding="utf-8") as f:
+      for line in f:
+        download_from_vt(file_id=line.rstrip())
 
-    else:
-        logging.info("Treating input as a checksum...")
-        download_from_vt(file_id=args.user_input)
+  else:
+    logging.info("Treating input as a checksum...")
+    download_from_vt(file_id=args.user_input)
 
 
 if __name__ == "__main__":
-    main()
+  main()

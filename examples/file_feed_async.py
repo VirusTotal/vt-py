@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-This example program shows how to use the vt-py asynchronous API for getting
+"""This example program shows how to use the vt-py asynchronous API for getting
+
 the VirusTotal file feed in an efficient manner. This is a more elaborate
 example than file_feed.py, it will run faster by leveraging the asynchronous
 API for making concurrent calls to the VirusTotal backend.
@@ -33,8 +33,9 @@ import vt
 class FeedReader:
   """Reads and processes a VirusTotal file feed batch."""
 
-  def __init__(self, apikey, output_dir, num_workers=4,
-               download_files=False,cursor=None):
+  def __init__(
+      self, apikey, output_dir, num_workers=4, download_files=False, cursor=None
+  ):
     self._apikey = apikey
     self._aborted = False
     self._cursor = cursor
@@ -67,14 +68,14 @@ class FeedReader:
         file_path = os.path.join(self._output_dir, file_obj.id)
         # Write a file <sha256>.json with file's metadata and another file
         # named <sha256> with the file's content.
-        with open(file_path + '.json', mode='w', encoding='utf-8') as f:
+        with open(file_path + ".json", mode="w", encoding="utf-8") as f:
           f.write(json.dumps(file_obj.to_dict()))
         if self._download_files:
           # The URL for downloading the file comes as a context attribute named
           # 'download_url'.
-          download_url = file_obj.context_attributes['download_url']
+          download_url = file_obj.context_attributes["download_url"]
           response = await client.get_async(download_url)
-          with open(file_path, mode='wb') as f:
+          with open(file_path, mode="wb") as f:
             f.write(await response.read_async())
         else:
           # When not downloading files this yields the control to event loop
@@ -93,13 +94,13 @@ class FeedReader:
     return self._cursor
 
   def run(self):
-
     loop = asyncio.get_event_loop()
     loop_tasks = []
     # Create a task that read file object's from the feed and put them in a
     # queue.
     self._enqueue_files_task = loop.create_task(
-        self._get_from_feed_and_enqueue())
+        self._get_from_feed_and_enqueue()
+    )
     loop_tasks.append(self._enqueue_files_task)
 
     # Create multiple tasks that read file object's from the queue, download
@@ -107,7 +108,8 @@ class FeedReader:
     self._worker_tasks = []
     for _ in range(self._num_workers):
       self._worker_tasks.append(
-          loop.create_task(self._process_files_from_queue()))
+          loop.create_task(self._process_files_from_queue())
+      )
 
     # If the program is interrupted, abort it gracefully.
     signals = (signal.SIGINT,)
@@ -121,33 +123,36 @@ class FeedReader:
 
 
 def main():
-
   parser = argparse.ArgumentParser(
-    description='Get files from the VirusTotal feed. '
-      'For each file in the feed a <sha256>.json file is created in the output '
-      'directory containing information about the file. Additionally you can '
-      'download the actual file with the --download-files option.')
+      description=(
+          "Get files from the VirusTotal feed. For each file in the feed a"
+          " <sha256>.json file is created in the output directory containing"
+          " information about the file. Additionally you can download the"
+          " actual file with the --download-files option."
+      )
+  )
 
-  parser.add_argument('--apikey',
-      required=True,
-      help='your VirusTotal API key')
+  parser.add_argument("--apikey", required=True, help="your VirusTotal API key")
 
-  parser.add_argument('--cursor',
-      required=False,
-      help='cursor indicating where to start')
+  parser.add_argument(
+      "--cursor", required=False, help="cursor indicating where to start"
+  )
 
-  parser.add_argument('--output',
-      default='./file-feed',
-      help='path to output directory')
+  parser.add_argument(
+      "--output", default="./file-feed", help="path to output directory"
+  )
 
-  parser.add_argument('--download-files',
-      action='store_true', help='download files')
+  parser.add_argument(
+      "--download-files", action="store_true", help="download files"
+  )
 
-  parser.add_argument('--num_workers',
+  parser.add_argument(
+      "--num_workers",
       type=int,
       required=False,
-      help='number of concurrent workers',
-      default=4)
+      help="number of concurrent workers",
+      default=4,
+  )
 
   args = parser.parse_args()
 
@@ -159,12 +164,13 @@ def main():
       args.output,
       num_workers=args.num_workers,
       download_files=args.download_files,
-      cursor=args.cursor)
+      cursor=args.cursor,
+  )
 
   feed_reader.run()
 
-  print(f'\ncontinuation cursor: {feed_reader.cursor()}')
+  print(f"\ncontinuation cursor: {feed_reader.cursor()}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
   main()

@@ -17,7 +17,7 @@ import datetime
 import functools
 import re
 
-__all__ = ['Object']
+__all__ = ["Object"]
 
 
 class WhistleBlowerDict(dict):
@@ -26,9 +26,10 @@ class WhistleBlowerDict(dict):
   This class wraps a standard Python dictionary and calls the provided callback
   whenever a change occurs in the dictionary.
   """
+
   def __init__(self, initial_dict, on_change_callback):
     self._on_change_callback = on_change_callback
-    for k,v in initial_dict.items():
+    for k, v in initial_dict.items():
       if isinstance(v, dict):
         initial_dict[k] = WhistleBlowerDict(v, on_change_callback)
     super().__init__(initial_dict)
@@ -61,10 +62,10 @@ class Object:
   # Python datetime object transparently.
 
   DATE_ATTRIBUTES = (
-    re.compile(r'^.+_date$'),
-    re.compile(r'^date$'),
-    re.compile(r'^last_login$'),
-    re.compile(r'^user_since$'),
+      re.compile(r"^.+_date$"),
+      re.compile(r"^date$"),
+      re.compile(r"^last_login$"),
+      re.compile(r"^user_since$"),
   )
 
   @classmethod
@@ -89,26 +90,24 @@ class Object:
     not, an exception is raised.
     """
     if not isinstance(obj_dict, dict):
-      raise ValueError(
-          f'Expecting dictionary, got: {type(obj_dict).__name__}')
+      raise ValueError(f"Expecting dictionary, got: {type(obj_dict).__name__}")
 
-    for field in ('type', 'id'):
+    for field in ("type", "id"):
       if field not in obj_dict:
-        raise ValueError(f'Object {field} not found')
+        raise ValueError(f"Object {field} not found")
 
     obj = cls(
-        obj_dict.get('type'),
-        obj_dict.get('id'),
-        obj_dict.get('attributes'))
+        obj_dict.get("type"), obj_dict.get("id"), obj_dict.get("attributes")
+    )
 
-    if 'context_attributes' in obj_dict:
-      obj._context_attributes = obj_dict['context_attributes']
+    if "context_attributes" in obj_dict:
+      obj._context_attributes = obj_dict["context_attributes"]
 
-    if 'relationships' in obj_dict:
-      obj._relationships = obj_dict['relationships']
+    if "relationships" in obj_dict:
+      obj._relationships = obj_dict["relationships"]
 
-    if 'error' in obj_dict:
-      obj._error = obj_dict['error']
+    if "error" in obj_dict:
+      obj._error = obj_dict["error"]
 
     return obj
 
@@ -116,7 +115,7 @@ class Object:
     """Initializes a VirusTotal API object."""
 
     if not isinstance(obj_attributes, (dict, type(None))):
-      raise ValueError('Object attributes must be a dictionary')
+      raise ValueError("Object attributes must be a dictionary")
 
     self._type = obj_type
     self._id = obj_id
@@ -133,7 +132,7 @@ class Object:
     self._error = None
 
   def __on_attr_change(self, attr):
-    if hasattr(self, '_modified_attrs'):
+    if hasattr(self, "_modified_attrs"):
       self._modified_attrs.append(attr)
 
   def __getattribute__(self, attr):
@@ -147,7 +146,8 @@ class Object:
   def __setattr__(self, attr, value):
     if isinstance(value, dict):
       value = WhistleBlowerDict(
-          value, functools.partial(self.__on_attr_change, attr))
+          value, functools.partial(self.__on_attr_change, attr)
+      )
     elif isinstance(value, datetime.datetime):
       value = int(datetime.datetime.timestamp(value))
     if attr not in self.__dict__ or value != self.__dict__[attr]:
@@ -155,10 +155,10 @@ class Object:
     super().__setattr__(attr, value)
 
   def __repr__(self):
-    return f'<vt.object.Object {str(self)}>'
+    return f"<vt.object.Object {str(self)}>"
 
   def __str__(self):
-    return f'{self.type} {self.id}'
+    return f"{self.type} {self.id}"
 
   @property
   def id(self):
@@ -174,13 +174,13 @@ class Object:
 
   @property
   def context_attributes(self):
-    if hasattr(self, '_context_attributes'):
+    if hasattr(self, "_context_attributes"):
       return self._context_attributes
     return {}
 
   @property
   def relationships(self):
-    if hasattr(self, '_relationships'):
+    if hasattr(self, "_relationships"):
       return self._relationships
     return {}
 
@@ -202,25 +202,25 @@ class Object:
     return self.__dict__.get(attr_name, default)
 
   def to_dict(self, modified_attributes_only=False):
-    result = {'type': self._type, 'attributes': {}}
+    result = {"type": self._type, "attributes": {}}
 
     if self._id:
-      result['id'] = self._id
+      result["id"] = self._id
 
     attributes = {}
     for name, value in self.__dict__.items():
-      if not name.startswith('_'):
+      if not name.startswith("_"):
         if not modified_attributes_only or name in self._modified_attrs:
           attributes[name] = value
 
     if attributes:
-      result['attributes'] = attributes
+      result["attributes"] = attributes
 
     if self.relationships:
-      result['relationships'] = self.relationships
+      result["relationships"] = self.relationships
 
     if self.context_attributes:
-      result['context_attributes'] = self.context_attributes
+      result["context_attributes"] = self.context_attributes
 
     for key, val in self._modified_data.items():
       result[key] = val

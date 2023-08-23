@@ -14,8 +14,8 @@
 """How to update a collection in VirusTotal."""
 
 import argparse
-import json
 import io
+import json
 import vt
 
 
@@ -31,22 +31,24 @@ def update_collection(client, collection_id, file):
     The new collection object.
   """
 
-  collection_obj = vt.Object('collection', obj_id=collection_id)
-  collection_obj.set_data('raw_items', file.read())
+  collection_obj = vt.Object("collection", obj_id=collection_id)
+  collection_obj.set_data("raw_items", file.read())
   return client.patch_object(
-      f'/collections/{collection_id}', obj=collection_obj)
+      f"/collections/{collection_id}", obj=collection_obj
+  )
 
 
 def generate_ui_link(collection_id):
-  return f'https://www.virustotal.com/gui/collection/{collection_id}'
+  return f"https://www.virustotal.com/gui/collection/{collection_id}"
 
 
 def main():
   parser = argparse.ArgumentParser(
-    description='Update a VirusTotal collection.')
+      description="Update a VirusTotal collection."
+  )
 
-  parser.add_argument('--apikey', required=True, help='your VirusTotal API key')
-  parser.add_argument('--id', required=True, help='collection\'s id')
+  parser.add_argument("--apikey", required=True, help="your VirusTotal API key")
+  parser.add_argument("--id", required=True, help="collection's id")
 
   args = parser.parse_args()
   client = vt.Client(args.apikey)
@@ -56,14 +58,14 @@ def main():
   #   collection_obj = update_collection(client, args.id, f)
 
   # Or using a string with the IOCs.
-  iocs = io.StringIO('www.example.com\nhttps://www.hooli.com')
+  iocs = io.StringIO("www.example.com\nhttps://www.hooli.com")
   collection_obj = update_collection(client, args.id, iocs)
 
   client.close()
   print(json.dumps(collection_obj.to_dict(), indent=2))
 
-  print(f'Link:\n{generate_ui_link(collection_obj.id)}')
+  print(f"Link:\n{generate_ui_link(collection_obj.id)}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
   main()

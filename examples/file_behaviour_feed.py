@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-NOTICE: In order to use this program you will need an API key that has
+"""NOTICE: In order to use this program you will need an API key that has
+
 privileges for using the VirusTotal Feed API.
 
 Set an env-var e.g. $VT_API_KEY
@@ -35,23 +35,25 @@ def process_item(item):
   except AttributeError:
     processes_created = []
 
-  if ('executes-dropped-file' in tags or
-      'powershell.exe' in '\n'.join(processes_created)):
-    print(item.id.split('_')[0])
+  if "executes-dropped-file" in tags or "powershell.exe" in "\n".join(
+      processes_created
+  ):
+    print(item.id.split("_")[0])
 
 
 def main():
-
   parser = argparse.ArgumentParser(
-      description='Get file behaviour reports from the VirusTotal feed. '
-      'Print documents dropping an executable or launching a Powershell.')
+      description=(
+          "Get file behaviour reports from the VirusTotal feed. "
+          "Print documents dropping an executable or launching a Powershell."
+      )
+  )
 
-  parser.add_argument('--apikey',
-      required=True, help='your VirusTotal API key')
+  parser.add_argument("--apikey", required=True, help="your VirusTotal API key")
 
-  parser.add_argument('--cursor',
-      required=False,
-      help='cursor indicating where to start')
+  parser.add_argument(
+      "--cursor", required=False, help="cursor indicating where to start"
+  )
 
   args = parser.parse_args()
 
@@ -62,14 +64,15 @@ def main():
 
     try:
       for behaviour_obj in client.feed(
-          vt.FeedType.FILE_BEHAVIOURS, cursor=args.cursor):
+          vt.FeedType.FILE_BEHAVIOURS, cursor=args.cursor
+      ):
         # process the behaviour_obj
         process_item(behaviour_obj)
     except KeyboardInterrupt:
-      print('\nKeyboard interrupt. Closing.')
+      print("\nKeyboard interrupt. Closing.")
     finally:
       client.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
   main()

@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-This example program shows how to use the vt-py synchronous API for getting
+"""This example program shows how to use the vt-py synchronous API for getting
+
 the VirusTotal file feed. For a more elaborate example that includes the use
 of cursors and the asynchronous API see file_feed_async.py.
 
@@ -28,25 +28,28 @@ import vt
 
 
 def main():
-
   parser = argparse.ArgumentParser(
-      description='Get files from the VirusTotal feed. '
-      'For each file in the feed a <sha256>.json file is created in the output '
-      'directory containing information about the file. Additionally you can '
-      'download the actual file with the --download-files option.')
+      description=(
+          "Get files from the VirusTotal feed. For each file in the feed a"
+          " <sha256>.json file is created in the output directory containing"
+          " information about the file. Additionally you can download the"
+          " actual file with the --download-files option."
+      )
+  )
 
-  parser.add_argument('--apikey',
-      required=True, help='your VirusTotal API key')
+  parser.add_argument("--apikey", required=True, help="your VirusTotal API key")
 
-  parser.add_argument('--output',
-      default='./file-feed', help='path to output directory')
+  parser.add_argument(
+      "--output", default="./file-feed", help="path to output directory"
+  )
 
-  parser.add_argument('--download-files',
-      action='store_true', help='download files')
+  parser.add_argument(
+      "--download-files", action="store_true", help="download files"
+  )
 
-  parser.add_argument('--cursor',
-      required=False,
-      help='cursor indicating where to start')
+  parser.add_argument(
+      "--cursor", required=False, help="cursor indicating where to start"
+  )
 
   args = parser.parse_args()
 
@@ -60,17 +63,17 @@ def main():
       # Write the file's metadata into a JSON-encoded file. The name of the
       # JSON file will be <SHA-256>.json
       file_path = os.path.join(args.output, file_obj.id)
-      with open(file_path + '.json', mode='w', encoding='utf-8') as f:
+      with open(file_path + ".json", mode="w", encoding="utf-8") as f:
         f.write(json.dumps(file_obj.to_dict()))
       if args.download_files:
         # Download the file and write it to the output directory with the
         # SHA-256 as its name.
-        download_url = file_obj.context_attributes['download_url']
+        download_url = file_obj.context_attributes["download_url"]
         response = client.get(download_url)
-        with open(file_path, mode='wb') as f:
+        with open(file_path, mode="wb") as f:
           f.write(response.read())
       print(file_obj.id)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
   main()

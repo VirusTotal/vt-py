@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
-"""
-This example shows how to find similar files to a given one without uploading
+"""This example shows how to find similar files to a given one without uploading
+
 it to VirusTotal.
 
 To find similar files, this example computes both imphash and rich pe header
@@ -21,15 +21,15 @@ https://www.virustotal.com/learn/
 import argparse
 import asyncio
 import hashlib
+import sys
 import pefile
 import vt
-import sys
 
 
 SEARCHES = [
-    ('have', 'behaviour_network'),
-    ('have', 'itw'),
-    ('tag', 'attachment')
+    ("have", "behaviour_network"),
+    ("have", "itw"),
+    ("tag", "attachment"),
 ]
 
 
@@ -41,7 +41,7 @@ def compute_hashes(path):
 
   rich_data = pe.parse_rich_header()
   # https://github.com/RichHeaderResearch/RichPE/blob/master/rich.py#L467
-  rich = hashlib.md5(rich_data['clear_data']).hexdigest() if rich_data else None
+  rich = hashlib.md5(rich_data["clear_data"]).hexdigest() if rich_data else None
 
   pe.close()
 
@@ -55,7 +55,8 @@ def detection_rate_str(file_obj):
 
 
 async def search_files(
-      apikey, numfiles, hash_type, hash_value, search_type, search_value):
+    apikey, numfiles, hash_type, hash_value, search_type, search_value
+):
   """Searches files on VirusTotal based on hash and a filter value.
 
   Args:
@@ -70,66 +71,82 @@ async def search_files(
   Returns:
     A set with found URLs in the files' relationships
   """
-  search = f'{hash_type}: {hash_value} {search_type}: {search_value}'
+  search = f"{hash_type}: {hash_value} {search_type}: {search_value}"
   urls = set()
   async with vt.Client(apikey) as client:
     it = client.iterator(
-        '/intelligence/search',
-        params={'query': search, 'relationships': 'itw_urls,contacted_urls'},
-        limit=numfiles)
+        "/intelligence/search",
+        params={"query": search, "relationships": "itw_urls,contacted_urls"},
+        limit=numfiles,
+    )
 
     async for f in it:
       print(
           f'{f.sha256}\t{f.last_analysis_date.strftime("%Y-%m-%d")}\t'
-          f'{detection_rate_str(f)}')
+          f"{detection_rate_str(f)}"
+      )
 
       for rel in f.relationships.values():
-        for r in rel['data']:
-          urls.add(r['context_attributes']['url'])
+        for r in rel["data"]:
+          urls.add(r["context_attributes"]["url"])
 
   return urls
 
 
 async def main():
   parser = argparse.ArgumentParser(
-      description='Search similar files to a given one without uploading it '
-                  'to VirusTotal.')
-  parser.add_argument('--apikey', required=True, help='Your VirusTotal API key')
+      description=(
+          "Search similar files to a given one without uploading it "
+          "to VirusTotal."
+      )
+  )
+  parser.add_argument("--apikey", required=True, help="Your VirusTotal API key")
   parser.add_argument(
-      '-n', '--numfiles', dest='numfiles', default=20,
-      help='Number of files to search for in every search.')
+      "-n",
+      "--numfiles",
+      dest="numfiles",
+      default=20,
+      help="Number of files to search for in every search.",
+  )
   parser.add_argument(
-      '--path', required=True,
-      help='File path to find similar files to.')
+      "--path", required=True, help="File path to find similar files to."
+  )
   args = parser.parse_args()
 
   try:
     imphash, rich = compute_hashes(args.path)
   except pefile.PEFormatError:
-    print('ERROR: Input file is not a PE.')
+    print("ERROR: Input file is not a PE.")
     sys.exit(1)
 
   tasks = []
-  print('Files having same imphash or rich PE header hash:')
+  print("Files having same imphash or rich PE header hash:")
   for hash_type, hash_val in [
-        ('imphash', imphash), ('rich_pe_header_hash', rich)]:
+      ("imphash", imphash),
+      ("rich_pe_header_hash", rich),
+  ]:
     for search_type, search_value in SEARCHES:
-
       if hash_val is None:
         continue
 
-      tasks.append(asyncio.create_task(
-          search_files(
-              args.apikey, args.numfiles, hash_type, hash_val,
-              search_type, search_value
+      tasks.append(
+          asyncio.create_task(
+              search_files(
+                  args.apikey,
+                  args.numfiles,
+                  hash_type,
+                  hash_val,
+                  search_type,
+                  search_value,
+              )
           )
-      ))
+      )
 
   urls = await asyncio.gather(*tasks)
   urls = set().union(*urls)
   if urls:
-    print('\nRelated URLs:\n{}'.format('\n\t'.join(urls)))
+    print("\nRelated URLs:\n{}".format("\n\t".join(urls)))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
   asyncio.run(main())

@@ -14,30 +14,28 @@
 
 """Processes items from VT API feeds."""
 
+import asyncio
+import bz2
 from datetime import datetime
 from datetime import timedelta
-
 import enum
 import io
 import json
-import asyncio
-import bz2
 
 from .error import APIError
 from .object import Object
 from .utils import make_sync
 
 
-__all__ = [
-    'Feed',
-    'FeedType']
+__all__ = ["Feed", "FeedType"]
 
 
 class FeedType(enum.Enum):
   """Feed types."""
-  FILES = 'files'
-  URLS = 'urls'
-  FILE_BEHAVIOURS = 'file-behaviours'
+
+  FILES = "files"
+  URLS = "urls"
+  FILE_BEHAVIOURS = "file-behaviours"
 
 
 class Feed:
@@ -76,8 +74,8 @@ class Feed:
     self._missing_batches_tolerancy = 1
 
     if cursor:
-      batch_time, _, batch_skip = cursor.partition('-')
-      self._batch_time = datetime.strptime(batch_time, '%Y%m%d%H%M')
+      batch_time, _, batch_skip = cursor.partition("-")
+      self._batch_time = datetime.strptime(batch_time, "%Y%m%d%H%M")
       self._batch_skip = int(batch_skip) if batch_skip else 0
     else:
       self._batch_time = datetime.utcnow() - timedelta(minutes=70)
@@ -86,7 +84,7 @@ class Feed:
     self._next_batch_time = self._batch_time
 
   async def _get_batch_async(self, batch_time):
-    """"Retrieves a specific batch from the backend.
+    """ "Retrieves a specific batch from the backend.
 
     There's one batch per minute, each identified by the date in YYYYMMDDhhmm
     format. The batch_time argument is a datetime object that is converted to
@@ -94,11 +92,12 @@ class Feed:
     """
     while True:
       response = await self._client.get_async(
-          f'/feeds/{self._type.value}/{batch_time.strftime("%Y%m%d%H%M")}')
+          f'/feeds/{self._type.value}/{batch_time.strftime("%Y%m%d%H%M")}'
+      )
       error = await self._client.get_error_async(response)
       if not error:
         break
-      if error.code == 'NotAvailableYet':
+      if error.code == "NotAvailableYet":
         await asyncio.sleep(60)
       else:
         raise error
@@ -122,7 +121,7 @@ class Feed:
       except APIError as error:
         # The only acceptable error here is NotFoundError, if such an error
         # occurs we try to get the next batch.
-        if error.code != 'NotFoundError':
+        if error.code != "NotFoundError":
           raise error
         missing_batches += 1
         if missing_batches > self._missing_batches_tolerancy:
@@ -156,7 +155,7 @@ class Feed:
       if next_item:
         self._count += 1
         self._batch_cursor += 1
-        return Object.from_dict(json.loads(next_item.decode('utf-8')))
+        return Object.from_dict(json.loads(next_item.decode("utf-8")))
       else:
         self._batch = None
 
@@ -167,4 +166,4 @@ class Feed:
     This cursor can be used for creating a new Feed object that continues where
     a previous one left.
     """
-    return self._batch_time.strftime('%Y%m%d%H%M-') + str(self._batch_cursor)
+    return self._batch_time.strftime("%Y%m%d%H%M-") + str(self._batch_cursor)

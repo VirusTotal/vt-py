@@ -16,7 +16,7 @@
 from .object import Object
 from .utils import make_sync
 
-__all__ = ['Iterator']
+__all__ = ["Iterator"]
 
 
 class Iterator:
@@ -26,9 +26,11 @@ class Iterator:
   Some endpoints in the VirusTotal API represent a collection of objects, for
   example:
 
-  `/files/{id}/comments <https://developers.virustotal.com/v3.0/reference#files-comments-get>`_
+  `/files/{id}/comments
+  <https://developers.virustotal.com/v3.0/reference#files-comments-get>`_
 
-  `/intelligence/search <https://developers.virustotal.com/v3.0/reference#intelligence-search>`_
+  `/intelligence/search
+  <https://developers.virustotal.com/v3.0/reference#intelligence-search>`_
 
   These collections can be iterated using an instance of this class.
 
@@ -60,8 +62,9 @@ class Iterator:
   """
   # pylint: disable=line-too-long
 
-  def __init__(self, client, path, params=None, cursor=None,
-               limit=None, batch_size=0):
+  def __init__(
+      self, client, path, params=None, cursor=None, limit=None, batch_size=0
+  ):
     """Initializes an iterator.
 
     This function is not intended to be called directly. Client.iterator() is
@@ -78,39 +81,40 @@ class Iterator:
     self._batch_cursor = 0
     self._meta = None
 
-    if 'cursor' in self._params:
+    if "cursor" in self._params:
       raise ValueError('Do not pass "cursor" as a path param')
 
-    if 'limit' in self._params:
+    if "limit" in self._params:
       raise ValueError('Do not pass "limit" as a path param')
 
     if cursor:
-      self._server_cursor, _, batch_cursor = cursor.rpartition('-')
+      self._server_cursor, _, batch_cursor = cursor.rpartition("-")
       if not self._server_cursor:
-        raise ValueError('invalid cursor')
+        raise ValueError("invalid cursor")
       try:
         self._batch_cursor = int(batch_cursor)
       except ValueError as exc:
-        raise ValueError('invalid cursor') from exc
+        raise ValueError("invalid cursor") from exc
 
   def _build_params(self):
     params = self._params.copy()
     if self._server_cursor:
-      params['cursor'] = self._server_cursor
+      params["cursor"] = self._server_cursor
     if self._batch_size:
-      params['limit'] = self._batch_size
+      params["limit"] = self._batch_size
     return params
 
   def _parse_response(self, json_resp, batch_cursor):
-    if not isinstance(json_resp.get('data'), list):
-      raise ValueError(f'{self._path} is not a collection')
-    meta = json_resp.get('meta', {})
-    items = json_resp['data'][batch_cursor:]
+    if not isinstance(json_resp.get("data"), list):
+      raise ValueError(f"{self._path} is not a collection")
+    meta = json_resp.get("meta", {})
+    items = json_resp["data"][batch_cursor:]
     return items, meta
 
   async def _get_batch_async(self, batch_cursor=0):
     json_resp = await self._client.get_json_async(
-        self._path, params=self._build_params())
+        self._path, params=self._build_params()
+    )
     return self._parse_response(json_resp, batch_cursor)
 
   def __iter__(self):
@@ -130,7 +134,7 @@ class Iterator:
       raise StopAsyncIteration()
     if not self._items and (self.cursor or self._count == 0):
       self._items, self._meta = await self._get_batch_async()
-      self._server_cursor = self._meta.pop('cursor', None)
+      self._server_cursor = self._meta.pop("cursor", None)
       self._batch_cursor = 0
     if not self._items and not self._server_cursor:
       raise StopAsyncIteration()
@@ -148,7 +152,7 @@ class Iterator:
     """
     if not self._server_cursor or not self._count:
       return None
-    return self._server_cursor + '-' + str(self._batch_cursor)
+    return self._server_cursor + "-" + str(self._batch_cursor)
 
   @property
   async def meta_async(self):
@@ -159,7 +163,7 @@ class Iterator:
     if self._meta is None:
       # Load the first batch of items in order to retrieve the meta info.
       self._items, self._meta = await self._get_batch_async()
-      self._server_cursor = self._meta.pop('cursor', None)
+      self._server_cursor = self._meta.pop("cursor", None)
       self._batch_cursor = 0
     return self._meta
 

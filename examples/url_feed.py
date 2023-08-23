@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-NOTICE: In order to use this program you will need an API key that has
+"""NOTICE: In order to use this program you will need an API key that has
+
 privileges for using the VirusTotal Feed API.
 
 Set an env-var e.g. $VT_API_KEY
@@ -29,21 +29,23 @@ def process_item(item):
   num_spaces = 100 - len(item.url) if len(item.url) < 100 else 10
   print(
       f'{item.url}{" " * num_spaces}'
-      f'{item.last_analysis_stats["malicious"]}/{total_clean}')
+      f'{item.last_analysis_stats["malicious"]}/{total_clean}'
+  )
 
 
 def main():
-
   parser = argparse.ArgumentParser(
-      description='Get URLs from the VirusTotal feed. '
-      'For each URL in the feed, print its detection ratio.')
+      description=(
+          "Get URLs from the VirusTotal feed. "
+          "For each URL in the feed, print its detection ratio."
+      )
+  )
 
-  parser.add_argument('--apikey',
-      required=True, help='your VirusTotal API key')
+  parser.add_argument("--apikey", required=True, help="your VirusTotal API key")
 
-  parser.add_argument('--cursor',
-      required=False,
-      help='cursor indicating where to start')
+  parser.add_argument(
+      "--cursor", required=False, help="cursor indicating where to start"
+  )
 
   args = parser.parse_args()
 
@@ -56,10 +58,10 @@ def main():
         # process the url_obj
         process_item(url_obj)
     except KeyboardInterrupt:
-      print('\nKeyboard interrupt. Closing.')
+      print("\nKeyboard interrupt. Closing.")
     finally:
       client.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
   main()

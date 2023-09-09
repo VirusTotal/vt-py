@@ -13,8 +13,14 @@
 
 """Defines an iterator to loop through VT API collections."""
 
+import typing
+
 from .object import Object
 from .utils import make_sync
+
+if typing.TYPE_CHECKING:
+  from .client import Client
+
 
 __all__ = ["Iterator"]
 
@@ -63,7 +69,12 @@ class Iterator:
   # pylint: disable=line-too-long
 
   def __init__(
-      self, client, path, params=None, cursor=None, limit=None, batch_size=0
+    self,
+    client: "Client",
+    path: str, params=None,
+    cursor: typing.Optional[str] = None,
+    limit: typing.Optional[int] = None,
+    batch_size: int = 0
   ):
     """Initializes an iterator.
 
@@ -72,14 +83,14 @@ class Iterator:
     """
     self._client = client
     self._path = path
-    self._params = params or {}
+    self._params: typing.Dict = params or {}
     self._batch_size = batch_size
     self._limit = limit
-    self._items = []
+    self._items: typing.List[typing.Dict] = []
     self._count = 0
-    self._server_cursor = None
+    self._server_cursor: typing.Optional[str] = None
     self._batch_cursor = 0
-    self._meta = None
+    self._meta: typing.Optional[typing.Dict] = None
 
     if "cursor" in self._params:
       raise ValueError('Do not pass "cursor" as a path param')
@@ -96,7 +107,7 @@ class Iterator:
       except ValueError as exc:
         raise ValueError("invalid cursor") from exc
 
-  def _build_params(self):
+  def _build_params(self) -> typing.Dict:
     params = self._params.copy()
     if self._server_cursor:
       params["cursor"] = self._server_cursor
@@ -104,14 +115,15 @@ class Iterator:
       params["limit"] = self._batch_size
     return params
 
-  def _parse_response(self, json_resp, batch_cursor):
+  def _parse_response(self, json_resp: typing.Dict, batch_cursor: int) -> typing.Tuple[typing.List[typing.Dict], typing.Dict]:
     if not isinstance(json_resp.get("data"), list):
       raise ValueError(f"{self._path} is not a collection")
     meta = json_resp.get("meta", {})
     items = json_resp["data"][batch_cursor:]
+
     return items, meta
 
-  async def _get_batch_async(self, batch_cursor=0):
+  async def _get_batch_async(self, batch_cursor: int = 0) -> typing.Tuple[typing.List[typing.Dict], typing.Dict]:
     json_resp = await self._client.get_json_async(
         self._path, params=self._build_params()
     )
@@ -123,13 +135,13 @@ class Iterator:
   def __aiter__(self):
     return self
 
-  def __next__(self):
+  def __next__(self) -> Object:
     try:
       return make_sync(self.__anext__())
     except StopAsyncIteration as exc:
       raise StopIteration() from exc
 
-  async def __anext__(self):
+  async def __anext__(self) -> Object:
     if self._limit and self._count == self._limit:
       raise StopAsyncIteration()
     if not self._items and (self.cursor or self._count == 0):
@@ -144,7 +156,7 @@ class Iterator:
     return Object.from_dict(item)
 
   @property
-  def cursor(self):
+  def cursor(self) -> typing.Optional[str]:
     """Cursor indicating the last returned object.
 
     This cursor can be used for creating a new iterator that continues where
@@ -155,7 +167,7 @@ class Iterator:
     return self._server_cursor + "-" + str(self._batch_cursor)
 
   @property
-  async def meta_async(self):
+  async def meta_async(self) -> typing.Dict:
     """Meta information.
 
     The cursor is not included, as it's exposed as a property.
@@ -168,5 +180,5 @@ class Iterator:
     return self._meta
 
   @property
-  def meta(self):
+  def meta(self) -> typing.Dict:
     return make_sync(self.meta_async)

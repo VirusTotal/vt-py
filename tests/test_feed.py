@@ -148,9 +148,7 @@ def test_tolerance(httpserver, feed_response_missing_packages, tolerance):  # py
 
   with new_client(httpserver) as client:
     feed = client.feed(FeedType.FILES, cursor="200102030405")
-    feed._missing_batches_tolerancy = (
-        tolerance  # pylint: disable=protected-access
-    )
+    feed._missing_batches_tolerancy = tolerance # pylint: disable=protected-access
 
     obj = next(feed)
     assert obj.id == "dummy_file_id_1"

@@ -379,7 +379,7 @@ class Client:
 
   def download_zip_files(
     self,
-    hashes: list[str],
+    hashes: typing.List[str],
     zipfile: typing.BinaryIO,
     password: typing.Optional[str] = None,
     sleep_time: int = 20
@@ -401,7 +401,7 @@ class Client:
 
   async def download_zip_files_async(
     self,
-    hashes: list[str],
+    hashes: typing.List[str],
     zipfile: typing.BinaryIO,
     password: typing.Optional[str] = None,
     sleep_time: int = 20

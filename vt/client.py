@@ -379,7 +379,7 @@ class Client:
 
   def download_zip_files(
     self,
-    hashes: list[str], # pylint: disable=unsubscriptable-object
+    hashes: list[str],
     zipfile: typing.BinaryIO,
     password: typing.Optional[str] = None,
     sleep_time: int = 20
@@ -401,7 +401,7 @@ class Client:
 
   async def download_zip_files_async(
     self,
-    hashes: list[str], # pylint: disable=unsubscriptable-object
+    hashes: list[str],
     zipfile: typing.BinaryIO,
     password: typing.Optional[str] = None,
     sleep_time: int = 20

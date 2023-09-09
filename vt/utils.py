@@ -14,9 +14,9 @@
 """Module defining some helper functions used across the project."""
 
 import asyncio
-import typing
 
-def make_sync(future: typing.Coroutine):
+
+def make_sync(future):
   """Utility function that waits for an async call, making it sync."""
   try:
     event_loop = asyncio.get_event_loop()

@@ -21,14 +21,10 @@ from datetime import timedelta
 import enum
 import io
 import json
-import typing
 
 from .error import APIError
 from .object import Object
 from .utils import make_sync
-
-if typing.TYPE_CHECKING:
-  from .client import Client
 
 
 __all__ = ["Feed", "FeedType"]
@@ -60,12 +56,7 @@ class Feed:
   :func:`vt.Client.feed` method instead.
   """
 
-  def __init__(
-    self,
-    client: "Client",
-    feed_type: FeedType,
-    cursor: typing.Optional[str] = None
-  ):
+  def __init__(self, client, feed_type, cursor=None):
     """Initializes a Feed object.
 
     This function is not intended to be called directly. Client.feed() is
@@ -73,7 +64,7 @@ class Feed:
     """
     self._client = client
     self._type = feed_type
-    self._batch: typing.Optional[io.BytesIO] = None
+    self._batch = None
     self._count = 0
 
     # This class tolerates a given number of consecutive missing batches in
@@ -92,7 +83,7 @@ class Feed:
 
     self._next_batch_time = self._batch_time
 
-  async def _get_batch_async(self, batch_time: datetime) -> io.BytesIO:
+  async def _get_batch_async(self, batch_time):
     """ "Retrieves a specific batch from the backend.
 
     There's one batch per minute, each identified by the date in YYYYMMDDhhmm
@@ -112,7 +103,7 @@ class Feed:
         raise error
     return io.BytesIO(bz2.decompress(await response.content.read_async()))
 
-  async def _get_next_batch_async(self) -> None:
+  async def _get_next_batch_async(self):
     """Retrieves the next batch from the feed.
 
     This function tolerates a certain number of missing batches. If some batch
@@ -136,7 +127,7 @@ class Feed:
         if missing_batches > self._missing_batches_tolerancy:
           raise error
 
-  def _skip(self, n: int) -> None:
+  def _skip(self, n):
     for _ in range(n):
       self._batch.readline()
       self._batch_cursor += 1
@@ -169,7 +160,7 @@ class Feed:
         self._batch = None
 
   @property
-  def cursor(self) -> str:
+  def cursor(self):
     """Returns a cursor indicating the last item retrieved from the feed.
 
     This cursor can be used for creating a new Feed object that continues where

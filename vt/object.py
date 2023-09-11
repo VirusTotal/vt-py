@@ -16,6 +16,7 @@
 import datetime
 import functools
 import re
+import typing
 
 __all__ = ["Object"]
 
@@ -27,7 +28,11 @@ class WhistleBlowerDict(dict):
   whenever a change occurs in the dictionary.
   """
 
-  def __init__(self, initial_dict, on_change_callback):
+  def __init__(
+    self,
+    initial_dict: typing.Dict,
+    on_change_callback: typing.Callable
+  ):
     self._on_change_callback = on_change_callback
     for k, v in initial_dict.items():
       if isinstance(v, dict):
@@ -69,7 +74,7 @@ class Object:
   )
 
   @classmethod
-  def from_dict(cls, obj_dict):
+  def from_dict(cls, obj_dict: typing.Dict):
     """Creates an object from its dictionary representation.
 
     The dictionary representation of a VirusTotal API object has the following
@@ -111,7 +116,12 @@ class Object:
 
     return obj
 
-  def __init__(self, obj_type, obj_id=None, obj_attributes=None):
+  def __init__(
+    self,
+    obj_type: str,
+    obj_id: typing.Optional[str] = None,
+    obj_attributes: typing.Optional[typing.Dict] = None
+  ):
     """Initializes a VirusTotal API object."""
 
     if not isinstance(obj_attributes, (dict, type(None))):
@@ -131,11 +141,11 @@ class Object:
     self._modified_data = {}
     self._error = None
 
-  def __on_attr_change(self, attr):
+  def __on_attr_change(self, attr: str) -> None:
     if hasattr(self, "_modified_attrs"):
       self._modified_attrs.append(attr)
 
-  def __getattribute__(self, attr):
+  def __getattribute__(self, attr: str) -> typing.Any:
     value = super().__getattribute__(attr)
     for r in Object.DATE_ATTRIBUTES:
       if r.match(attr):
@@ -143,7 +153,7 @@ class Object:
         break
     return value
 
-  def __setattr__(self, attr, value):
+  def __setattr__(self, attr: str, value: typing.Any) -> None:
     if isinstance(value, dict):
       value = WhistleBlowerDict(
           value, functools.partial(self.__on_attr_change, attr)
@@ -154,41 +164,45 @@ class Object:
       self.__on_attr_change(attr)
     super().__setattr__(attr, value)
 
-  def __repr__(self):
+  def __repr__(self) -> str:
     return f"<vt.object.Object {str(self)}>"
 
-  def __str__(self):
+  def __str__(self) -> str:
     return f"{self.type} {self.id}"
 
   @property
-  def id(self):
+  def id(self) -> typing.Optional[str]:
     return self._id
 
   @property
-  def type(self):
+  def type(self) -> str:
     return self._type
 
-  def set_data(self, key, value):
+  def set_data(self, key: str, value: typing.Any):
     """Sets a field of the object's data."""
     self._modified_data[key] = value
 
   @property
-  def context_attributes(self):
+  def context_attributes(self) -> typing.Dict:
     if hasattr(self, "_context_attributes"):
       return self._context_attributes
     return {}
 
   @property
-  def relationships(self):
+  def relationships(self) -> typing.Dict:
     if hasattr(self, "_relationships"):
       return self._relationships
     return {}
 
   @property
-  def error(self):
+  def error(self) -> typing.Optional[typing.Dict]:
     return self._error
 
-  def get(self, attr_name, default=None):
+  def get(
+    self,
+    attr_name: str,
+    default: typing.Optional[typing.Any] = None
+  ) -> typing.Any:
     """Returns an attribute by name.
 
     If the attribute is not present in the object, it returns None
@@ -201,7 +215,7 @@ class Object:
     """
     return self.__dict__.get(attr_name, default)
 
-  def to_dict(self, modified_attributes_only=False):
+  def to_dict(self, modified_attributes_only: bool = False) -> typing.Dict:
     result = {"type": self._type, "attributes": {}}
 
     if self._id:

@@ -85,7 +85,8 @@ def test_interface(httpserver):
     assert isinstance(it, abc.AsyncIterator)
 
 
-def test_next(httpserver, iterator_response):  # pylint: disable=unused-argument
+@pytest.mark.usefixtures("iterator_response")
+def test_next(httpserver):
   """Tests iterator's next with a limit higher than the total of elements."""
   with new_client(httpserver) as client:
     it = client.iterator("/dummy_collection/foo", limit=10, batch_size=3)
@@ -117,7 +118,8 @@ def test_next(httpserver, iterator_response):  # pylint: disable=unused-argument
       pytest.fail("Iteration should already be finished")
 
 
-def test_next_limit(httpserver, iterator_response):  # pylint: disable=unused-argument
+@pytest.mark.usefixtures("iterator_response")
+def test_next_limit(httpserver):
   """Tests iterator's next with a limit smaller than the total of elements."""
   with new_client(httpserver) as client:
     it = client.iterator("/dummy_collection/foo", limit=3)
@@ -144,7 +146,8 @@ def test_next_limit(httpserver, iterator_response):  # pylint: disable=unused-ar
 
 
 @pytest.mark.asyncio
-async def test_anext(httpserver, iterator_response):  # pylint: disable=unused-argument
+@pytest.mark.usefixtures("iterator_response")
+async def test_anext(httpserver):
   """Tests iterator's async next."""
   async with new_client(httpserver) as client:
     it = client.iterator("/dummy_collection/foo", limit=10, batch_size=3)

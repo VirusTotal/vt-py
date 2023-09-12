@@ -90,7 +90,8 @@ def test_interface(httpserver):
   assert isinstance(feed, abc.AsyncIterator)
 
 
-def test_next(httpserver, feed_response):  # pylint: disable=unused-argument
+@pytest.mark.usefixtures("feed_response")
+def test_next(httpserver):
   """Tests feed's next."""
   with new_client(httpserver) as client:
     feed = client.feed(FeedType.FILES, cursor="200102030405")
@@ -116,7 +117,8 @@ def test_next(httpserver, feed_response):  # pylint: disable=unused-argument
 
 
 @pytest.mark.asyncio
-async def test_anext(httpserver, feed_response):  # pylint: disable=unused-argument
+@pytest.mark.usefixtures("feed_response")
+async def test_anext(httpserver):
   """Tests feed's async next."""
   async with new_client(httpserver) as client:
     feed = client.feed(FeedType.FILES, cursor="200102030405")
@@ -141,7 +143,8 @@ async def test_anext(httpserver, feed_response):  # pylint: disable=unused-argum
 
 
 @pytest.mark.parametrize("tolerance", [0, 1, 2])
-def test_tolerance(httpserver, feed_response_missing_packages, tolerance):  # pylint: disable=unused-argument
+@pytest.mark.usefixtures("feed_response_missing_packages")
+def test_tolerance(httpserver, tolerance):
   """Tests feed's tolerance to missing packages."""
 
   missing_batches = 2  # Consecutive missing batches in fixture
@@ -175,7 +178,8 @@ def test_tolerance(httpserver, feed_response_missing_packages, tolerance):  # py
         (4, "200102030406-1"),
     ],
 )
-def test_cursor(httpserver, feed_response, test_iters, expected_cursor):  # pylint: disable=unused-argument
+@pytest.mark.usefixtures("feed_response")
+def test_cursor(httpserver,  test_iters, expected_cursor):
   """Tests feed's cursor."""
   with new_client(httpserver) as client:
     feed = client.feed(FeedType.FILES, cursor="200102030405")
@@ -195,7 +199,8 @@ def test_cursor(httpserver, feed_response, test_iters, expected_cursor):  # pyli
         ("200102030405-3", "dummy_file_id_4"),
     ],
 )
-def test_skip(httpserver, feed_response, cursor, expected_file_id):  # pylint: disable=unused-argument
+@pytest.mark.usefixtures("feed_response")
+def test_skip(httpserver, cursor, expected_file_id):
   """Tests feed's skip, used to continue where a previous object left."""
   with new_client(httpserver) as client:
     feed = client.feed(FeedType.FILES, cursor=cursor)

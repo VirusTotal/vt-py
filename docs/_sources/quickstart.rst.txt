@@ -22,7 +22,7 @@ with some other SHA-256, SHA-1 or MD5:
 Now `file` is an instance of :class:`vt.Object` that contains information
 about the requested file. This object have the attributes returned in the
 API response which are listed in the `VirusTotal API v3 documentation
-<https://developers.virustotal.com/v3.0/reference#files>`_. Some examples:
+<https://docs.virustotal.com/reference/files>`_. Some examples:
 
 >>> file.size
 68
@@ -66,7 +66,7 @@ While retrieving a file any of its hashes can be used as the file identifier,
 but with URLs is a bit more complicated. You must use :func:`vt.url_id` for
 generating the appropriate identifier. You can find more information about why
 this is necessary in:
-`<https://developers.virustotal.com/v3.0/reference#url>`_.
+`<https://docs.virustotal.com/reference/url>`_.
 
 Also notice how we are using a placeholder `{}` in the path. The placeholder
 will be replaced with the value of `url_id`. This works exactly like Python's
@@ -187,7 +187,7 @@ Let's abort the job:
 
 Here we are using :meth:`vt.Client.post` instead of :meth:`vt.Client.post_object`,
 this is because the `/intelligence/retrohunt_jobs/{id}/abort
-<https://developers.virustotal.com/v3.0/reference#abort-retrohunt-job>`_
+<https://docs.virustotal.com/reference/abort-retrohunt-job>`_
 endpoint doesn't expect an object, just a POST request with an empty body. The
 result from :meth:`vt.Client.post` is a :class:`vt.ClientResponse` instance.
 

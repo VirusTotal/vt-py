@@ -3,9 +3,9 @@ Overview
 ********
 
 The API for this library is relatively small and shares the same concepts and
-principles seen in the underlying `REST API <https://developers.virustotal.com/v3.0/reference>`_.
+principles seen in the underlying `REST API <https://docs.virustotal.com/v3.0/reference>`_.
 For this reason we highly recommend you to familiarize yourself with these
-`concepts <https://developers.virustotal.com/v3.0/reference#key-concepts>`_ before
+`concepts <https://docs.virustotal.com/reference/key-concepts>`_ before
 continuing.
 
 While using this library you may have the impression that it's very similar to

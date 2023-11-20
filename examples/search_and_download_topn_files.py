@@ -7,7 +7,7 @@ VirusTotal Intelligence search.
 NOTE: In order to use this script you will need to have access to
 VT Intelligence or to the Premium API. Learn more about these services at:
 https://www.virustotal.com/gui/intelligence-overview
-https://developers.virustotal.com/v3.0/reference#search
+https://docs.virustotal.com/reference/search
 https://www.virustotal.com/learn/
 """
 

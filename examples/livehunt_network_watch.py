@@ -39,6 +39,11 @@ TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), "netwatch_templates")
 RULESET_ENTITY = ("file", "url", "domain", "ip_address")
 RULESET_LINK = "https://www.virustotal.com/yara-editor/livehunt/"
 
+EMPTY_DOMAIN_LIST_MSG = (
+  "* Empty domain list, use --add-domain domain.tld or bulk operations to"
+  " register them"
+)
+
 
 def extract_domains_from_rule(rules):
   """Extract the domain list from the comment of a yara rule."""
@@ -80,11 +85,22 @@ def render_template(entity, domains):
     template += "\n"
 
   kind_template = os.path.join(TEMPLATE_DIR, entity + ".yara")
+  escaped_domains = {}
   with open(kind_template, encoding="utf-8") as f:
     rule_block = f.read()
 
     for domain in domains:
-      domain_escaped = re.compile(r"[^\w\d]").sub("_", domain)
+      domain_escaped = domain.lower()
+      domain_escaped = re.compile(r"[^[a-z\d]").sub("_", domain_escaped)
+      domain_escaped = re.compile(r"(_(?i:_)+)").sub("_", domain_escaped)
+
+      if not domain_escaped in escaped_domains:
+        escaped_domains[domain_escaped] = 0
+      escaped_domains[domain_escaped] += 1
+
+      if escaped_domains[domain_escaped] > 1:
+        domain_escaped = f"{domain_escaped}_{escaped_domains[domain_escaped]}"
+
       template += rule_block.replace("${domain}", domain).replace(
           "${domain_escaped}", domain_escaped
       )
@@ -118,13 +134,20 @@ async def upload_rulesets(queue):
         )
         try:
           # Fix for https://github.com/VirusTotal/vt-py/issues/155 issue.
-          await client.patch_async(
+          result = await client.patch_async(
               path="/intelligence/hunting_rulesets/" + task.get("id"),
               json_data={"data": ruleset.to_dict()},
           )
-          print(f'Ruleset {name} [{RULESET_LINK}{task["id"]}] updated.')
         except vt.error.APIError as e:
           print(f"Error updating {name}: {e}")
+          sys.exit(1)
+
+        response = await result.json_async()
+        if response.get("error") is not None:
+          print(f"{name}: {response}")
+          sys.exit(1)
+
+        print(f'Ruleset {name} [{RULESET_LINK}{task["id"]}] updated.')
 
       else:
         ruleset = vt.Object(
@@ -141,11 +164,32 @@ async def upload_rulesets(queue):
           result = await client.post_object_async(
               path="/intelligence/hunting_rulesets", obj=ruleset
           )
-          print(f"Ruleset {name} [{RULESET_LINK}{result.id}] created.")
         except vt.error.APIError as e:
           print(f"Error saving {name}: {e}")
+          sys.exit(1)
+
+        response = await result.json_async()
+        if response.get("error") is not None:
+          print(f"{name}: {response}")
+          sys.exit(1)
+
+        print(f"Ruleset {name} [{RULESET_LINK}{result.id}] created.")
 
       queue.task_done()
+
+
+def load_bulk_file_domains(filename):
+  if not os.path.isfile(filename):
+    print(f"Error: File {filename} does not exists.")
+    sys.exit(1)
+
+  domains = []
+  with open(filename, encoding="utf-8") as bulk_file:
+    for line in bulk_file.read().split("\n"):
+      if not line:
+        continue
+      domains.append(line)
+  return domains
 
 
 async def main():
@@ -160,9 +204,27 @@ async def main():
       action="store_true",
       help="List current monitored domains.",
   )
-  parser.add_argument("-a", "--add-domain", help="Add a domain to the list.")
   parser.add_argument(
-      "-d", "--delete-domain", help="Remove a domain from the list."
+      "-a",
+      "--add-domain",
+      action="append",
+      type=str,
+      help="Add a domain to the list.",
+  )
+  parser.add_argument(
+      "-d",
+      "--delete-domain",
+      action="append",
+      type=str,
+      help="Remove a domain from the list.",
+  )
+  parser.add_argument(
+      "--bulk-append",
+      help="Add a list of domains from an input file.",
+  )
+  parser.add_argument(
+      "--bulk-replace",
+      help="Replace the remote list with a new list from a file.",
   )
   parser.add_argument(
       "--workers",
@@ -185,14 +247,15 @@ async def main():
     return
 
   rulesets = await get_rulesets()
-  if not rulesets and not args.add_domain:
-    print("* Empty domain list, use --add-domain domain.tld to register one")
+  if (not rulesets and
+      not (args.add_domain or args.bulk_append or args.bulk_replace)):
+    print(EMPTY_DOMAIN_LIST_MSG)
     sys.exit(1)
 
   domains = rulesets.get("url", {}).get("domains", [])
   if args.list:
     if not domains:
-      print("* Empty domain list, use --add-domain domain.tld to register one")
+      print(EMPTY_DOMAIN_LIST_MSG)
       sys.exit(0)
 
     print("Currently monitored domains:")
@@ -201,16 +264,25 @@ async def main():
     sys.exit(0)
 
   new_domain_list = copy.copy(domains)
-  if args.add_domain:
-    new_domain_list.append(args.add_domain)
+  if args.bulk_replace:
+    new_domain_list = load_bulk_file_domains(args.bulk_replace)
 
-  if args.delete_domain:
-    if not args.delete_domain in new_domain_list:
-      print(f"* {args.delete_domain} not in list")
-      sys.exit(1)
-    new_domain_list.remove(args.delete_domain)
+  elif args.bulk_append:
+    new_domain_list += load_bulk_file_domains(args.bulk_append)
+
+  else:
+    if args.add_domain:
+      new_domain_list += args.add_domain
+
+    if args.delete_domain:
+      for deleted_domain in args.delete_domain:
+        if not deleted_domain in new_domain_list:
+          print(f"* {deleted_domain} not in list")
+          sys.exit(1)
+        new_domain_list.remove(deleted_domain)
 
   new_domain_list = list(set(new_domain_list))
+  new_domain_list = [domain.lower() for domain in new_domain_list]
   new_domain_list.sort()
 
   if new_domain_list != domains:

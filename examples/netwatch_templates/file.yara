@@ -1,4 +1,4 @@
-rule network_watch_${domain_escaped} : ${domain_escaped} {
+rule network_watch_${domain_escaped} : domain_${domain_escaped} {
 meta:
   description = "New files downloaded from ${domain}"
   target_entity = "file"
@@ -10,7 +10,7 @@ condition:
 }
 
 
-rule network_watch_contact_${domain_escaped} : ${domain_escaped} {
+rule network_watch_contact_${domain_escaped} : domain_${domain_escaped} {
 meta:
   description = "New files contacting ${domain}"
   target_entity = "file"

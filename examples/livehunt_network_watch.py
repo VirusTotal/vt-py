@@ -195,7 +195,7 @@ async def main():
   )
   parser.add_argument(
       "--bulk-replace",
-      help="Remove the remote list with a new list from a file.",
+      help="Replace the remote list with a new list from a file.",
   )
   parser.add_argument(
       "--workers",

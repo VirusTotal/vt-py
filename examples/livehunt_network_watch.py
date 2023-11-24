@@ -85,11 +85,21 @@ def render_template(entity, domains):
     template += "\n"
 
   kind_template = os.path.join(TEMPLATE_DIR, entity + ".yara")
+  escaped_domains = {}
   with open(kind_template, encoding="utf-8") as f:
     rule_block = f.read()
 
     for domain in domains:
-      domain_escaped = re.compile(r"[^\w\d]").sub("_", domain)
+      domain_escaped = re.compile(r"[^[a-z\d]").sub("_", domain)
+      domain_escaped = re.compile(r'(_(?i:_)+)').sub('_', domain_escaped)
+
+      if not domain_escaped in escaped_domains:
+        escaped_domains[domain_escaped] = 0
+      escaped_domains[domain_escaped] += 1
+
+      if escaped_domains[domain_escaped] > 1:
+        domain_escaped = f"{domain_escaped}_{escaped_domains[domain_escaped]}"
+
       template += rule_block.replace("${domain}", domain).replace(
           "${domain_escaped}", domain_escaped
       )

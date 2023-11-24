@@ -91,7 +91,7 @@ def render_template(entity, domains):
 
     for domain in domains:
       domain_escaped = re.compile(r"[^[a-z\d]").sub("_", domain)
-      domain_escaped = re.compile(r'(_(?i:_)+)').sub('_', domain_escaped)
+      domain_escaped = re.compile(r"(_(?i:_)+)").sub("_", domain_escaped)
 
       if not domain_escaped in escaped_domains:
         escaped_domains[domain_escaped] = 0
@@ -141,7 +141,7 @@ async def upload_rulesets(queue):
           print(f"Error updating {name}: {e}")
 
         response = await result.json_async()
-        if response.get('error') != None:
+        if response.get("error") is not Non:
           print(f'{name}: {response}')
 
         print(f'Ruleset {name} [{RULESET_LINK}{task["id"]}] updated.')
@@ -165,7 +165,7 @@ async def upload_rulesets(queue):
           print(f"Error saving {name}: {e}")
 
         response = await result.json_async()
-        if response.get('error') != None:
+        if response.get("error") is not Non:
           print(f'{name}: {response}')
 
         print(f"Ruleset {name} [{RULESET_LINK}{result.id}] created.")
@@ -180,7 +180,7 @@ def load_bulk_file_domains(filename):
 
   domains = []
   with open(filename, encoding="utf-8") as bulk_file:
-    for line in bulk_file.read().split('\n'):
+    for line in bulk_file.read().split("\n"):
       if not line:
         continue
       domains.append(line)

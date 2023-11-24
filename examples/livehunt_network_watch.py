@@ -140,6 +140,7 @@ async def upload_rulesets(queue):
           )
         except vt.error.APIError as e:
           print(f"Error updating {name}: {e}")
+          sys.exit(1)
 
         response = await result.json_async()
         if response.get("error") is not None:
@@ -164,6 +165,7 @@ async def upload_rulesets(queue):
           )
         except vt.error.APIError as e:
           print(f"Error saving {name}: {e}")
+          sys.exit(1)
 
         response = await result.json_async()
         if response.get("error") is not None:

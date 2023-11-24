@@ -90,7 +90,8 @@ def render_template(entity, domains):
     rule_block = f.read()
 
     for domain in domains:
-      domain_escaped = re.compile(r"[^[a-z\d]").sub("_", domain)
+      domain_escaped = domain.lower()
+      domain_escaped = re.compile(r"[^[a-z\d]").sub("_", domain_escaped)
       domain_escaped = re.compile(r"(_(?i:_)+)").sub("_", domain_escaped)
 
       if not domain_escaped in escaped_domains:
@@ -277,6 +278,7 @@ async def main():
         new_domain_list.remove(deleted_domain)
 
   new_domain_list = list(set(new_domain_list))
+  new_domain_list = [domain.lower() for domain in new_domain_list]
   new_domain_list.sort()
 
   if new_domain_list != domains:

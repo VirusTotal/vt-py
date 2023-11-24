@@ -39,6 +39,11 @@ TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), "netwatch_templates")
 RULESET_ENTITY = ("file", "url", "domain", "ip_address")
 RULESET_LINK = "https://www.virustotal.com/yara-editor/livehunt/"
 
+EMPTY_DOMAIN_LIST_MSG = (
+  "* Empty domain list, use --add-domain domain.tld or bulk operations to"
+  " register them"
+)
+
 
 def extract_domains_from_rule(rules):
   """Extract the domain list from the comment of a yara rule."""
@@ -148,6 +153,20 @@ async def upload_rulesets(queue):
       queue.task_done()
 
 
+def load_bulk_file_domains(filename):
+  if not os.path.isfile(filename):
+    print(f"Error: File {filename} does not exists.")
+    sys.exit(1)
+
+  domains = []
+  with open(filename, encoding="utf-8") as bulk_file:
+    for line in bulk_file.read().split('\n'):
+      if not line:
+        continue
+      domains.append(line)
+  return domains
+
+
 async def main():
   parser = argparse.ArgumentParser(
       description=(
@@ -160,9 +179,23 @@ async def main():
       action="store_true",
       help="List current monitored domains.",
   )
-  parser.add_argument("-a", "--add-domain", help="Add a domain to the list.")
   parser.add_argument(
-      "-d", "--delete-domain", help="Remove a domain from the list."
+      "-a",
+      "--add-domain",
+      help="Add a domain to the list.",
+  )
+  parser.add_argument(
+      "-d",
+      "--delete-domain",
+      help="Remove a domain from the list.",
+  )
+  parser.add_argument(
+      "--bulk-append",
+      help="Add a list of domains from an input file.",
+  )
+  parser.add_argument(
+      "--bulk-replace",
+      help="Remove the remote list with a new list from a file.",
   )
   parser.add_argument(
       "--workers",
@@ -185,14 +218,15 @@ async def main():
     return
 
   rulesets = await get_rulesets()
-  if not rulesets and not args.add_domain:
-    print("* Empty domain list, use --add-domain domain.tld to register one")
+  if (not rulesets and
+      not (args.add_domain or args.bulk_append or args.bulk_replace)):
+    print(EMPTY_DOMAIN_LIST_MSG)
     sys.exit(1)
 
   domains = rulesets.get("url", {}).get("domains", [])
   if args.list:
     if not domains:
-      print("* Empty domain list, use --add-domain domain.tld to register one")
+      print(EMPTY_DOMAIN_LIST_MSG)
       sys.exit(0)
 
     print("Currently monitored domains:")
@@ -201,14 +235,21 @@ async def main():
     sys.exit(0)
 
   new_domain_list = copy.copy(domains)
-  if args.add_domain:
-    new_domain_list.append(args.add_domain)
+  if args.bulk_replace:
+    new_domain_list = load_bulk_file_domains(args.bulk_replace)
 
-  if args.delete_domain:
-    if not args.delete_domain in new_domain_list:
-      print(f"* {args.delete_domain} not in list")
-      sys.exit(1)
-    new_domain_list.remove(args.delete_domain)
+  elif args.bulk_append:
+    new_domain_list += load_bulk_file_domains(args.bulk_append)
+
+  else:
+    if args.add_domain:
+      new_domain_list.append(args.add_domain)
+
+    if args.delete_domain:
+      if not args.delete_domain in new_domain_list:
+        print(f"* {args.delete_domain} not in list")
+        sys.exit(1)
+      new_domain_list.remove(args.delete_domain)
 
   new_domain_list = list(set(new_domain_list))
   new_domain_list.sort()

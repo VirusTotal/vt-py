@@ -145,6 +145,7 @@ async def upload_rulesets(queue):
         response = await result.json_async()
         if response.get("error") is not None:
           print(f"{name}: {response}")
+          sys.exit(1)
 
         print(f'Ruleset {name} [{RULESET_LINK}{task["id"]}] updated.')
 
@@ -170,6 +171,7 @@ async def upload_rulesets(queue):
         response = await result.json_async()
         if response.get("error") is not None:
           print(f"{name}: {response}")
+          sys.exit(1)
 
         print(f"Ruleset {name} [{RULESET_LINK}{result.id}] created.")
 

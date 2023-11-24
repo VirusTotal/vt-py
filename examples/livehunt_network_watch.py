@@ -123,13 +123,18 @@ async def upload_rulesets(queue):
         )
         try:
           # Fix for https://github.com/VirusTotal/vt-py/issues/155 issue.
-          await client.patch_async(
+          result = await client.patch_async(
               path="/intelligence/hunting_rulesets/" + task.get("id"),
               json_data={"data": ruleset.to_dict()},
           )
-          print(f'Ruleset {name} [{RULESET_LINK}{task["id"]}] updated.')
         except vt.error.APIError as e:
           print(f"Error updating {name}: {e}")
+
+        response = await result.json_async()
+        if response.get('error') != None:
+          print(f'{name}: {response}')
+
+        print(f'Ruleset {name} [{RULESET_LINK}{task["id"]}] updated.')
 
       else:
         ruleset = vt.Object(
@@ -146,9 +151,14 @@ async def upload_rulesets(queue):
           result = await client.post_object_async(
               path="/intelligence/hunting_rulesets", obj=ruleset
           )
-          print(f"Ruleset {name} [{RULESET_LINK}{result.id}] created.")
         except vt.error.APIError as e:
           print(f"Error saving {name}: {e}")
+
+        response = await result.json_async()
+        if response.get('error') != None:
+          print(f'{name}: {response}')
+
+        print(f"Ruleset {name} [{RULESET_LINK}{result.id}] created.")
 
       queue.task_done()
 
@@ -182,11 +192,15 @@ async def main():
   parser.add_argument(
       "-a",
       "--add-domain",
+      action="append",
+      type=str,
       help="Add a domain to the list.",
   )
   parser.add_argument(
       "-d",
       "--delete-domain",
+      action="append",
+      type=str,
       help="Remove a domain from the list.",
   )
   parser.add_argument(
@@ -243,13 +257,14 @@ async def main():
 
   else:
     if args.add_domain:
-      new_domain_list.append(args.add_domain)
+      new_domain_list += args.add_domain
 
     if args.delete_domain:
-      if not args.delete_domain in new_domain_list:
-        print(f"* {args.delete_domain} not in list")
-        sys.exit(1)
-      new_domain_list.remove(args.delete_domain)
+      for deleted_domain in args.delete_domain:
+        if not deleted_domain in new_domain_list:
+          print(f"* {deleted_domain} not in list")
+          sys.exit(1)
+        new_domain_list.remove(deleted_domain)
 
   new_domain_list = list(set(new_domain_list))
   new_domain_list.sort()

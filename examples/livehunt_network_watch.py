@@ -19,8 +19,8 @@ ip) in your VT account by adding and removing domains.
 
 Read more:
 https://www.virustotal.com/gui/hunting-overview
-https://developers.virustotal.com/v3.0/reference#livehunt
-https://developers.virustotal.com/docs/nethunt
+https://docs.virustotal.com/reference/list-hunting-rulesets
+https://docs.virustotal.com/docs/nethunt
 """
 
 import argparse

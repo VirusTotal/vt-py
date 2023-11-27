@@ -32,16 +32,14 @@ class Iterator:
   Some endpoints in the VirusTotal API represent a collection of objects, for
   example:
 
-  `/files/{id}/comments
-  <https://developers.virustotal.com/v3.0/reference#files-comments-get>`_
+  `/files/{id}/comments <https://docs.virustotal.com/reference/get-comments>`_
 
-  `/intelligence/search
-  <https://developers.virustotal.com/v3.0/reference#intelligence-search>`_
+  `/intelligence/search <https://docs.virustotal.com/reference/search>`_
 
   These collections can be iterated using an instance of this class.
 
   Learn more about collections in the VirusTotal API in:
-  https://developers.virustotal.com/v3.0/reference#collections
+  https://docs.virustotal.com/reference/collections-create
 
   The following example iterates over the most recent 200 comments, retrieving
   them in batches of 20:

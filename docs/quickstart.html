@@ -10,7 +10,7 @@
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
+
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
@@ -18,17 +18,17 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="API reference" href="apireference.html" />
-    <link rel="prev" title="Overview" href="overview.html" /> 
+    <link rel="prev" title="Overview" href="overview.html" />
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
 
-          
-          
+
+
           <a href="index.html" class="icon icon-home">
             vt-py
           </a>
@@ -81,7 +81,7 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+
   <section id="quickstart">
 <h1>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this heading"></a></h1>
 <section id="get-information-about-a-file">
@@ -101,7 +101,7 @@ with some other SHA-256, SHA-1 or MD5:</p>
 </div>
 <p>Now <cite>file</cite> is an instance of <code class="xref py py-class docutils literal notranslate"><span class="pre">vt.Object</span></code> that contains information
 about the requested file. This object have the attributes returned in the
-API response which are listed in the <a class="reference external" href="https://developers.virustotal.com/v3.0/reference#files">VirusTotal API v3 documentation</a>. Some examples:</p>
+API response which are listed in the <a class="reference external" href="https://docs.virustotal.com/reference/files">VirusTotal API v3 documentation</a>. Some examples:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">file</span><span class="o">.</span><span class="n">size</span>
 <span class="go">68</span>
 </pre></div>
@@ -148,7 +148,7 @@ While retrieving a file any of its hashes can be used as the file identifier,
 but with URLs is a bit more complicated. You must use <code class="xref py py-func docutils literal notranslate"><span class="pre">vt.url_id()</span></code> for
 generating the appropriate identifier. You can find more information about why
 this is necessary in:
-<a class="reference external" href="https://developers.virustotal.com/v3.0/reference#url">https://developers.virustotal.com/v3.0/reference#url</a>.</p>
+<a class="reference external" href="https://docs.virustotal.com/reference/url">https://docs.virustotal.com/reference/url</a>.</p>
 <p>Also notice how we are using a placeholder <cite>{}</cite> in the path. The placeholder
 will be replaced with the value of <cite>url_id</cite>. This works exactly like Python’s
 <a class="reference external" href="https://pyformat.info/">new-style string formatting</a> using the <cite>.format()</cite>
@@ -266,7 +266,7 @@ progress. Wait for a few seconds and do:</p>
 </pre></div>
 </div>
 <p>Here we are using <code class="xref py py-meth docutils literal notranslate"><span class="pre">vt.Client.post()</span></code> instead of <code class="xref py py-meth docutils literal notranslate"><span class="pre">vt.Client.post_object()</span></code>,
-this is because the <a class="reference external" href="https://developers.virustotal.com/v3.0/reference#abort-retrohunt-job">/intelligence/retrohunt_jobs/{id}/abort</a>
+this is because the <a class="reference external" href="https://docs.virustotal.com/reference/abort-retrohunt-job">/intelligence/retrohunt_jobs/{id}/abort</a>
 endpoint doesn’t expect an object, just a POST request with an empty body. The
 result from <code class="xref py py-meth docutils literal notranslate"><span class="pre">vt.Client.post()</span></code> is a <code class="xref py py-class docutils literal notranslate"><span class="pre">vt.ClientResponse</span></code> instance.</p>
 </section>
@@ -337,7 +337,7 @@ the client is automatically closed after exiting, so there’s no need to call c
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+
 
 </footer>
         </div>
@@ -348,7 +348,7 @@ the client is automatically closed after exiting, so there’s no need to call c
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
 
 </body>
 </html>

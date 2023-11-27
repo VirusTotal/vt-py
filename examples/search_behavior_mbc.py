@@ -9,7 +9,7 @@ MBC as of 2023 is present in the CAPA tool integrated in VirusTotal
 NOTE: In order to use this script you will need to have access to
 VT Intelligence or to the Premium API. Learn more about these services at:
 https://www.virustotal.com/gui/intelligence-overview
-https://developers.virustotal.com/v3.0/reference#search
+https://docs.virustotal.com/reference/search
 https://www.virustotal.com/learn/
 """
 
@@ -70,8 +70,8 @@ class FetchMBCHandler:
       while True:
         file_hash = await self.queue.get()
         # behavior report ID is format SHA256_SandboxName
-        # https://developers.virustotal.com/reference/get-file-behaviour-id
-        report_id = f"{file_hash}_CAPA"
+        # https://docs.virustotal.com/reference/get-file-behaviour-id
+        report_id = f'{file_hash}_CAPA'
         behavior_report = await client.get_object_async(
             f"/file_behaviours/{report_id}"
         )

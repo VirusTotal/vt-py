@@ -30,7 +30,7 @@ async def get_files_to_upload(queue, path):
   n_files = 0
   with os.scandir(path) as it:
     for entry in it:
-      if not entry.name.startswith('.') and entry.is_file():
+      if not entry.name.startswith(".") and entry.is_file():
         await queue.put(entry.path)
         n_files += 1
   return n_files
@@ -43,9 +43,9 @@ async def upload_hashes(queue, apikey):
   async with vt.Client(apikey) as client:
     while not queue.empty():
       file_path = await queue.get()
-      with open(file_path, encoding='utf-8') as f:
+      with open(file_path, encoding="utf-8") as f:
         analysis = await client.scan_file_async(file=f)
-        print(f'File {file_path} uploaded.')
+        print(f"File {file_path} uploaded.")
         queue.task_done()
         return_values.append((analysis, file_path))
 
@@ -55,22 +55,28 @@ async def upload_hashes(queue, apikey):
 async def process_analysis_results(apikey, analysis, file_path):
   async with vt.Client(apikey) as client:
     completed_analysis = await client.wait_for_analysis_completion(analysis)
-    print(f'{file_path}: {completed_analysis.stats}')
+    print(f"{file_path}: {completed_analysis.stats}")
+    print(f"analysis id: {completed_analysis.id}")
 
 
 async def main():
+  parser = argparse.ArgumentParser(description="Upload files to VirusTotal.")
 
-  parser = argparse.ArgumentParser(description='Upload files to VirusTotal.')
-
-  parser.add_argument('--apikey', required=True, help='your VirusTotal API key')
-  parser.add_argument('--path', required=True,
-                      help='path to the file/directory to upload.')
-  parser.add_argument('--workers', type=int, required=False, default=4,
-                      help='number of concurrent workers')
+  parser.add_argument("--apikey", required=True, help="your VirusTotal API key")
+  parser.add_argument(
+      "--path", required=True, help="path to the file/directory to upload."
+  )
+  parser.add_argument(
+      "--workers",
+      type=int,
+      required=False,
+      default=4,
+      help="number of concurrent workers",
+  )
   args = parser.parse_args()
 
   if not os.path.exists(args.path):
-    print(f'ERROR: file {args.path} not found.')
+    print(f"ERROR: file {args.path} not found.")
     sys.exit(1)
 
   queue = asyncio.Queue()
@@ -82,10 +88,13 @@ async def main():
 
   # Wait until all worker tasks has completed.
   analyses = itertools.chain.from_iterable(await asyncio.gather(*worker_tasks))
-  await asyncio.gather(*[
-      asyncio.create_task(
-          process_analysis_results(args.apikey, a, f)) for a, f in analyses])
+  await asyncio.gather(
+      *[
+          asyncio.create_task(process_analysis_results(args.apikey, a, f))
+          for a, f in analyses
+      ]
+  )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
   asyncio.run(main())

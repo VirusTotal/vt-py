@@ -52,6 +52,7 @@ def get(data, path, default=None):
     data: Data to be queried.
     path: Query string in JsonPath format.
     default: Value returned when there are no results.
+
   Returns:
     The value in data matching the given path.
   Raises:
@@ -61,5 +62,5 @@ def get(data, path, default=None):
   if not result:
     return default
   if len(result) > 1:
-    raise DictPathException(f'JsonPath {path} returning more than one value')
+    raise DictPathException(f"JsonPath {path} returning more than one value")
   return result[0]

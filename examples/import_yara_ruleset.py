@@ -26,8 +26,8 @@ https://docs.virustotal.com/docs/whats-vthunting
 import argparse
 import asyncio
 import os
-import vt
 import sys
+import vt
 
 
 async def get_rules_files(queue, path):
@@ -38,7 +38,7 @@ async def get_rules_files(queue, path):
 
   with os.scandir(path) as it:
     for entry in it:
-      if not entry.name.startswith('.') and entry.is_file():
+      if not entry.name.startswith(".") and entry.is_file():
         await queue.put(entry.path)
 
 
@@ -47,40 +47,52 @@ async def upload_rules(queue, apikey, enable):
   async with vt.Client(apikey) as client:
     while not queue.empty():
       file_path = await queue.get()
-      with open(file_path, encoding='utf-8') as f:
+      with open(file_path, encoding="utf-8") as f:
         ruleset = vt.Object(
-            obj_type='hunting_ruleset',
+            obj_type="hunting_ruleset",
             obj_attributes={
-                'name': os.path.basename(file_path),
-                'enabled': enable,
-                'rules': f.read()})
+                "name": os.path.basename(file_path),
+                "enabled": enable,
+                "rules": f.read(),
+            },
+        )
 
       try:
         await client.post_object_async(
-            path='/intelligence/hunting_rulesets', obj=ruleset)
-        print(f'File {file_path} uploaded.')
+            path="/intelligence/hunting_rulesets", obj=ruleset
+        )
+        print(f"File {file_path} uploaded.")
       except vt.error.APIError as e:
-        print(f'Error uploading {file_path}: {e}')
+        print(f"Error uploading {file_path}: {e}")
 
       queue.task_done()
 
 
 def main():
-
   parser = argparse.ArgumentParser(
-      description='Import YARA rules to a VirusTotal account.')
+      description="Import YARA rules to a VirusTotal account."
+  )
 
-  parser.add_argument('--apikey', required=True, help='your VirusTotal API key')
-  parser.add_argument('--path', required=True,
-                      help='path to the file/directory to upload.')
-  parser.add_argument('--enable', action='store_true',
-                      help='Whether to enable the YARA rules or not.')
-  parser.add_argument('--workers', type=int, required=False, default=4,
-                      help='number of concurrent workers')
+  parser.add_argument("--apikey", required=True, help="your VirusTotal API key")
+  parser.add_argument(
+      "--path", required=True, help="path to the file/directory to upload."
+  )
+  parser.add_argument(
+      "--enable",
+      action="store_true",
+      help="Whether to enable the YARA rules or not.",
+  )
+  parser.add_argument(
+      "--workers",
+      type=int,
+      required=False,
+      default=4,
+      help="number of concurrent workers",
+  )
   args = parser.parse_args()
 
   if not os.path.exists(args.path):
-    print(f'ERROR: file {args.path} not found.')
+    print(f"ERROR: file {args.path} not found.")
     sys.exit(1)
 
   loop = asyncio.get_event_loop()
@@ -90,12 +102,13 @@ def main():
   worker_tasks = []
   for _ in range(args.workers):
     worker_tasks.append(
-        loop.create_task(upload_rules(queue, args.apikey, args.enable)))
+        loop.create_task(upload_rules(queue, args.apikey, args.enable))
+    )
 
   # Wait until all worker tasks has completed.
   loop.run_until_complete(asyncio.gather(*worker_tasks))
   loop.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
   main()

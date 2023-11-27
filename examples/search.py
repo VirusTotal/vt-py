@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-This example program shows how to make VirusTotal Intelligence searches, the
+"""This example program shows how to make VirusTotal Intelligence searches, the
+
 program accepts a query a prints the matching files/URLs.
 
 NOTICE: In order to use this program you will need an API key that has
@@ -25,35 +25,42 @@ import vt
 
 
 def main():
-
   parser = argparse.ArgumentParser(
-      description='Make a VirusTotal Intelligence search and prints the matching objects.')  # pylint: disable=line-too-long
+      description=(
+          "Make a VirusTotal Intelligence search and prints the matching"
+          " objects."
+      )
+  )  # pylint: disable=line-too-long
 
-  parser.add_argument('--query',
+  parser.add_argument(
+      "--query",
       type=str,
       required=True,
-      nargs='+',
-      help='a VirusTotal Intelligence search query.')
+      nargs="+",
+      help="a VirusTotal Intelligence search query.",
+  )
 
-  parser.add_argument('--apikey',
-      required=True,
-      help='your VirusTotal API key')
+  parser.add_argument("--apikey", required=True, help="your VirusTotal API key")
 
-  parser.add_argument('--limit',
+  parser.add_argument(
+      "--limit",
       type=int,
       required=False,
-      help='maximum number of objects that will be retrieved',
-      default=50)
+      help="maximum number of objects that will be retrieved",
+      default=50,
+  )
 
   args = parser.parse_args()
 
   with vt.Client(args.apikey) as client:
-    it = client.iterator('/intelligence/search',
-        params={'query': ' '.join(args.query)},
-        limit=args.limit)
+    it = client.iterator(
+        "/intelligence/search",
+        params={"query": " ".join(args.query)},
+        limit=args.limit,
+    )
     for obj in it:
-      print(f'{obj.type}:{obj.id}')
+      print(f"{obj.type}:{obj.id}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
   main()

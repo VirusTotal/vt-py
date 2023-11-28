@@ -20,8 +20,8 @@ indicators of compromise that can be fed into network perimeter defenses.
 
 Read more:
 https://www.virustotal.com/gui/intelligence-overview
-https://developers.virustotal.com/v3.0/reference#intelligence-search
-https://support.virustotal.com/hc/en-us/articles/360001387057-VirusTotal-Intelligence-Introduction
+https://docs.virustotal.com/reference/search
+https://docs.virustotal.com/docs/virustotal-intelligence-introduction
 """
 
 import argparse

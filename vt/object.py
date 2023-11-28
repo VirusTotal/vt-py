@@ -59,7 +59,7 @@ class Object:
   to :meth:`vt.Client.post_object`.
 
   Learn more about objects in the VirusTotal API in:
-  https://developers.virustotal.com/v3.0/reference#objects
+  https://docs.virustotal.com/reference/objects
   """
 
   # Attributes from all object types that match any of the following names

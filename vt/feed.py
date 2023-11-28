@@ -46,7 +46,7 @@ class Feed:
   """Feed represents a stream of objects received from VirusTotal in real-time.
 
   For more information about VirusTotal Feeds see:
-  https://developers.virustotal.com/v3.0/reference#feeds
+  https://docs.virustotal.com/reference/file-feed
 
   In the example below the loop iterates forever, retrieving file objects as
   they are processed by VirusTotal. For a more elaborate example see the file

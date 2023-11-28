@@ -71,7 +71,7 @@ class FetchMBCHandler:
         file_hash = await self.queue.get()
         # behavior report ID is format SHA256_SandboxName
         # https://docs.virustotal.com/reference/get-file-behaviour-id
-        report_id = f'{file_hash}_CAPA'
+        report_id = f"{file_hash}_CAPA"
         behavior_report = await client.get_object_async(
             f"/file_behaviours/{report_id}"
         )

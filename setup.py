@@ -22,8 +22,8 @@ with open(convert_path("vt/version.py")) as ver_file:
 with open("README.md") as fh:
   long_description = fh.read()
 
-if sys.version_info < (3, 6, 0):
-  raise RuntimeError("vt-py requires Python 3.6.0+")
+if sys.version_info < (3, 7, 0):
+  raise RuntimeError("vt-py requires Python 3.7.0+")
 
 setuptools.setup(
     name="vt-py",
@@ -35,7 +35,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/VirusTotal/vt-py",
     packages=["vt"],
-    python_requires=">=3.6.0",
+    python_requires=">=3.7.0",
     install_requires=["aiohttp"],
     setup_requires=["pytest-runner"],
     extras_require={"test": ["pytest", "pytest_httpserver", "pytest_asyncio"]},

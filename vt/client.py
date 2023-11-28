@@ -44,6 +44,9 @@ _ENDPOINT_PREFIX = "/api/v3"
 # See: https://cloud.google.com/appengine/kb/#compression
 _USER_AGENT_FMT = "{agent}; vtpy {version}; gzip"
 
+# https://github.com/aio-libs/aiohttp/discussions/6044#discussioncomment-1432443
+setattr(asyncio.sslproto._SSLProtocolTransport, "_start_tls_compatible", True)  # pylint: disable=protected-access
+
 
 def url_id(url: str) -> str:
   """Generates the object ID for an URL.

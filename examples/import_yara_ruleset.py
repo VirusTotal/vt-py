@@ -68,7 +68,7 @@ async def upload_rules(queue, apikey, enable):
       queue.task_done()
 
 
-def main():
+async def main():
   parser = argparse.ArgumentParser(
       description="Import YARA rules to a VirusTotal account."
   )
@@ -95,20 +95,18 @@ def main():
     print(f"ERROR: file {args.path} not found.")
     sys.exit(1)
 
-  loop = asyncio.get_event_loop()
-  queue = asyncio.Queue(loop=loop)
-  loop.create_task(get_rules_files(queue, args.path))
+  queue = asyncio.Queue()
+  asyncio.create_task(get_rules_files(queue, args.path))
 
   worker_tasks = []
   for _ in range(args.workers):
     worker_tasks.append(
-        loop.create_task(upload_rules(queue, args.apikey, args.enable))
+        asyncio.create_task(upload_rules(queue, args.apikey, args.enable))
     )
 
   # Wait until all worker tasks has completed.
-  loop.run_until_complete(asyncio.gather(*worker_tasks))
-  loop.close()
+  await asyncio.gather(*worker_tasks)
 
 
 if __name__ == "__main__":
-  main()
+  asyncio.run(main())

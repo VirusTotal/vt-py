@@ -38,7 +38,7 @@ async def enqueue_urls(queue, apikey):
       queue.task_done()
 
 
-def main():
+async def main():
   parser = argparse.ArgumentParser(description="Enqueue URLs to be scanned.")
 
   parser.add_argument("--apikey", required=True, help="your VirusTotal API key")
@@ -58,18 +58,16 @@ def main():
   group.add_argument("--url", help="URL to scan.")
   args = parser.parse_args()
 
-  loop = asyncio.get_event_loop()
-  queue = asyncio.Queue(loop=loop)
-  loop.create_task(get_urls_to_enqueue(queue, args.path, args.url))
+  queue = asyncio.Queue()
+  asyncio.create_task(get_urls_to_enqueue(queue, args.path, args.url))
 
   worker_tasks = []
   for _ in range(args.workers):
-    worker_tasks.append(loop.create_task(enqueue_urls(queue, args.apikey)))
+    worker_tasks.append(asyncio.create_task(enqueue_urls(queue, args.apikey)))
 
   # Wait until all worker tasks has completed.
-  loop.run_until_complete(asyncio.gather(*worker_tasks))
-  loop.close()
+  await asyncio.gather(*worker_tasks)
 
 
 if __name__ == "__main__":
-  main()
+  asyncio.run(main())

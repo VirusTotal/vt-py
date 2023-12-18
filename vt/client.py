@@ -212,6 +212,7 @@ class Client:
       proxy: typing.Optional[str] = None,
       headers: typing.Optional[typing.Dict] = None,
       verify_ssl: bool = True,
+      connector: aiohttp.BaseConnector = None
   ):
     """Initialize the client with the provided API key."""
 
@@ -230,6 +231,10 @@ class Client:
     self._proxy = proxy
     self._user_headers = headers
     self._verify_ssl = verify_ssl
+    if connector is not None:
+      self._connector = connector
+    else:
+      self._connector = aiohttp.TCPConnector(ssl=self._verify_ssl),
 
   def _full_url(self, path:str, *args: typing.Any) -> str:
     try:
@@ -256,7 +261,7 @@ class Client:
         headers.update(self._user_headers)
 
       self._session = aiohttp.ClientSession(
-          connector=aiohttp.TCPConnector(ssl=self._verify_ssl),
+          connector=self._connector,
           headers=headers,
           trust_env=self._trust_env,
           timeout=aiohttp.ClientTimeout(total=self._timeout),

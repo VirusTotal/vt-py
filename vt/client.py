@@ -234,7 +234,7 @@ class Client:
     if connector is not None:
       self._connector = connector
     else:
-      self._connector = aiohttp.TCPConnector(ssl=self._verify_ssl),
+      self._connector = aiohttp.TCPConnector(ssl=self._verify_ssl)
 
   def _full_url(self, path:str, *args: typing.Any) -> str:
     try:

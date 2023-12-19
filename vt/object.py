@@ -13,6 +13,7 @@
 
 """Defines a VT object and other helper classes."""
 
+import collections
 import datetime
 import functools
 import re
@@ -21,7 +22,7 @@ import typing
 __all__ = ["Object"]
 
 
-class WhistleBlowerDict(dict):
+class WhistleBlowerDict(collections.UserDict):
   """Helper class for detecting changes in a dictionary.
 
   This class wraps a standard Python dictionary and calls the provided callback
@@ -141,7 +142,7 @@ class Object:
     self._modified_data = {}
     self._error = None
 
-  def __on_attr_change(self, attr: str) -> None:
+  def _on_attr_change(self, attr: str) -> None:
     if hasattr(self, "_modified_attrs"):
       self._modified_attrs.append(attr)
 
@@ -156,12 +157,12 @@ class Object:
   def __setattr__(self, attr: str, value: typing.Any) -> None:
     if isinstance(value, dict):
       value = WhistleBlowerDict(
-          value, functools.partial(self.__on_attr_change, attr)
+          value, functools.partial(self._on_attr_change, attr)
       )
     elif isinstance(value, datetime.datetime):
       value = int(datetime.datetime.timestamp(value))
     if attr not in self.__dict__ or value != self.__dict__[attr]:
-      self.__on_attr_change(attr)
+      self._on_attr_change(attr)
     super().__setattr__(attr, value)
 
   def __repr__(self) -> str:

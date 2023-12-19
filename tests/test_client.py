@@ -16,6 +16,7 @@
 import datetime
 import io
 import json
+import pickle
 
 import pytest
 from vt import APIError
@@ -68,6 +69,12 @@ def test_object_date_attrs():
   obj.foo_date = 0
 
   assert obj.foo_date == datetime.datetime(1970, 1, 1, 0, 0, 0)
+
+
+def test_object_pickle():
+  obj = Object("dummy")
+  obj.whatever = {'1': '2'}
+  pickle.loads(pickle.dumps(obj))
 
 
 def test_object_to_dict():

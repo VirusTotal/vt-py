@@ -73,8 +73,10 @@ def test_object_date_attrs():
 
 def test_object_pickle():
   obj = Object("dummy")
-  obj.whatever = {'1': '2'}
-  pickle.loads(pickle.dumps(obj))
+  obj.whatever = {"1": "2"}
+  new = pickle.loads(pickle.dumps(obj))
+  assert new.whatever == obj.whatever
+  assert new.to_dict() == obj.to_dict()
 
 
 def test_object_to_dict():

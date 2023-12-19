@@ -192,6 +192,7 @@ class Client:
     made by the client (None by default).
   :param headers: Dict of headers defined by the user.
   :param verify_ssl: Whether to verify the certificate in SSL connections.
+  :param connector: (Optional) A custom aiohttp connector.
   :type apikey: str
   :type agent: str
   :type host: str
@@ -200,6 +201,7 @@ class Client:
   :type proxy: str
   :type headers: dict
   :type verify_ssl: bool
+  :type connector: aiohttp.BaseConnector
   """
 
   def __init__(

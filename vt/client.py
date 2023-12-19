@@ -192,6 +192,7 @@ class Client:
     made by the client (None by default).
   :param headers: Dict of headers defined by the user.
   :param verify_ssl: Whether to verify the certificate in SSL connections.
+  :param connector: (Optional) A custom aiohttp connector.
   :type apikey: str
   :type agent: str
   :type host: str
@@ -200,6 +201,7 @@ class Client:
   :type proxy: str
   :type headers: dict
   :type verify_ssl: bool
+  :type connector: aiohttp.BaseConnector
   """
 
   def __init__(
@@ -212,6 +214,7 @@ class Client:
       proxy: typing.Optional[str] = None,
       headers: typing.Optional[typing.Dict] = None,
       verify_ssl: bool = True,
+      connector: aiohttp.BaseConnector = None
   ):
     """Initialize the client with the provided API key."""
 
@@ -230,6 +233,10 @@ class Client:
     self._proxy = proxy
     self._user_headers = headers
     self._verify_ssl = verify_ssl
+    if connector is not None:
+      self._connector = connector
+    else:
+      self._connector = aiohttp.TCPConnector(ssl=self._verify_ssl)
 
   def _full_url(self, path:str, *args: typing.Any) -> str:
     try:
@@ -256,7 +263,7 @@ class Client:
         headers.update(self._user_headers)
 
       self._session = aiohttp.ClientSession(
-          connector=aiohttp.TCPConnector(ssl=self._verify_ssl),
+          connector=self._connector,
           headers=headers,
           trust_env=self._trust_env,
           timeout=aiohttp.ClientTimeout(total=self._timeout),

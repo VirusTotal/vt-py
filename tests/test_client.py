@@ -176,6 +176,7 @@ def test_get_object(httpserver):
 
 def test_patch_object(httpserver):
   obj = Object("dummy_type", "dummy_id", {"foo": 1, "bar": 2})
+  obj._context_attributes = {'a': 'b'}
   obj.foo = 2
 
   httpserver.expect_request(
@@ -191,6 +192,7 @@ def test_patch_object(httpserver):
               "attributes": {
                   "foo": 2,
               },
+              "context_attributes": {"a": "b"}
           }
       }
   )

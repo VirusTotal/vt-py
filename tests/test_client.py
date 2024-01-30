@@ -176,7 +176,7 @@ def test_get_object(httpserver):
 
 def test_patch_object(httpserver):
   obj = Object("dummy_type", "dummy_id", {"foo": 1, "bar": 2})
-  obj._context_attributes = {'a': 'b'}
+  obj._context_attributes = {"a": "b"}  # pylint: disable=protected-access
   obj.foo = 2
 
   httpserver.expect_request(

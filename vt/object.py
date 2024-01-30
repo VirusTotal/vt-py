@@ -16,6 +16,7 @@
 import collections
 import datetime
 import functools
+import json
 import re
 import typing
 
@@ -49,6 +50,15 @@ class WhistleBlowerDict(collections.UserDict):
   def __delitem__(self, item):
     self._on_change_callback()
     super().__delitem__(item)
+
+
+class UserDictJsonEncoder(json.JSONEncoder):
+  """Custom json encoder for UserDict objects."""
+
+  def default(self, o):
+    if isinstance(o, collections.UserDict):
+      return o.data
+    return super().default(o)
 
 
 class Object:

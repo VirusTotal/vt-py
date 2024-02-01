@@ -838,6 +838,34 @@ class Client:
         batch_size=batch_size,
     )
 
+  def quota_summary(
+      self,
+      id: typing.Optional[str] = None
+  ) -> Object:
+    """Returns a summary of a user's overall quotas.
+    Uses current client API key if none given.
+
+    :param id: User ID or API key (client object's key by default)
+    :type id: str
+    """
+    return make_sync(
+      self.quota_summary_async(id)
+    )
+
+  async def quota_summary_async(
+      self,
+      id: typing.Optional[str] = None
+  ) -> Object:
+    """Like :func:`quota_summary` but returns a coroutine."""
+
+    if id is None:
+      id = self._apikey
+
+    if not isinstance(id, str):
+      raise TypeError(f"Expected id to be a string, got {type(id)}")
+
+    return await self.get_data_async(f"/users/{id}/overall_quotas")
+
   def scan_file(
     self,
     file: typing.BinaryIO,

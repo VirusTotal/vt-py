@@ -15,7 +15,7 @@
 
 import argparse
 import io
-import json
+from pprint import pprint
 import vt
 
 
@@ -62,7 +62,7 @@ def main():
   collection_obj = update_collection(client, args.id, iocs)
 
   client.close()
-  print(json.dumps(collection_obj.to_dict(), indent=2))
+  print(pprint(collection_obj.to_dict()))
 
   print(f"Link:\n{generate_ui_link(collection_obj.id)}")
 

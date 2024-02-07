@@ -19,7 +19,7 @@ privileges for creating References.
 
 import argparse
 import base64
-import json
+from pprint import pprint
 import vt
 
 
@@ -170,7 +170,7 @@ def main():
 
   client.close()
   if reference_obj:
-    print(json.dumps(reference_obj.to_dict(), indent=2))
+    pprint(reference_obj.to_dict())
 
 
 if __name__ == "__main__":

@@ -15,8 +15,8 @@
 
 import argparse
 import io
-import json
 import vt
+from pprint import pprint
 
 
 def create_collection(client, name, description, file):
@@ -66,7 +66,7 @@ def main():
   collection_obj = create_collection(client, args.name, args.description, iocs)
 
   client.close()
-  print(json.dumps(collection_obj.to_dict(), indent=2))
+  pprint(collection_obj.to_dict())
 
   print(f"Link:\n{generate_ui_link(collection_obj.id)}")
 

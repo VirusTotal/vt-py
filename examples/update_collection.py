@@ -62,7 +62,7 @@ def main():
   collection_obj = update_collection(client, args.id, iocs)
 
   client.close()
-  print(pprint(collection_obj.to_dict()))
+  pprint(collection_obj.to_dict())
 
   print(f"Link:\n{generate_ui_link(collection_obj.id)}")
 

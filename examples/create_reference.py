@@ -170,7 +170,7 @@ def main():
 
   client.close()
   if reference_obj:
-    print(pprint(reference_obj.to_dict()))
+    pprint(reference_obj.to_dict())
 
 
 if __name__ == "__main__":

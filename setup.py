@@ -36,7 +36,10 @@ setuptools.setup(
     url="https://github.com/VirusTotal/vt-py",
     packages=["vt"],
     python_requires=">=3.7.0",
-    install_requires=["aiohttp==3.8.6"],
+    install_requires=[
+        "aiohttp==3.8.6 ; python_version=='3.7'",
+        "aiohttp ; python_version>'3.7'"
+    ],
     setup_requires=["pytest-runner"],
     extras_require={"test": ["pytest", "pytest_httpserver", "pytest_asyncio"]},
     classifiers=[

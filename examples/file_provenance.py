@@ -27,28 +27,28 @@ import vt
 
 async def get_provenance_info(apikey, file_hash):
   async with vt.Client(apikey) as client:
-    file_obj = await client.get_object_async(f"/files/{file_hash}")
+    file_obj = await client.get_object_async(f'/files/{file_hash}')
 
   return (
-      getattr(file_obj, "monitor_info", None),
-      getattr(file_obj, "nsrl_info", None),
-      getattr(file_obj, "signature_info", None),
-      getattr(file_obj, "tags", []),
-      getattr(file_obj, "trusted_verdict", None),
+      getattr(file_obj, 'monitor_info', None),
+      getattr(file_obj, 'nsrl_info', None),
+      getattr(file_obj, 'signature_info', None),
+      getattr(file_obj, 'tags', []),
+      getattr(file_obj, 'trusted_verdict', None),
   )
 
 
 async def main():
   parser = argparse.ArgumentParser(
-      description="Get provenance info for a given file."
+      description='Get provenance info for a given file.'
   )
 
-  parser.add_argument("--apikey", required=True, help="your VirusTotal API key")
+  parser.add_argument('--apikey', required=True, help='your VirusTotal API key')
   parser.add_argument(
-      "--path",
+      '--path',
       required=True,
-      type=argparse.FileType("rb"),
-      help="path to the file check.",
+      type=argparse.FileType('rb'),
+      help='path to the file check.',
   )
   args = parser.parse_args()
 
@@ -59,13 +59,13 @@ async def main():
         args.apikey, file_hash
     )
   except vt.error.APIError as e:
-    print(f"ERROR: {e}")
+    print(f'ERROR: {e}')
     sys.exit(1)
 
   if monitor:
     print(
-        "Present in monitor collections "
-        f"of {', '.join(monitor['organizations'])}"
+        'Present in monitor collections '
+        f'of {", ".join(monitor["organizations"])}'
     )
 
   if nslr:
@@ -80,7 +80,7 @@ async def main():
     print(f'Trusted file by {trusted["organization"]}')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
   loop = asyncio.get_event_loop()
   loop.run_until_complete(main())
   loop.close()

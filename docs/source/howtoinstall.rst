@@ -14,7 +14,7 @@ repository:
 
 .. code-block:: sh
 
-    $ git clone git://github.com/VirusTotal/vt-py.git
+    $ git clone https://github.com/VirusTotal/vt-py.git
     $ cd vt-py
 
 Or, download the tarball for the `latest release <https://github.com/VirusTotal/vt-py/releases>`_
@@ -29,4 +29,4 @@ Once you have the code you can install it with:
 
 .. code-block:: sh
 
-    $ sudo python3 setup.py install
+    $ pip install .

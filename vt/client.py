@@ -238,7 +238,17 @@ class Client:
     if connector is not None:
       self._connector = connector
     else:
-      self._connector = aiohttp.TCPConnector(ssl=self._verify_ssl)
+      # the TCPConnector class expects to be instantiated inside a event loop.
+      # If there is none, create one.
+      try:
+        event_loop = asyncio.get_event_loop()
+      except RuntimeError:
+        event_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(event_loop)
+
+      self._connector = aiohttp.TCPConnector(
+          ssl=self._verify_ssl, loop=event_loop
+      )
 
   def _full_url(self, path:str, *args: typing.Any) -> str:
     try:

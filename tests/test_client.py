@@ -27,7 +27,7 @@ from vt import Object
 from tests import wsgi_app
 
 
-def new_client(httpserver, unused_apikey=''):
+def new_client(httpserver, unused_apikey=""):
   return Client(
       "dummy_api_key",
       host="http://" + httpserver.host + ":" + str(httpserver.port),
@@ -487,12 +487,12 @@ def test_user_headers(httpserver):
 
 def test_wsgi_app(httpserver, monkeypatch):
   app = wsgi_app.app
-  app.config.update({'TESTING': True})
+  app.config.update({"TESTING": True})
   client = app.test_client()
-  expected_response = {'data': {
-      'id': 'google.com',
-      'type': 'domain',
-      'attributes': {'foo': 'foo'},
+  expected_response = {"data": {
+      "id": "google.com",
+      "type": "domain",
+      "attributes": {"foo": "foo"},
   }}
 
 
@@ -501,8 +501,8 @@ def test_wsgi_app(httpserver, monkeypatch):
       headers={"X-Apikey": "dummy_api_key"}
   ).respond_with_json(expected_response)
   monkeypatch.setattr(
-      'tests.wsgi_app.vt.Client', functools.partial(new_client, httpserver)
+      "tests.wsgi_app.vt.Client", functools.partial(new_client, httpserver)
   )
-  response = client.get('/')
+  response = client.get("/")
   assert response.status_code == 200
   assert response.json == expected_response

@@ -1,3 +1,5 @@
+"""Simulates a Flask app using vt-py to test non-async environments."""
+
 import flask
 import os
 import vt

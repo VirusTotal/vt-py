@@ -15,6 +15,7 @@
 
 import datetime
 import io
+import functools
 import json
 import pickle
 
@@ -23,8 +24,10 @@ from vt import APIError
 from vt import Client
 from vt import Object
 
+from tests import wsgi_app
 
-def new_client(httpserver):
+
+def new_client(httpserver, unused_apikey=""):
   return Client(
       "dummy_api_key",
       host="http://" + httpserver.host + ":" + str(httpserver.port),
@@ -480,3 +483,26 @@ def test_user_headers(httpserver):
   assert "Accept-Encoding" in headers
   assert "User-Agent" in headers
   assert "foo" in headers
+
+
+def test_wsgi_app(httpserver, monkeypatch):
+  app = wsgi_app.app
+  app.config.update({"TESTING": True})
+  client = app.test_client()
+  expected_response = {"data": {
+      "id": "google.com",
+      "type": "domain",
+      "attributes": {"foo": "foo"},
+  }}
+
+
+  httpserver.expect_request(
+      "/api/v3/domains/google.com", method="GET",
+      headers={"X-Apikey": "dummy_api_key"}
+  ).respond_with_json(expected_response)
+  monkeypatch.setattr(
+      "tests.wsgi_app.vt.Client", functools.partial(new_client, httpserver)
+  )
+  response = client.get("/")
+  assert response.status_code == 200
+  assert response.json == expected_response

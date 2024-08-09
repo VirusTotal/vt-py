@@ -37,7 +37,7 @@ setuptools.setup(
     packages=["vt"],
     python_requires=">=3.7.0",
     install_requires=[
-        "aiohttp==3.8.6 ; python_version=='3.7'",
+        "aiohttp==3.10.2 ; python_version=='3.7'",
         "aiohttp ; python_version>'3.7'"
     ],
     setup_requires=["pytest-runner"],

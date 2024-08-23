@@ -106,7 +106,7 @@ class Feed:
       error = await self._client.get_error_async(response)
       if not error:
         break
-      if error.code == "NotAvailableYet":
+      if error.code == "NotAvailableYetError":
         await asyncio.sleep(60)
       else:
         raise error

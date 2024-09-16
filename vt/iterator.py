@@ -77,7 +77,7 @@ class Iterator:
     """Initializes an iterator.
 
     This function is not intended to be called directly. Client.iterator() is
-    the preferred way for creating an iteraror.
+    the preferred way for creating an iterator.
     """
     self._client = client
     self._path = path

@@ -336,26 +336,43 @@ class Client:
     """
     return make_sync(self.close_async())
 
-  def delete(self, path: str, *path_args: typing.Any) -> ClientResponse:
+  def delete(
+    self,
+    path: str,
+    *path_args: typing.Any,
+    data: typing.Optional[typing.Union[str, bytes]] = None,
+    json_data: typing.Optional[typing.Dict] = None
+  ) -> ClientResponse:
     """Sends a DELETE request to a given API endpoint.
 
     :param path: Path to API endpoint, can contain format placeholders {}.
     :param path_args: A variable number of arguments that are put into any
       placeholders used in path.
+    :param data: Data sent in the request body.
+    :param json_data: dict containing data to send in the request body as JSON.
     :type path: str
+    :type data: A string or bytes
+    :type json_data: dict
     :returns: An instance of :class:`ClientResponse`.
     """
-    return make_sync(self.delete_async(path, *path_args))
+    return make_sync(
+        self.delete_async(path, *path_args, data=data, json_data=json_data)
+    )
 
   async def delete_async(
       self,
       path: str,
-      *path_args: typing.Any
+      *path_args: typing.Any,
+      data: typing.Optional[typing.Union[str, bytes]] = None,
+      json_data: typing.Optional[typing.Dict] = None
   ) -> ClientResponse:
     """Like :func:`delete` but returns a coroutine."""
     return ClientResponse(
         await self._get_session().delete(
-            self._full_url(path, *path_args), proxy=self._proxy
+            self._full_url(path, *path_args),
+            data=data,
+            json=json_data,
+            proxy=self._proxy
         )
     )
 

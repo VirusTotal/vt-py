@@ -233,11 +233,12 @@ def test_post_object(httpserver):
 
 def test_delete(httpserver):
   httpserver.expect_request(
-      "/api/v3/foo", method="DELETE", headers={"X-Apikey": "dummy_api_key"}
+      "/api/v3/foo", method="DELETE", headers={"X-Apikey": "dummy_api_key"},
+      json={"hello": "world"},
   ).respond_with_json({"data": "dummy_data"})
 
   with new_client(httpserver) as client:
-    response = client.delete("/foo")
+    response = client.delete("/foo", json_data={"hello": "world"})
 
   assert response.status == 200
 

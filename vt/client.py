@@ -19,8 +19,10 @@ import functools
 import io
 import json
 import typing
+import os
 
 import aiohttp
+import aiofiles
 
 from .error import APIError
 from .feed import Feed, FeedType
@@ -926,20 +928,62 @@ class Client:
       analysis = await self._wait_for_analysis_completion(analysis)
 
     return analysis
+      
+  def scan_file_private(
+      self, 
+      file: typing.Union[typing.BinaryIO, str],
+      code_insight: bool = False,
+      wait_for_completion: bool = False
+  ) -> Object:
+      """Scan file privately with optional code insight analysis.
+      
+      Args:
+          file: File to scan (path string or file object)
+          code_insight: Enable code analysis features
+          wait_for_completion: Wait for completion
+          
+      Returns:
+          Object: Analysis object with scan results
+      """
+      return make_sync(
+          self.scan_file_private_async(file, code_insight, wait_for_completion)
+      )
 
-  def scan_url(self, url: str, wait_for_completion: bool = False) -> Object:
-    """Scans a URL.
+  async def scan_file_private_async(
+      self,
+      file: typing.Union[typing.BinaryIO, str],
+      code_insight: bool = False, 
+      wait_for_completion: bool = False
+  ) -> Object:
+      """Async version of scan_file_private"""
+      
+      # Handle string path
+      if isinstance(file, str):
+          async with aiofiles.open(file, 'rb') as f:
+              file_content = io.BytesIO(await f.read())
+              file_content.name = os.path.basename(file)
+              return await self.scan_file_private_async(
+                  file_content,
+                  code_insight=code_insight,
+                  wait_for_completion=wait_for_completion
+              )
 
-    :param url: The URL to be scanned.
-    :param wait_for_completion: If True the function doesn't return until the
-       analysis has been completed.
-    :type url: str
-    :type wait_for_completion: bool
-    :returns: An instance of :class:`Object` of analysis type.
-    """
-    return make_sync(
-        self.scan_url_async(url, wait_for_completion=wait_for_completion)
-    )
+      # Create form data
+      form = aiohttp.FormData()
+      form.add_field('file', file)
+      form.add_field('private', '1')
+      form.add_field('code_insight', '1' if code_insight else '0')
+
+      # Get upload URL and submit file
+      upload_url = await self.get_data_async("/files/upload_url")
+      response = await self.post_async(upload_url, data=form)
+      
+      analysis = await self._response_to_object(response)
+
+      if wait_for_completion:
+          analysis = await self._wait_for_analysis_completion(analysis)
+      
+      return analysis
 
   async def scan_url_async(
     self,

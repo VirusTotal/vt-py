@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Tool for scanning files privately using VirusTotal API.
 Supports code insight analysis and waiting for scan completion.

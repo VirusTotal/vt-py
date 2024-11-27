@@ -985,6 +985,20 @@ class Client:
       
       return analysis
 
+  def scan_url(self, url: str, wait_for_completion: bool = False) -> Object:
+    """Scans a URL.
+
+    :param url: The URL to be scanned.
+    :param wait_for_completion: If True the function doesn't return until the
+       analysis has been completed.
+    :type url: str
+    :type wait_for_completion: bool
+    :returns: An instance of :class:`Object` of analysis type.
+    """
+    return make_sync(
+        self.scan_url_async(url, wait_for_completion=wait_for_completion)
+    )
+    
   async def scan_url_async(
     self,
     url: str,

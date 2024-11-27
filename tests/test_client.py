@@ -23,6 +23,7 @@ import pytest
 from vt import APIError
 from vt import Client
 from vt import Object
+import vt
 
 from tests import wsgi_app
 
@@ -507,3 +508,117 @@ def test_wsgi_app(httpserver, monkeypatch):
   response = client.get("/")
   assert response.status_code == 200
   assert response.json == expected_response
+
+def test_scan_file_private(httpserver):
+    """Test synchronous private file scanning."""
+    upload_url = f"http://{httpserver.host}:{httpserver.port}/upload"
+
+    # Mock upload URL request
+    httpserver.expect_request(
+        "/api/v3/files/upload_url",
+        method="GET"
+    ).respond_with_json({
+        "data": upload_url
+    })
+
+    # Mock file upload with proper data structure
+    httpserver.expect_request(
+        "/upload", 
+        method="POST"
+    ).respond_with_json({
+        "data": {
+            "id": "dummy_scan_id",
+            "type": "analysis",
+            "links": {
+                "self": "dummy_link"
+            },
+            "attributes": {
+                "status": "queued",
+                "private": True,
+                "code_insight": True
+            }
+        },
+        "meta": {
+            "test": True
+        }
+    })
+
+    with new_client(httpserver) as client:
+        with io.StringIO("test file content") as f:
+            analysis = client.scan_file_private(f, code_insight=True)
+
+        assert analysis.id == "dummy_scan_id"
+        assert analysis.type == "analysis"
+        assert getattr(analysis, "status") == "queued"
+        assert getattr(analysis, "private") is True
+        assert getattr(analysis, "code_insight") is True
+
+@pytest.mark.asyncio 
+async def test_scan_file_private_async(httpserver):
+    """Test asynchronous private file scanning."""
+    upload_url = f"http://{httpserver.host}:{httpserver.port}/upload"
+
+    # Mock upload URL request
+    httpserver.expect_request(
+        "/api/v3/files/upload_url",
+        method="GET"
+    ).respond_with_json({
+        "data": upload_url
+    })
+
+    # Mock file upload
+    httpserver.expect_request(
+        "/upload",
+        method="POST"
+    ).respond_with_json({
+        "data": {
+            "id": "dummy_scan_id",
+            "type": "analysis",
+            "links": {
+                "self": "dummy_link"
+            },
+            "attributes": {
+                "status": "queued",
+                "private": True,
+                "code_insight": True
+            }
+        }
+    })
+
+    # Mock analysis status check
+    httpserver.expect_request(
+        "/api/v3/analyses/dummy_scan_id",
+        method="GET"
+    ).respond_with_json({
+        "data": {
+            "id": "dummy_scan_id",
+            "type": "analysis",
+            "links": {
+                "self": "dummy_link"
+            },
+            "attributes": {
+                "status": "completed",
+                "private": True,
+                "code_insight": True,
+                "stats": {
+                    "malicious": 0,
+                    "suspicious": 0
+                }
+            }
+        }
+    })
+
+    async with new_client(httpserver) as client:
+        with io.StringIO("test file content") as f:
+            analysis = await client.scan_file_private_async(
+                f,
+                code_insight=True,
+                wait_for_completion=True
+            )
+
+        assert analysis.id == "dummy_scan_id"
+        assert analysis.type == "analysis"
+        assert getattr(analysis, "status") == "completed"
+        assert getattr(analysis, "private") is True
+        assert getattr(analysis, "code_insight") is True
+        assert hasattr(analysis, "stats")

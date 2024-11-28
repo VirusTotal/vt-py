@@ -976,7 +976,6 @@ class Client:
   async def wait_for_analysis_completion(self, analysis: Object) -> Object:
     return await self._wait_for_analysis_completion(analysis)
 
-
   def scan_file_private(
       self, 
       file: typing.Union[typing.BinaryIO, str],
@@ -987,7 +986,7 @@ class Client:
       
       Args:
           file: File to scan (path string or file object)
-          code_insight: Enable code analysis features
+          code_insight: Deprecated - Code insight is controlled by group settings
           wait_for_completion: Wait for completion
           
       Returns:
@@ -1019,7 +1018,6 @@ class Client:
       # Create form data for private scan
       form = aiohttp.FormData()
       form.add_field('file', file)
-      form.add_field('code_insight', '1' if code_insight else '0')
 
       # Get private upload URL and submit
       upload_url = await self.get_data_async("/private/files/upload_url")

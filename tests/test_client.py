@@ -528,14 +528,12 @@ def private_scan_mocks(httpserver):
     ).respond_with_json({
         "data": {
             "id": "dummy_scan_id",
-            "type": "analysis", 
+            "type": "private_analysis", 
             "links": {
                 "self": "dummy_link"
             },
             "attributes": {
                 "status": "queued",
-                "private": True,
-                "code_insight": True
             }
         }
     })
@@ -547,14 +545,12 @@ def private_scan_mocks(httpserver):
     ).respond_with_json({
         "data": {
             "id": "dummy_scan_id", 
-            "type": "analysis",
+            "type": "private_analysis",
             "links": {
                 "self": "dummy_link"
             },
             "attributes": {
                 "status": "completed",
-                "private": True,
-                "code_insight": True,
                 "stats": {
                     "malicious": 0,
                     "suspicious": 0
@@ -568,16 +564,14 @@ def private_scan_mocks(httpserver):
 def verify_analysis(analysis, status="queued"):
     """Helper to verify analysis response."""
     assert analysis.id == "dummy_scan_id"
-    assert analysis.type == "analysis"
+    assert analysis.type == "private_analysis"
     assert getattr(analysis, "status") == status
-    assert getattr(analysis, "private") is True
-    assert getattr(analysis, "code_insight") is True
 
 def test_scan_file_private(httpserver, private_scan_mocks):
     """Test synchronous private file scanning."""
     with new_client(httpserver) as client:
         with io.StringIO("test file content") as f:
-            analysis = client.scan_file_private(f, code_insight=True)
+            analysis = client.scan_file_private(f)
         verify_analysis(analysis)
 
 @pytest.mark.asyncio
@@ -587,7 +581,6 @@ async def test_scan_file_private_async(httpserver, private_scan_mocks):
         with io.StringIO("test file content") as f:
             analysis = await client.scan_file_private_async(
                 f,
-                code_insight=True,
                 wait_for_completion=True
             )
         verify_analysis(analysis, status="completed")

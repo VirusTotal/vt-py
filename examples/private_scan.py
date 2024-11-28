@@ -1,6 +1,6 @@
 """
 Tool for scanning files privately using VirusTotal API.
-Supports code insight analysis and waiting for scan completion.
+Supports waiting for scan completion.
 """
 
 import sys
@@ -16,7 +16,6 @@ console = Console()
 async def scan_file_private(
     api_key: str,
     file_path: Path,
-    code_insight: bool = False,
     wait: bool = False
 ) -> None:
     """
@@ -25,7 +24,6 @@ async def scan_file_private(
     Args:
         api_key: VirusTotal API key
         file_path: Path to file to scan
-        code_insight: Enable code analysis
         wait: Wait for scan completion
     """
     async with vt.Client(api_key) as client:
@@ -38,7 +36,6 @@ async def scan_file_private(
 
                 analysis = await client.scan_file_private_async(
                     str(file_path),
-                    code_insight=code_insight,
                     wait_for_completion=wait
                 )
 
@@ -66,11 +63,6 @@ def main():
     parser.add_argument("apikey", help="VirusTotal API key")
     parser.add_argument("file_path", help="Path to file to scan")
     parser.add_argument(
-        "--code-insight",
-        action="store_true",
-        help="Enable code analysis features"
-    )
-    parser.add_argument(
         "--wait",
         action="store_true",
         help="Wait for scan completion"
@@ -90,7 +82,6 @@ def main():
     asyncio.run(scan_file_private(
         args.apikey,
         file_path,
-        args.code_insight,
         args.wait
     ))
 

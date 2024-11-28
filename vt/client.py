@@ -979,27 +979,24 @@ class Client:
   def scan_file_private(
       self, 
       file: typing.Union[typing.BinaryIO, str],
-      code_insight: bool = False,
       wait_for_completion: bool = False
   ) -> Object:
-      """Scan file privately with optional code insight analysis.
+      """Scan file privately.
       
       Args:
           file: File to scan (path string or file object)
-          code_insight: Deprecated - Code insight is controlled by group settings
           wait_for_completion: Wait for completion
           
       Returns:
           Object: Analysis object with scan results
       """
       return make_sync(
-          self.scan_file_private_async(file, code_insight, wait_for_completion)
+          self.scan_file_private_async(file, wait_for_completion)
       )
 
   async def scan_file_private_async(
       self,
       file: typing.Union[typing.BinaryIO, str],
-      code_insight: bool = False, 
       wait_for_completion: bool = False
   ) -> Object:
       """Async version of scan_file_private"""
@@ -1011,7 +1008,6 @@ class Client:
               file_content.name = os.path.basename(file)
               return await self.scan_file_private_async(
                   file_content,
-                  code_insight=code_insight,
                   wait_for_completion=wait_for_completion
               )
 

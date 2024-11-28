@@ -1016,14 +1016,13 @@ class Client:
                   wait_for_completion=wait_for_completion
               )
 
-      # Create form data
+      # Create form data for private scan
       form = aiohttp.FormData()
       form.add_field('file', file)
-      form.add_field('private', '1')
       form.add_field('code_insight', '1' if code_insight else '0')
 
-      # Get upload URL and submit file
-      upload_url = await self.get_data_async("/files/upload_url")
+      # Get private upload URL and submit
+      upload_url = await self.get_data_async("/private/files/upload_url")
       response = await self.post_async(upload_url, data=form)
 
       analysis = await self._response_to_object(response)

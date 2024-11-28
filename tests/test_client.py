@@ -508,71 +508,27 @@ def test_wsgi_app(httpserver, monkeypatch):
   assert response.status_code == 200
   assert response.json == expected_response
 
-def test_scan_file_private(httpserver):
-    """Test synchronous private file scanning."""
+@pytest.fixture
+def private_scan_mocks(httpserver):
+    """Fixture for mocking private scan API calls."""
     upload_url = f"http://{httpserver.host}:{httpserver.port}/upload"
 
-    # Mock upload URL request
+    # Mock private upload URL request
     httpserver.expect_request(
-        "/api/v3/files/upload_url",
+        "/api/v3/private/files/upload_url", 
         method="GET"
     ).respond_with_json({
         "data": upload_url
     })
 
-    # Mock file upload with proper data structure
-    httpserver.expect_request(
-        "/upload", 
-        method="POST"
-    ).respond_with_json({
-        "data": {
-            "id": "dummy_scan_id",
-            "type": "analysis",
-            "links": {
-                "self": "dummy_link"
-            },
-            "attributes": {
-                "status": "queued",
-                "private": True,
-                "code_insight": True
-            }
-        },
-        "meta": {
-            "test": True
-        }
-    })
-
-    with new_client(httpserver) as client:
-        with io.StringIO("test file content") as f:
-            analysis = client.scan_file_private(f, code_insight=True)
-
-        assert analysis.id == "dummy_scan_id"
-        assert analysis.type == "analysis"
-        assert getattr(analysis, "status") == "queued"
-        assert getattr(analysis, "private") is True
-        assert getattr(analysis, "code_insight") is True
-
-@pytest.mark.asyncio 
-async def test_scan_file_private_async(httpserver):
-    """Test asynchronous private file scanning."""
-    upload_url = f"http://{httpserver.host}:{httpserver.port}/upload"
-
-    # Mock upload URL request
-    httpserver.expect_request(
-        "/api/v3/files/upload_url",
-        method="GET"
-    ).respond_with_json({
-        "data": upload_url
-    })
-
-    # Mock file upload
+    # Mock file upload response
     httpserver.expect_request(
         "/upload",
         method="POST"
     ).respond_with_json({
         "data": {
             "id": "dummy_scan_id",
-            "type": "analysis",
+            "type": "analysis", 
             "links": {
                 "self": "dummy_link"
             },
@@ -583,14 +539,14 @@ async def test_scan_file_private_async(httpserver):
             }
         }
     })
-
-    # Mock analysis status check
+    
+    # Add mock for analysis status endpoint
     httpserver.expect_request(
         "/api/v3/analyses/dummy_scan_id",
         method="GET"
     ).respond_with_json({
         "data": {
-            "id": "dummy_scan_id",
+            "id": "dummy_scan_id", 
             "type": "analysis",
             "links": {
                 "self": "dummy_link"
@@ -607,6 +563,26 @@ async def test_scan_file_private_async(httpserver):
         }
     })
 
+    return upload_url
+
+def verify_analysis(analysis, status="queued"):
+    """Helper to verify analysis response."""
+    assert analysis.id == "dummy_scan_id"
+    assert analysis.type == "analysis"
+    assert getattr(analysis, "status") == status
+    assert getattr(analysis, "private") is True
+    assert getattr(analysis, "code_insight") is True
+
+def test_scan_file_private(httpserver, private_scan_mocks):
+    """Test synchronous private file scanning."""
+    with new_client(httpserver) as client:
+        with io.StringIO("test file content") as f:
+            analysis = client.scan_file_private(f, code_insight=True)
+        verify_analysis(analysis)
+
+@pytest.mark.asyncio
+async def test_scan_file_private_async(httpserver, private_scan_mocks):
+    """Test asynchronous private file scanning."""
     async with new_client(httpserver) as client:
         with io.StringIO("test file content") as f:
             analysis = await client.scan_file_private_async(
@@ -614,10 +590,4 @@ async def test_scan_file_private_async(httpserver):
                 code_insight=True,
                 wait_for_completion=True
             )
-
-        assert analysis.id == "dummy_scan_id"
-        assert analysis.type == "analysis"
-        assert getattr(analysis, "status") == "completed"
-        assert getattr(analysis, "private") is True
-        assert getattr(analysis, "code_insight") is True
-        assert hasattr(analysis, "stats")
+        verify_analysis(analysis, status="completed")

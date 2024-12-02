@@ -60,8 +60,8 @@ def main():
     parser = argparse.ArgumentParser(
         description="Scan file privately using VirusTotal API"
     )
-    parser.add_argument("apikey", help="VirusTotal API key")
-    parser.add_argument("file_path", help="Path to file to scan")
+    parser.add_argument("--apikey", help="VirusTotal API key")
+    parser.add_argument("--file_path", help="Path to file to scan")
     parser.add_argument(
         "--wait",
         action="store_true",

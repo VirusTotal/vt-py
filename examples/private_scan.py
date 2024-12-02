@@ -48,7 +48,7 @@ async def scan_file_private(
 
     except vt.error.APIError as e:
       console.print(f"[red]API Error: {e}[/red]")
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-exception-caught
       console.print(f"[red]Error: {e}[/red]")
 
 

@@ -521,7 +521,7 @@ def test_wsgi_app(httpserver, monkeypatch):
   assert response.json == expected_response
 
 
-@pytest.fixture
+@pytest.fixture(name='private_scan')
 def private_scan_mocks(httpserver):
   """Fixture for mocking private scan API calls."""
   upload_url = f"http://{httpserver.host}:{httpserver.port}/upload"
@@ -572,7 +572,7 @@ def verify_analysis(analysis, status="queued"):
   assert getattr(analysis, "status") == status
 
 
-def test_scan_file_private(httpserver, private_scan_mocks):
+def test_scan_file_private(httpserver, private_scan):  # pylint: disable=unused-argumen
   """Test synchronous private file scanning."""
   with new_client(httpserver) as client:
     with io.StringIO("test file content") as f:
@@ -581,7 +581,7 @@ def test_scan_file_private(httpserver, private_scan_mocks):
 
 
 @pytest.mark.asyncio
-async def test_scan_file_private_async(httpserver, private_scan_mocks):
+async def test_scan_file_private_async(httpserver, private_scan):  # pylint: disable=unused-argumen
   """Test asynchronous private file scanning."""
   async with new_client(httpserver) as client:
     with io.StringIO("test file content") as f:

@@ -507,3 +507,80 @@ def test_wsgi_app(httpserver, monkeypatch):
   response = client.get("/")
   assert response.status_code == 200
   assert response.json == expected_response
+
+@pytest.fixture
+def private_scan_mocks(httpserver):
+    """Fixture for mocking private scan API calls."""
+    upload_url = f"http://{httpserver.host}:{httpserver.port}/upload"
+
+    # Mock private upload URL request
+    httpserver.expect_request(
+        "/api/v3/private/files/upload_url", 
+        method="GET"
+    ).respond_with_json({
+        "data": upload_url
+    })
+
+    # Mock file upload response
+    httpserver.expect_request(
+        "/upload",
+        method="POST"
+    ).respond_with_json({
+        "data": {
+            "id": "dummy_scan_id",
+            "type": "private_analysis", 
+            "links": {
+                "self": "dummy_link"
+            },
+            "attributes": {
+                "status": "queued",
+            }
+        }
+    })
+    
+    # Add mock for analysis status endpoint
+    httpserver.expect_request(
+        "/api/v3/analyses/dummy_scan_id",
+        method="GET"
+    ).respond_with_json({
+        "data": {
+            "id": "dummy_scan_id", 
+            "type": "private_analysis",
+            "links": {
+                "self": "dummy_link"
+            },
+            "attributes": {
+                "status": "completed",
+                "stats": {
+                    "malicious": 0,
+                    "suspicious": 0
+                }
+            }
+        }
+    })
+
+    return upload_url
+
+def verify_analysis(analysis, status="queued"):
+    """Helper to verify analysis response."""
+    assert analysis.id == "dummy_scan_id"
+    assert analysis.type == "private_analysis"
+    assert getattr(analysis, "status") == status
+
+def test_scan_file_private(httpserver, private_scan_mocks):
+    """Test synchronous private file scanning."""
+    with new_client(httpserver) as client:
+        with io.StringIO("test file content") as f:
+            analysis = client.scan_file_private(f)
+        verify_analysis(analysis)
+
+@pytest.mark.asyncio
+async def test_scan_file_private_async(httpserver, private_scan_mocks):
+    """Test asynchronous private file scanning."""
+    async with new_client(httpserver) as client:
+        with io.StringIO("test file content") as f:
+            analysis = await client.scan_file_private_async(
+                f,
+                wait_for_completion=True
+            )
+        verify_analysis(analysis, status="completed")

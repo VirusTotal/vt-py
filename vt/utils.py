@@ -16,6 +16,7 @@
 import asyncio
 import typing
 
+
 def make_sync(future: typing.Coroutine):
   """Utility function that waits for an async call, making it sync."""
   try:

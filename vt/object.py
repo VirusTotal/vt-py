@@ -31,9 +31,7 @@ class WhistleBlowerDict(collections.UserDict):
   """
 
   def __init__(
-    self,
-    initial_dict: typing.Dict,
-    on_change_callback: typing.Callable
+      self, initial_dict: typing.Dict, on_change_callback: typing.Callable
   ):
     self._on_change_callback = on_change_callback
     for k, v in initial_dict.items():
@@ -128,10 +126,10 @@ class Object:
     return obj
 
   def __init__(
-    self,
-    obj_type: str,
-    obj_id: typing.Optional[str] = None,
-    obj_attributes: typing.Optional[typing.Dict] = None
+      self,
+      obj_type: str,
+      obj_id: typing.Optional[str] = None,
+      obj_attributes: typing.Optional[typing.Dict] = None,
   ):
     """Initializes a VirusTotal API object."""
 
@@ -210,9 +208,7 @@ class Object:
     return self._error
 
   def get(
-    self,
-    attr_name: str,
-    default: typing.Optional[typing.Any] = None
+      self, attr_name: str, default: typing.Optional[typing.Any] = None
   ) -> typing.Any:
     """Returns an attribute by name.
 

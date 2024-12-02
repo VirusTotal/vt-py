@@ -179,7 +179,7 @@ def test_tolerance(httpserver, tolerance):
     ],
 )
 @pytest.mark.usefixtures("feed_response")
-def test_cursor(httpserver,  test_iters, expected_cursor):
+def test_cursor(httpserver, test_iters, expected_cursor):
   """Tests feed's cursor."""
   with new_client(httpserver) as client:
     feed = client.feed(FeedType.FILES, cursor="200102030405")

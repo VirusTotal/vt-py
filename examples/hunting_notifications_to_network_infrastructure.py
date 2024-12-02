@@ -98,21 +98,27 @@ class HuntingNotificationToNetworkInfrastructureHandler:
       contacted_domains = relationships["contacted_domains"]["data"]
       contacted_ips = relationships["contacted_ips"]["data"]
       contacted_urls = relationships["contacted_urls"]["data"]
-      await self.queue.put({
-          "contacted_addresses": contacted_domains,
-          "type": "domains",
-          "file": file_hash,
-      })
-      await self.queue.put({
-          "contacted_addresses": contacted_ips,
-          "type": "ips",
-          "file": file_hash,
-      })
-      await self.queue.put({
-          "contacted_addresses": contacted_urls,
-          "type": "urls",
-          "file": file_hash,
-      })
+      await self.queue.put(
+          {
+              "contacted_addresses": contacted_domains,
+              "type": "domains",
+              "file": file_hash,
+          }
+      )
+      await self.queue.put(
+          {
+              "contacted_addresses": contacted_ips,
+              "type": "ips",
+              "file": file_hash,
+          }
+      )
+      await self.queue.put(
+          {
+              "contacted_addresses": contacted_urls,
+              "type": "urls",
+              "file": file_hash,
+          }
+      )
       self.networking_infrastructure[file_hash]["domains"] = contacted_domains
       self.networking_infrastructure[file_hash]["ips"] = contacted_ips
       self.networking_infrastructure[file_hash]["urls"] = contacted_urls

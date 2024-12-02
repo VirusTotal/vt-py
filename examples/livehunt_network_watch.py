@@ -40,8 +40,8 @@ RULESET_ENTITY = ("file", "url", "domain", "ip_address")
 RULESET_LINK = "https://www.virustotal.com/yara-editor/livehunt/"
 
 EMPTY_DOMAIN_LIST_MSG = (
-  "* Empty domain list, use --add-domain domain.tld or bulk operations to"
-  " register them"
+    "* Empty domain list, use --add-domain domain.tld or bulk operations to"
+    " register them"
 )
 
 
@@ -247,8 +247,9 @@ async def main():
     return
 
   rulesets = await get_rulesets()
-  if (not rulesets and
-      not (args.add_domain or args.bulk_append or args.bulk_replace)):
+  if not rulesets and not (
+      args.add_domain or args.bulk_append or args.bulk_replace
+  ):
     print(EMPTY_DOMAIN_LIST_MSG)
     sys.exit(1)
 

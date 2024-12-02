@@ -572,7 +572,7 @@ def verify_analysis(analysis, status="queued"):
   assert getattr(analysis, "status") == status
 
 
-def test_scan_file_private(httpserver, private_scan):  # pylint: disable=unused-argumen
+def test_scan_file_private(httpserver, private_scan):  # pylint: disable=unused-argument
   """Test synchronous private file scanning."""
   with new_client(httpserver) as client:
     with io.StringIO("test file content") as f:
@@ -581,7 +581,7 @@ def test_scan_file_private(httpserver, private_scan):  # pylint: disable=unused-
 
 
 @pytest.mark.asyncio
-async def test_scan_file_private_async(httpserver, private_scan):  # pylint: disable=unused-argumen
+async def test_scan_file_private_async(httpserver, private_scan):  # pylint: disable=unused-argument
   """Test asynchronous private file scanning."""
   async with new_client(httpserver) as client:
     with io.StringIO("test file content") as f:

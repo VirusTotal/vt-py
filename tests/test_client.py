@@ -36,15 +36,19 @@ def new_client(httpserver, unused_apikey=""):
 
 
 def test_object_from_dict():
-  obj = Object.from_dict({
-      "type": "dummy_type",
-      "id": "dummy_id",
-      "attributes": {
-          "attr1": "foo",
-          "attr2": 1,
-      },
-      "relationships": {"foos": {"data": [{"type": "foo", "id": "foo_id"}]}},
-  })
+  obj = Object.from_dict(
+      {
+          "type": "dummy_type",
+          "id": "dummy_id",
+          "attributes": {
+              "attr1": "foo",
+              "attr2": 1,
+          },
+          "relationships": {
+              "foos": {"data": [{"type": "foo", "id": "foo_id"}]}
+          },
+      }
+  )
 
   assert obj.id == "dummy_id"
   assert obj.type == "dummy_type"
@@ -83,16 +87,18 @@ def test_object_pickle():
 
 
 def test_object_to_dict():
-  obj = Object.from_dict({
-      "type": "dummy_type",
-      "id": "dummy_id",
-      "attributes": {
-          "attr1": "foo",
-          "attr2": 1,
-          "attr3": {"subattr1": "bar"},
-          "attr4": {"subattr1": "baz"},
-      },
-  })
+  obj = Object.from_dict(
+      {
+          "type": "dummy_type",
+          "id": "dummy_id",
+          "attributes": {
+              "attr1": "foo",
+              "attr2": 1,
+              "attr3": {"subattr1": "bar"},
+              "attr4": {"subattr1": "baz"},
+          },
+      }
+  )
 
   obj.set_data("data_key", {"some": "value"})
 
@@ -195,7 +201,7 @@ def test_patch_object(httpserver):
               "attributes": {
                   "foo": 2,
               },
-              "context_attributes": {"a": "b"}
+              "context_attributes": {"a": "b"},
           }
       }
   )
@@ -233,7 +239,9 @@ def test_post_object(httpserver):
 
 def test_delete(httpserver):
   httpserver.expect_request(
-      "/api/v3/foo", method="DELETE", headers={"X-Apikey": "dummy_api_key"},
+      "/api/v3/foo",
+      method="DELETE",
+      headers={"X-Apikey": "dummy_api_key"},
       json={"hello": "world"},
   ).respond_with_json({"data": "dummy_data"})
 
@@ -250,11 +258,13 @@ def test_iterator(httpserver):
       headers={"X-Apikey": "dummy_api_key"},
   ).respond_with_json(
       {
-          "data": [{
-              "id": "dummy_id_1",
-              "type": "dummy_type",
-              "attributes": {"order": 0},
-          }]
+          "data": [
+              {
+                  "id": "dummy_id_1",
+                  "type": "dummy_type",
+                  "attributes": {"order": 0},
+              }
+          ]
       }
   )
 
@@ -490,16 +500,18 @@ def test_wsgi_app(httpserver, monkeypatch):
   app = wsgi_app.app
   app.config.update({"TESTING": True})
   client = app.test_client()
-  expected_response = {"data": {
-      "id": "google.com",
-      "type": "domain",
-      "attributes": {"foo": "foo"},
-  }}
-
+  expected_response = {
+      "data": {
+          "id": "google.com",
+          "type": "domain",
+          "attributes": {"foo": "foo"},
+      }
+  }
 
   httpserver.expect_request(
-      "/api/v3/domains/google.com", method="GET",
-      headers={"X-Apikey": "dummy_api_key"}
+      "/api/v3/domains/google.com",
+      method="GET",
+      headers={"X-Apikey": "dummy_api_key"},
   ).respond_with_json(expected_response)
   monkeypatch.setattr(
       "tests.wsgi_app.vt.Client", functools.partial(new_client, httpserver)
@@ -508,79 +520,72 @@ def test_wsgi_app(httpserver, monkeypatch):
   assert response.status_code == 200
   assert response.json == expected_response
 
-@pytest.fixture
+
+@pytest.fixture(name='private_scan')
 def private_scan_mocks(httpserver):
-    """Fixture for mocking private scan API calls."""
-    upload_url = f"http://{httpserver.host}:{httpserver.port}/upload"
+  """Fixture for mocking private scan API calls."""
+  upload_url = f"http://{httpserver.host}:{httpserver.port}/upload"
 
-    # Mock private upload URL request
-    httpserver.expect_request(
-        "/api/v3/private/files/upload_url", 
-        method="GET"
-    ).respond_with_json({
-        "data": upload_url
-    })
+  # Mock private upload URL request
+  httpserver.expect_request(
+      "/api/v3/private/files/upload_url", method="GET"
+  ).respond_with_json({"data": upload_url})
 
-    # Mock file upload response
-    httpserver.expect_request(
-        "/upload",
-        method="POST"
-    ).respond_with_json({
-        "data": {
-            "id": "dummy_scan_id",
-            "type": "private_analysis", 
-            "links": {
-                "self": "dummy_link"
-            },
-            "attributes": {
-                "status": "queued",
-            }
-        }
-    })
-    
-    # Add mock for analysis status endpoint
-    httpserver.expect_request(
-        "/api/v3/analyses/dummy_scan_id",
-        method="GET"
-    ).respond_with_json({
-        "data": {
-            "id": "dummy_scan_id", 
-            "type": "private_analysis",
-            "links": {
-                "self": "dummy_link"
-            },
-            "attributes": {
-                "status": "completed",
-                "stats": {
-                    "malicious": 0,
-                    "suspicious": 0
-                }
-            }
-        }
-    })
+  # Mock file upload response
+  httpserver.expect_request("/upload", method="POST").respond_with_json(
+      {
+          "data": {
+              "id": "dummy_scan_id",
+              "type": "private_analysis",
+              "links": {"self": "dummy_link"},
+              "attributes": {
+                  "status": "queued",
+              },
+          }
+      }
+  )
 
-    return upload_url
+  # Add mock for analysis status endpoint
+  httpserver.expect_request(
+      "/api/v3/analyses/dummy_scan_id", method="GET"
+  ).respond_with_json(
+      {
+          "data": {
+              "id": "dummy_scan_id",
+              "type": "private_analysis",
+              "links": {"self": "dummy_link"},
+              "attributes": {
+                  "status": "completed",
+                  "stats": {"malicious": 0, "suspicious": 0},
+              },
+          }
+      }
+  )
+
+  return upload_url
+
 
 def verify_analysis(analysis, status="queued"):
-    """Helper to verify analysis response."""
-    assert analysis.id == "dummy_scan_id"
-    assert analysis.type == "private_analysis"
-    assert getattr(analysis, "status") == status
+  """Helper to verify analysis response."""
+  assert analysis.id == "dummy_scan_id"
+  assert analysis.type == "private_analysis"
+  assert getattr(analysis, "status") == status
 
-def test_scan_file_private(httpserver, private_scan_mocks):
-    """Test synchronous private file scanning."""
-    with new_client(httpserver) as client:
-        with io.StringIO("test file content") as f:
-            analysis = client.scan_file_private(f)
-        verify_analysis(analysis)
+
+def test_scan_file_private(httpserver, private_scan):  # pylint: disable=unused-argument
+  """Test synchronous private file scanning."""
+  with new_client(httpserver) as client:
+    with io.StringIO("test file content") as f:
+      analysis = client.scan_file_private(f)
+    verify_analysis(analysis)
+
 
 @pytest.mark.asyncio
-async def test_scan_file_private_async(httpserver, private_scan_mocks):
-    """Test asynchronous private file scanning."""
-    async with new_client(httpserver) as client:
-        with io.StringIO("test file content") as f:
-            analysis = await client.scan_file_private_async(
-                f,
-                wait_for_completion=True
-            )
-        verify_analysis(analysis, status="completed")
+async def test_scan_file_private_async(httpserver, private_scan):  # pylint: disable=unused-argument
+  """Test asynchronous private file scanning."""
+  async with new_client(httpserver) as client:
+    with io.StringIO("test file content") as f:
+      analysis = await client.scan_file_private_async(
+          f, wait_for_completion=True
+      )
+    verify_analysis(analysis, status="completed")

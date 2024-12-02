@@ -13,77 +13,68 @@ from rich.progress import Progress
 
 console = Console()
 
+
 async def scan_file_private(
-    api_key: str,
-    file_path: Path,
-    wait: bool = False
+    api_key: str, file_path: Path, wait: bool = False
 ) -> None:
-    """
-    Scan a file privately on VirusTotal.
-    
-    Args:
-        api_key: VirusTotal API key
-        file_path: Path to file to scan
-        wait: Wait for scan completion
-    """
-    async with vt.Client(api_key) as client:
-        try:
-            with Progress() as progress:
-                task = progress.add_task(
-                    "Scanning file...",
-                    total=None if wait else 1
-                )
+  """
+  Scan a file privately on VirusTotal.
 
-                analysis = await client.scan_file_private_async(
-                    str(file_path),
-                    wait_for_completion=wait
-                )
+  Args:
+      api_key: VirusTotal API key
+      file_path: Path to file to scan
+      wait: Wait for scan completion
+  """
+  async with vt.Client(api_key) as client:
+    try:
+      with Progress() as progress:
+        task = progress.add_task("Scanning file...", total=None if wait else 1)
 
-                progress.update(task, advance=1)
+        analysis = await client.scan_file_private_async(
+            str(file_path), wait_for_completion=wait
+        )
 
-                console.print("\n[green]Scan submitted successfully[/green]")
-                console.print(f"Analysis ID: {analysis.id}")
+        progress.update(task, advance=1)
 
-                if wait:
-                    console.print(f"\nScan Status: {analysis.status}")
-                    if hasattr(analysis, 'stats'):
-                        console.print("Detection Stats:")
-                        for k, v in analysis.stats.items():
-                            console.print(f"  {k}: {v}")
+        console.print("\n[green]Scan submitted successfully[/green]")
+        console.print(f"Analysis ID: {analysis.id}")
 
-        except vt.error.APIError as e:
-            console.print(f"[red]API Error: {e}[/red]")
-        except Exception as e:
-            console.print(f"[red]Error: {e}[/red]")
+        if wait:
+          console.print(f"\nScan Status: {analysis.status}")
+          if hasattr(analysis, "stats"):
+            console.print("Detection Stats:")
+            for k, v in analysis.stats.items():
+              console.print(f"  {k}: {v}")
+
+    except vt.error.APIError as e:
+      console.print(f"[red]API Error: {e}[/red]")
+    except Exception as e:  # pylint: disable=broad-exception-caught
+      console.print(f"[red]Error: {e}[/red]")
+
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Scan file privately using VirusTotal API"
-    )
-    parser.add_argument("--apikey", help="VirusTotal API key")
-    parser.add_argument("--file_path", help="Path to file to scan")
-    parser.add_argument(
-        "--wait",
-        action="store_true",
-        help="Wait for scan completion"
-    )
+  parser = argparse.ArgumentParser(
+      description="Scan file privately using VirusTotal API"
+  )
+  parser.add_argument("--apikey", help="VirusTotal API key")
+  parser.add_argument("--file_path", help="Path to file to scan")
+  parser.add_argument(
+      "--wait", action="store_true", help="Wait for scan completion"
+  )
 
-    args = parser.parse_args()
-    file_path = Path(args.file_path)
+  args = parser.parse_args()
+  file_path = Path(args.file_path)
 
-    if not file_path.exists():
-        console.print(f"[red]Error: File {file_path} not found[/red]")
-        sys.exit(1)
+  if not file_path.exists():
+    console.print(f"[red]Error: File {file_path} not found[/red]")
+    sys.exit(1)
 
-    if not file_path.is_file():
-        console.print(f"[red]Error: {file_path} is not a file[/red]")
-        sys.exit(1)
+  if not file_path.is_file():
+    console.print(f"[red]Error: {file_path} is not a file[/red]")
+    sys.exit(1)
 
-    asyncio.run(scan_file_private(
-        args.apikey,
-        file_path,
-        args.wait
-    ))
+  asyncio.run(scan_file_private(args.apikey, file_path, args.wait))
+
 
 if __name__ == "__main__":
-    main()
+  main()

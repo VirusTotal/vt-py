@@ -218,7 +218,7 @@ class Client:
       proxy: typing.Optional[str] = None,
       headers: typing.Optional[typing.Dict] = None,
       verify_ssl: bool = True,
-      connector: aiohttp.BaseConnector = None
+      connector: aiohttp.BaseConnector = None,
   ):
     """Initialize the client with the provided API key."""
 
@@ -252,7 +252,7 @@ class Client:
           ssl=self._verify_ssl, loop=event_loop
       )
 
-  def _full_url(self, path:str, *args: typing.Any) -> str:
+  def _full_url(self, path: str, *args: typing.Any) -> str:
     try:
       path = path.format(*args)
     except IndexError as exc:
@@ -281,7 +281,7 @@ class Client:
           headers=headers,
           trust_env=self._trust_env,
           timeout=aiohttp.ClientTimeout(total=self._timeout),
-          json_serialize=functools.partial(json.dumps, cls=UserDictJsonEncoder)
+          json_serialize=functools.partial(json.dumps, cls=UserDictJsonEncoder),
       )
     return self._session
 
@@ -339,11 +339,11 @@ class Client:
     return make_sync(self.close_async())
 
   def delete(
-    self,
-    path: str,
-    *path_args: typing.Any,
-    data: typing.Optional[typing.Union[str, bytes]] = None,
-    json_data: typing.Optional[typing.Dict] = None
+      self,
+      path: str,
+      *path_args: typing.Any,
+      data: typing.Optional[typing.Union[str, bytes]] = None,
+      json_data: typing.Optional[typing.Dict] = None,
   ) -> ClientResponse:
     """Sends a DELETE request to a given API endpoint.
 
@@ -366,7 +366,7 @@ class Client:
       path: str,
       *path_args: typing.Any,
       data: typing.Optional[typing.Union[str, bytes]] = None,
-      json_data: typing.Optional[typing.Dict] = None
+      json_data: typing.Optional[typing.Dict] = None,
   ) -> ClientResponse:
     """Like :func:`delete` but returns a coroutine."""
     return ClientResponse(
@@ -374,7 +374,7 @@ class Client:
             self._full_url(path, *path_args),
             data=data,
             json=json_data,
-            proxy=self._proxy
+            proxy=self._proxy,
         )
     )
 
@@ -392,9 +392,7 @@ class Client:
     return make_sync(self.download_file_async(file_hash, file))
 
   async def __download_async(
-    self,
-    endpoint: str,
-    file: typing.BinaryIO
+      self, endpoint: str, file: typing.BinaryIO
   ) -> None:
     """Downloads a file and writes it to file.
 
@@ -412,19 +410,17 @@ class Client:
       file.write(chunk)
 
   async def download_file_async(
-    self,
-    file_hash : str,
-    file: typing.BinaryIO
+      self, file_hash: str, file: typing.BinaryIO
   ) -> None:
     """Like :func:`download_file` but returns a coroutine."""
     await self.__download_async(f"/files/{file_hash}/download", file)
 
   def download_zip_files(
-    self,
-    hashes: typing.List[str],
-    zipfile: typing.BinaryIO,
-    password: typing.Optional[str] = None,
-    sleep_time: int = 20
+      self,
+      hashes: typing.List[str],
+      zipfile: typing.BinaryIO,
+      password: typing.Optional[str] = None,
+      sleep_time: int = 20,
   ) -> None:
     """Creates a bundle zip bundle containing one or multiple files.
 
@@ -442,11 +438,11 @@ class Client:
     )
 
   async def download_zip_files_async(
-    self,
-    hashes: typing.List[str],
-    zipfile: typing.BinaryIO,
-    password: typing.Optional[str] = None,
-    sleep_time: int = 20
+      self,
+      hashes: typing.List[str],
+      zipfile: typing.BinaryIO,
+      password: typing.Optional[str] = None,
+      sleep_time: int = 20,
   ) -> None:
     data = {"hashes": hashes}
     if password:
@@ -485,9 +481,7 @@ class Client:
     )
 
   def feed(
-    self,
-    feed_type: FeedType,
-    cursor: typing.Optional[str] = None
+      self, feed_type: FeedType, cursor: typing.Optional[str] = None
   ) -> Feed:
     """Returns an iterator for a VirusTotal feed.
 
@@ -506,10 +500,10 @@ class Client:
     return Feed(self, feed_type, cursor=cursor)
 
   def get(
-    self,
-    path: str,
-    *path_args: typing.Any,
-    params: typing.Optional[typing.Dict] = None
+      self,
+      path: str,
+      *path_args: typing.Any,
+      params: typing.Optional[typing.Dict] = None,
   ) -> ClientResponse:
     """Sends a GET request to a given API endpoint.
 
@@ -528,10 +522,10 @@ class Client:
     return make_sync(self.get_async(path, *path_args, params=params))
 
   async def get_async(
-    self,
-    path: str,
-    *path_args: typing.Any,
-    params: typing.Optional[typing.Dict] = None
+      self,
+      path: str,
+      *path_args: typing.Any,
+      params: typing.Optional[typing.Dict] = None,
   ) -> ClientResponse:
     """Like :func:`get` but returns a coroutine."""
     return ClientResponse(
@@ -541,10 +535,10 @@ class Client:
     )
 
   def get_data(
-    self,
-    path: str,
-    *path_args: typing.Any,
-    params: typing.Optional[typing.Dict] = None
+      self,
+      path: str,
+      *path_args: typing.Any,
+      params: typing.Optional[typing.Dict] = None,
   ) -> typing.Any:
     """Sends a GET request to a given API endpoint and returns response's data.
 
@@ -574,15 +568,14 @@ class Client:
       self,
       path: str,
       *path_args: typing.Any,
-      params: typing.Optional[typing.Dict] = None
-    ) -> typing.Any:
+      params: typing.Optional[typing.Dict] = None,
+  ) -> typing.Any:
     """Like :func:`get_data` but returns a coroutine."""
     json_response = await self.get_json_async(path, *path_args, params=params)
     return self._extract_data_from_json(json_response)
 
   async def get_error_async(
-    self,
-    response: ClientResponse
+      self, response: ClientResponse
   ) -> typing.Optional[APIError]:
     """Given a :class:`ClientResponse` returns a :class:`APIError`
 
@@ -605,10 +598,10 @@ class Client:
     return APIError("ServerError", await response.text_async())
 
   def get_json(
-    self,
-    path: str ,
-    *path_args: typing.Any,
-    params: typing.Optional[typing.Dict] = None
+      self,
+      path: str,
+      *path_args: typing.Any,
+      params: typing.Optional[typing.Dict] = None,
   ) -> typing.Dict:
     """Sends a GET request to a given API endpoint and parses the response.
 
@@ -627,20 +620,20 @@ class Client:
     return make_sync(self.get_json_async(path, *path_args, params=params))
 
   async def get_json_async(
-    self,
-    path: str,
-    *path_args: typing.Any,
-    params: typing.Optional[typing.Dict] = None
+      self,
+      path: str,
+      *path_args: typing.Any,
+      params: typing.Optional[typing.Dict] = None,
   ) -> typing.Dict:
     """Like :func:`get_json` but returns a coroutine."""
     response = await self.get_async(path, *path_args, params=params)
     return await self._response_to_json(response)
 
   def get_object(
-    self,
-    path: str,
-    *path_args: typing.Any,
-    params: typing.Optional[typing.Dict] = None
+      self,
+      path: str,
+      *path_args: typing.Any,
+      params: typing.Optional[typing.Dict] = None,
   ) -> Object:
     """Sends a GET request to a given API endpoint and returns an object.
 
@@ -661,21 +654,21 @@ class Client:
     return make_sync(self.get_object_async(path, *path_args, params=params))
 
   async def get_object_async(
-    self,
-    path: str,
-    *path_args: typing.Any,
-    params: typing.Optional[typing.Dict] = None
+      self,
+      path: str,
+      *path_args: typing.Any,
+      params: typing.Optional[typing.Dict] = None,
   ) -> Object:
     """Like :func:`get_object` but returns a coroutine."""
     response = await self.get_async(path, *path_args, params=params)
     return await self._response_to_object(response)
 
   def patch(
-    self,
-    path: str,
-    *path_args: typing.Any,
-    data: typing.Optional[typing.Union[str, bytes]] = None,
-    json_data: typing.Optional[typing.Dict] = None
+      self,
+      path: str,
+      *path_args: typing.Any,
+      data: typing.Optional[typing.Union[str, bytes]] = None,
+      json_data: typing.Optional[typing.Dict] = None,
   ) -> ClientResponse:
     """Sends a PATCH request to a given API endpoint.
 
@@ -696,11 +689,11 @@ class Client:
     return make_sync(self.patch_async(path, *path_args, data, json_data))
 
   async def patch_async(
-    self,
-    path: str,
-    *path_args: typing.Any,
-    data: typing.Optional[typing.Union[str, bytes]] = None,
-    json_data: typing.Optional[typing.Dict] = None
+      self,
+      path: str,
+      *path_args: typing.Any,
+      data: typing.Optional[typing.Union[str, bytes]] = None,
+      json_data: typing.Optional[typing.Dict] = None,
   ) -> ClientResponse:
     """Like :func:`patch` but returns a coroutine."""
     return ClientResponse(
@@ -713,10 +706,7 @@ class Client:
     )
 
   def patch_object(
-    self,
-    path: str,
-    *path_args: typing.Any,
-    obj: Object
+      self, path: str, *path_args: typing.Any, obj: Object
   ) -> Object:
     """Sends a PATCH request for modifying an object.
 
@@ -735,10 +725,7 @@ class Client:
     return make_sync(self.patch_object_async(path, *path_args, obj=obj))
 
   async def patch_object_async(
-    self,
-    path: str,
-    *path_args: typing.Any,
-    obj: Object
+      self, path: str, *path_args: typing.Any, obj: Object
   ) -> Object:
     """Like :func:`patch_object` but returns a coroutine."""
     data = {"data": obj.to_dict(modified_attributes_only=True)}
@@ -747,11 +734,11 @@ class Client:
     return await self._response_to_object(response)
 
   def post(
-    self,
-    path: str,
-    *path_args: typing.Any,
-    data: typing.Optional[typing.Union[str, bytes]] = None,
-    json_data: typing.Optional[typing.Dict] = None
+      self,
+      path: str,
+      *path_args: typing.Any,
+      data: typing.Optional[typing.Union[str, bytes]] = None,
+      json_data: typing.Optional[typing.Dict] = None,
   ) -> ClientResponse:
     """Sends a POST request to a given API endpoint.
 
@@ -774,11 +761,11 @@ class Client:
     )
 
   async def post_async(
-    self,
-    path: str,
-    *path_args: typing.Any,
-    data: typing.Optional[typing.Union[str, bytes]] = None,
-    json_data: typing.Optional[typing.Dict] = None
+      self,
+      path: str,
+      *path_args: typing.Any,
+      data: typing.Optional[typing.Union[str, bytes]] = None,
+      json_data: typing.Optional[typing.Dict] = None,
   ) -> ClientResponse:
     """Like :func:`post` but returns a coroutine."""
     return ClientResponse(
@@ -791,10 +778,7 @@ class Client:
     )
 
   def post_object(
-    self,
-    path: str,
-    *path_args: typing.Any,
-    obj: Object
+      self, path: str, *path_args: typing.Any, obj: Object
   ) -> Object:
     """Sends a POST request for creating an object.
 
@@ -813,10 +797,7 @@ class Client:
     return make_sync(self.post_object_async(path, *path_args, obj=obj))
 
   async def post_object_async(
-    self,
-    path: str,
-    *path_args: typing.Any,
-    obj: Object
+      self, path: str, *path_args: typing.Any, obj: Object
   ) -> Object:
     """Like :func:`post_object` but returns a coroutine."""
     data = {"data": obj.to_dict()}
@@ -825,13 +806,13 @@ class Client:
     return await self._response_to_object(response)
 
   def iterator(
-    self,
-    path: str,
-    *path_args: typing.Any,
-    params: typing.Optional[typing.Dict] = None,
-    cursor: typing.Optional[str] = None,
-    limit: typing.Optional[int] = None,
-    batch_size: int = 0
+      self,
+      path: str,
+      *path_args: typing.Any,
+      params: typing.Optional[typing.Dict] = None,
+      cursor: typing.Optional[str] = None,
+      limit: typing.Optional[int] = None,
+      batch_size: int = 0,
   ) -> Iterator:
     """Returns an iterator for the collection specified by the given path.
 
@@ -868,9 +849,7 @@ class Client:
     )
 
   def scan_file(
-    self,
-    file: typing.BinaryIO,
-    wait_for_completion: bool = False
+      self, file: typing.BinaryIO, wait_for_completion: bool = False
   ) -> Object:
     """Scans a file.
 
@@ -886,9 +865,7 @@ class Client:
     )
 
   async def scan_file_async(
-    self,
-    file: typing.BinaryIO,
-    wait_for_completion: bool = False
+      self, file: typing.BinaryIO, wait_for_completion: bool = False
   ) -> Object:
     """Like :func:`scan_file` but returns a coroutine."""
 
@@ -944,9 +921,7 @@ class Client:
     )
 
   async def scan_url_async(
-    self,
-    url: str,
-    wait_for_completion: bool = False
+      self, url: str, wait_for_completion: bool = False
   ) -> Object:
     """Like :func:`scan_url` but returns a coroutine."""
     form_data = aiohttp.FormData()
@@ -977,51 +952,48 @@ class Client:
     return await self._wait_for_analysis_completion(analysis)
 
   def scan_file_private(
-      self, 
+      self,
       file: typing.Union[typing.BinaryIO, str],
-      wait_for_completion: bool = False
+      wait_for_completion: bool = False,
   ) -> Object:
-      """Scan file privately.
-      
-      Args:
-          file: File to scan (path string or file object)
-          wait_for_completion: Wait for completion
-          
-      Returns:
-          Object: Analysis object with scan results
-      """
-      return make_sync(
-          self.scan_file_private_async(file, wait_for_completion)
-      )
+    """Scan file privately.
+
+    Args:
+      file: File to scan (path string or file object)
+      wait_for_completion: Wait for completion
+
+    Returns:
+      Object: Analysis object with scan results
+    """
+    return make_sync(self.scan_file_private_async(file, wait_for_completion))
 
   async def scan_file_private_async(
       self,
       file: typing.Union[typing.BinaryIO, str],
-      wait_for_completion: bool = False
+      wait_for_completion: bool = False,
   ) -> Object:
-      """Async version of scan_file_private"""
+    """Async version of scan_file_private"""
 
-      # Handle string path
-      if isinstance(file, str):
-          async with aiofiles.open(file, 'rb') as f:
-              file_content = io.BytesIO(await f.read())
-              file_content.name = os.path.basename(file)
-              return await self.scan_file_private_async(
-                  file_content,
-                  wait_for_completion=wait_for_completion
-              )
+    # Handle string path
+    if isinstance(file, str):
+      async with aiofiles.open(file, "rb") as f:
+        file_content = io.BytesIO(await f.read())
+        file_content.name = os.path.basename(file)
+        return await self.scan_file_private_async(
+            file_content, wait_for_completion=wait_for_completion
+        )
 
-      # Create form data for private scan
-      form = aiohttp.FormData()
-      form.add_field('file', file)
+    # Create form data for private scan
+    form = aiohttp.FormData()
+    form.add_field("file", file)
 
-      # Get private upload URL and submit
-      upload_url = await self.get_data_async("/private/files/upload_url")
-      response = await self.post_async(upload_url, data=form)
+    # Get private upload URL and submit
+    upload_url = await self.get_data_async("/private/files/upload_url")
+    response = await self.post_async(upload_url, data=form)
 
-      analysis = await self._response_to_object(response)
+    analysis = await self._response_to_object(response)
 
-      if wait_for_completion:
-          analysis = await self._wait_for_analysis_completion(analysis)
+    if wait_for_completion:
+      analysis = await self._wait_for_analysis_completion(analysis)
 
-      return analysis
+    return analysis

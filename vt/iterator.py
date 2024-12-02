@@ -67,12 +67,13 @@ class Iterator:
   # pylint: disable=line-too-long
 
   def __init__(
-    self,
-    client: "Client",
-    path: str, params=None,
-    cursor: typing.Optional[str] = None,
-    limit: typing.Optional[int] = None,
-    batch_size: int = 0
+      self,
+      client: "Client",
+      path: str,
+      params=None,
+      cursor: typing.Optional[str] = None,
+      limit: typing.Optional[int] = None,
+      batch_size: int = 0,
   ):
     """Initializes an iterator.
 
@@ -113,7 +114,9 @@ class Iterator:
       params["limit"] = self._batch_size
     return params
 
-  def _parse_response(self, json_resp: typing.Dict, batch_cursor: int) -> typing.Tuple[typing.List[typing.Dict], typing.Dict]:
+  def _parse_response(
+      self, json_resp: typing.Dict, batch_cursor: int
+  ) -> typing.Tuple[typing.List[typing.Dict], typing.Dict]:
     if not isinstance(json_resp.get("data"), list):
       raise ValueError(f"{self._path} is not a collection")
     meta = json_resp.get("meta", {})
@@ -121,7 +124,9 @@ class Iterator:
 
     return items, meta
 
-  async def _get_batch_async(self, batch_cursor: int = 0) -> typing.Tuple[typing.List[typing.Dict], typing.Dict]:
+  async def _get_batch_async(
+      self, batch_cursor: int = 0
+  ) -> typing.Tuple[typing.List[typing.Dict], typing.Dict]:
     json_resp = await self._client.get_json_async(
         self._path, params=self._build_params()
     )

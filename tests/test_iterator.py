@@ -32,26 +32,28 @@ def fixture_iterator_response(httpserver):
       "/api/v3/dummy_collection/foo",
       method="GET",
       headers={"X-Apikey": "dummy_api_key"},
-  ).respond_with_json({
-      "data": [
-          {
-              "id": "dummy_id_1",
-              "type": "dummy_type",
-              "attributes": {"order": 0},
-          },
-          {
-              "id": "dummy_id_2",
-              "type": "dummy_type",
-              "attributes": {"order": 0},
-          },
-          {
-              "id": "dummy_id_3",
-              "type": "dummy_type",
-              "attributes": {"order": 0},
-          },
-      ],
-      "meta": {"cursor": "3", "total_hits": 200},
-  })
+  ).respond_with_json(
+      {
+          "data": [
+              {
+                  "id": "dummy_id_1",
+                  "type": "dummy_type",
+                  "attributes": {"order": 0},
+              },
+              {
+                  "id": "dummy_id_2",
+                  "type": "dummy_type",
+                  "attributes": {"order": 0},
+              },
+              {
+                  "id": "dummy_id_3",
+                  "type": "dummy_type",
+                  "attributes": {"order": 0},
+              },
+          ],
+          "meta": {"cursor": "3", "total_hits": 200},
+      }
+  )
   httpserver.expect_ordered_request(
       "/api/v3/dummy_collection/foo",
       method="GET",

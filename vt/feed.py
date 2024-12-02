@@ -61,10 +61,10 @@ class Feed:
   """
 
   def __init__(
-    self,
-    client: "Client",
-    feed_type: FeedType,
-    cursor: typing.Optional[str] = None
+      self,
+      client: "Client",
+      feed_type: FeedType,
+      cursor: typing.Optional[str] = None,
   ):
     """Initializes a Feed object.
 

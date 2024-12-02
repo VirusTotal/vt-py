@@ -94,21 +94,27 @@ class VTISearchToNetworkInfrastructureHandler:
       contacted_urls = relationships["contacted_urls"]["data"]
       contacted_ips = relationships["contacted_ips"]["data"]
 
-      await self.queue.put({
-          "contacted_addresses": contacted_domains,
-          "type": "domains",
-          "file": checksum,
-      })
-      await self.queue.put({
-          "contacted_addresses": contacted_ips,
-          "type": "ips",
-          "file": checksum,
-      })
-      await self.queue.put({
-          "contacted_addresses": contacted_urls,
-          "type": "urls",
-          "file": checksum,
-      })
+      await self.queue.put(
+          {
+              "contacted_addresses": contacted_domains,
+              "type": "domains",
+              "file": checksum,
+          }
+      )
+      await self.queue.put(
+          {
+              "contacted_addresses": contacted_ips,
+              "type": "ips",
+              "file": checksum,
+          }
+      )
+      await self.queue.put(
+          {
+              "contacted_addresses": contacted_urls,
+              "type": "urls",
+              "file": checksum,
+          }
+      )
 
       self.networking_infrastructure[checksum]["domains"] = contacted_domains
       self.networking_infrastructure[checksum]["ips"] = contacted_ips

@@ -43,7 +43,7 @@ async def upload_hashes(queue, apikey):
   async with vt.Client(apikey) as client:
     while not queue.empty():
       file_path = await queue.get()
-      with open(file_path, encoding="utf-8") as f:
+      with open(file_path, 'rb') as f:
         analysis = await client.scan_file_async(file=f)
         print(f"File {file_path} uploaded.")
         queue.task_done()

@@ -15,7 +15,6 @@
 
 import asyncio
 import base64
-import functools
 import io
 import json
 import typing
@@ -28,7 +27,6 @@ from .error import APIError
 from .feed import Feed, FeedType
 from .iterator import Iterator
 from .object import Object
-from .object import UserDictJsonEncoder
 from .utils import make_sync
 from .version import __version__
 
@@ -281,7 +279,6 @@ class Client:
           headers=headers,
           trust_env=self._trust_env,
           timeout=aiohttp.ClientTimeout(total=self._timeout),
-          json_serialize=functools.partial(json.dumps, cls=UserDictJsonEncoder),
       )
     return self._session
 

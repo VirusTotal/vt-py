@@ -159,7 +159,7 @@ class Object:
     value = super().__getattribute__(attr)
     for r in Object.DATE_ATTRIBUTES:
       if r.match(attr):
-        value = datetime.datetime.utcfromtimestamp(value)
+        value = datetime.datetime.fromtimestamp(value, datetime.UTC)
         break
     return value
 

@@ -76,7 +76,8 @@ def test_object_date_attrs():
   obj = Object("dummy_type")
   obj.foo_date = 0
 
-  assert obj.foo_date == datetime.datetime(1970, 1, 1, 0, 0, 0)
+  assert obj.foo_date == datetime.datetime(
+      1970, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc)
 
 
 def test_object_pickle():

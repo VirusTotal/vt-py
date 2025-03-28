@@ -13,6 +13,7 @@
 
 """Client tests."""
 
+import collections
 import datetime
 import io
 import functools
@@ -99,6 +100,9 @@ def test_object_to_dict():
           },
       }
   )
+
+  obj_dict = obj.to_dict()
+  assert not isinstance(obj_dict["attributes"]["attr3"], collections.UserDict)
 
   obj.set_data("data_key", {"some": "value"})
 

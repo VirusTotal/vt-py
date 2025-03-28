@@ -50,14 +50,16 @@ class WhistleBlowerDict(collections.UserDict):
     super().__delitem__(item)
 
 
-class UserDictJsonEncoder(json.JSONEncoder):
-  """Custom json encoder for UserDict objects."""
-
-  def default(self, o):
-    if isinstance(o, collections.UserDict):
-      return o.data
-    return super().default(o)
-
+def to_plain_dict(d: typing.Dict) -> typing.Dict:
+  plain = {}
+  for k, v in d.items():
+    if isinstance(v, collections.UserDict):
+      plain[k] = to_plain_dict(v.data)
+    elif isinstance(v, dict):
+      plain[k] = to_plain_dict(v)
+    else:
+      plain[k] = v
+  return plain
 
 class Object:
   """This class encapsulates any type of object in the VirusTotal API.
@@ -246,4 +248,4 @@ class Object:
     for key, val in self._modified_data.items():
       result[key] = val
 
-    return result
+    return to_plain_dict(result)

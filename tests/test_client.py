@@ -552,7 +552,7 @@ def private_scan_mocks(httpserver):
 
   # Add mock for analysis status endpoint
   httpserver.expect_request(
-      "/api/v3/analyses/dummy_scan_id", method="GET"
+      "/api/v3/private/analyses/dummy_scan_id", method="GET"
   ).respond_with_json(
       {
           "data": {

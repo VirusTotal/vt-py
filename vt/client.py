@@ -937,10 +937,14 @@ class Client:
 
     return analysis
 
-  async def _wait_for_analysis_completion(self, analysis: Object, private_path: bool = False) -> Object:
+  async def _wait_for_analysis_completion(
+      self, analysis: Object, private_path: bool = False
+  ) -> Object:
     while True:
       if private_path:
-        analysis = await self.get_object_async("/private/analyses/{}", analysis.id)
+        analysis = await self.get_object_async(
+            "/private/analyses/{}", analysis.id
+        )
       else:
         analysis = await self.get_object_async("/analyses/{}", analysis.id)
       if analysis.status == "completed":
@@ -948,7 +952,9 @@ class Client:
       await asyncio.sleep(20)
     return analysis
 
-  async def wait_for_analysis_completion(self, analysis: Object, private_path: bool = False) -> Object:
+  async def wait_for_analysis_completion(
+      self, analysis: Object, private_path: bool = False
+  ) -> Object:
     return await self._wait_for_analysis_completion(analysis, private_path)
 
   def scan_file_private(

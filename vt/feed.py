@@ -17,7 +17,7 @@
 import asyncio
 import bz2
 from datetime import datetime
-from datetime import timedelta
+from datetime import timedelta, timezone
 import enum
 import io
 import json
@@ -37,7 +37,9 @@ __all__ = ["Feed", "FeedType"]
 class FeedType(enum.Enum):
   """Feed types."""
 
+  DOMAINS = "domains"
   FILES = "files"
+  IPS = "ipaddresses"
   URLS = "urls"
   FILE_BEHAVIOURS = "file-behaviours"
 
@@ -87,7 +89,7 @@ class Feed:
       self._batch_time = datetime.strptime(batch_time, "%Y%m%d%H%M")
       self._batch_skip = int(batch_skip) if batch_skip else 0
     else:
-      self._batch_time = datetime.utcnow() - timedelta(minutes=70)
+      self._batch_time = datetime.now(timezone.utc) - timedelta(minutes=70)
       self._batch_skip = 0
 
     self._next_batch_time = self._batch_time

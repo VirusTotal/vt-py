@@ -917,6 +917,20 @@ class Client:
         self.scan_url_async(url, wait_for_completion=wait_for_completion)
     )
 
+  def scan_url_private(self, url: str, wait_for_completion: bool = False) -> Object:
+    """Scans a URL privately.
+
+    :param url: The URL to be scanned.
+    :param wait_for_completion: If True the function doesn't return until the
+       analysis has been completed.
+    :type url: str
+    :type wait_for_completion: bool
+    :returns: An instance of :class:`Object` of analysis type.
+    """
+    return make_sync(
+        self.scan_url_private_async(url, wait_for_completion=wait_for_completion)
+    )
+
   async def scan_url_async(
       self, url: str, wait_for_completion: bool = False
   ) -> Object:
@@ -927,6 +941,26 @@ class Client:
     response = ClientResponse(
         await self._get_session().post(
             self._full_url("/urls"), data=form_data, proxy=self._proxy
+        )
+    ) 
+
+    analysis = await self._response_to_object(response)
+
+    if wait_for_completion:
+      analysis = await self._wait_for_analysis_completion(analysis)
+
+    return analysis
+
+  async def scan_url_private_async(
+      self, url: str, wait_for_completion: bool = False
+  ) -> Object:
+    """Like :func:`scan_url_private` but returns a coroutine."""
+    form_data = aiohttp.FormData()
+    form_data.add_field("url", url)
+
+    response = ClientResponse(
+        await self._get_session().post(
+            self._full_url("/private/urls"), data=form_data, proxy=self._proxy
         )
     )
 

@@ -462,14 +462,16 @@ def test_scan_file_valueerror(httpserver):
       client.scan_file("/Users/test/path/to/file.txt")
 
 
-def test_scan_url(httpserver):
+@pytest.mark.parametrize('private', [True, False])
+def test_scan_url(httpserver, private):
   httpserver.expect_request(
-      "/api/v3/urls", method="POST", headers={"X-Apikey": "dummy_api_key"}
+      f"/api/v3/{'private/' if private else ''}urls", method="POST",
+      headers={"X-Apikey": "dummy_api_key"}
   ).respond_with_json(
       {
           "data": {
               "id": "dummy_id",
-              "type": "analysis",
+              "type": f"{'private_' if private else ''}analysis",
               "attributes": {
                   "foo": "foo",
               },
@@ -478,9 +480,12 @@ def test_scan_url(httpserver):
   )
 
   with new_client(httpserver) as client:
-    analysis = client.scan_url("https://www.dummy.url")
+    if private:
+      analysis = client.scan_url_private("https://www.dummy.url")
+    else:
+      analysis = client.scan_url("https://www.dummy.url")
 
-  assert analysis.type == "analysis"
+  assert analysis.type == f"{'private_' if private else ''}analysis"
 
 
 def test_user_headers(httpserver):

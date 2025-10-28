@@ -1,18 +1,20 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>vt.client &mdash; vt-py  documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
   
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -85,56 +87,66 @@
 
 <span class="sd">&quot;&quot;&quot;Main object to interact with the VT API.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">aiohttp</span>
-<span class="kn">import</span> <span class="nn">asyncio</span>
-<span class="kn">import</span> <span class="nn">base64</span>
-<span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">base64</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">typing</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">aiofiles</span>
 
-<span class="kn">from</span> <span class="nn">.error</span> <span class="kn">import</span> <span class="n">APIError</span>
-<span class="kn">from</span> <span class="nn">.feed</span> <span class="kn">import</span> <span class="n">Feed</span>
-<span class="kn">from</span> <span class="nn">.iterator</span> <span class="kn">import</span> <span class="n">Iterator</span>
-<span class="kn">from</span> <span class="nn">.object</span> <span class="kn">import</span> <span class="n">Object</span>
-<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">make_sync</span>
-<span class="kn">from</span> <span class="nn">.version</span> <span class="kn">import</span> <span class="n">__version__</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">aiohttp</span>
 
-
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;Client&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;ClientResponse&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;url_id&#39;</span><span class="p">]</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">APIError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.feed</span><span class="w"> </span><span class="kn">import</span> <span class="n">Feed</span><span class="p">,</span> <span class="n">FeedType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.iterator</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.object</span><span class="w"> </span><span class="kn">import</span> <span class="n">Object</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_sync</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.version</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span>
 
 
-<span class="n">_API_HOST</span> <span class="o">=</span> <span class="s1">&#39;https://www.virustotal.com&#39;</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Client&quot;</span><span class="p">,</span> <span class="s2">&quot;ClientResponse&quot;</span><span class="p">,</span> <span class="s2">&quot;url_id&quot;</span><span class="p">]</span>
+
+
+<span class="n">_API_HOST</span> <span class="o">=</span> <span class="s2">&quot;https://www.virustotal.com&quot;</span>
 
 <span class="c1"># All API endpoints start with this prefix, you don&#39;t need to include the</span>
 <span class="c1"># prefix in the paths you request as it&#39;s prepended automatically.</span>
-<span class="n">_ENDPOINT_PREFIX</span> <span class="o">=</span> <span class="s1">&#39;/api/v3&#39;</span>
+<span class="n">_ENDPOINT_PREFIX</span> <span class="o">=</span> <span class="s2">&quot;/api/v3&quot;</span>
 
 <span class="c1"># AppEngine server decides whether or not it should serve gzipped content</span>
 <span class="c1"># based on Accept-Encoding and User-Agent. Non-standard UAs are not served</span>
 <span class="c1"># with gzipped content unless it contains the string &quot;gzip&quot; somewhere.</span>
 <span class="c1"># See: https://cloud.google.com/appengine/kb/#compression</span>
-<span class="n">_USER_AGENT_FMT</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{agent}</span><span class="s1">; vtpy </span><span class="si">{version}</span><span class="s1">; gzip&#39;</span>
+<span class="n">_USER_AGENT_FMT</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{agent}</span><span class="s2">; vtpy </span><span class="si">{version}</span><span class="s2">; gzip&quot;</span>
+
+<span class="c1"># https://github.com/aio-libs/aiohttp/discussions/6044#discussioncomment-1432443</span>
+<span class="nb">setattr</span><span class="p">(</span><span class="n">asyncio</span><span class="o">.</span><span class="n">sslproto</span><span class="o">.</span><span class="n">_SSLProtocolTransport</span><span class="p">,</span> <span class="s2">&quot;_start_tls_compatible&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>  <span class="c1"># pylint: disable=protected-access</span>
 
 
-<div class="viewcode-block" id="url_id"><a class="viewcode-back" href="../../api/utils.html#vt.url_id">[docs]</a><span class="k">def</span> <span class="nf">url_id</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+<div class="viewcode-block" id="url_id">
+<a class="viewcode-back" href="../../api/utils.html#vt.url_id">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">url_id</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">&quot;&quot;&quot;Generates the object ID for an URL.</span>
 
 <span class="sd">  The ID generated by this function can be used in calls that expect a URL ID</span>
 <span class="sd">  like `client.get_object(&#39;/urls/&lt;id&gt;&#39;)`</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="k">return</span> <span class="n">base64</span><span class="o">.</span><span class="n">urlsafe_b64encode</span><span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span></div>
+  <span class="k">return</span> <span class="n">base64</span><span class="o">.</span><span class="n">urlsafe_b64encode</span><span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="ClientResponse"><a class="viewcode-back" href="../../api/client.html#vt.ClientResponse">[docs]</a><span class="k">class</span> <span class="nc">ClientResponse</span><span class="p">:</span>
+
+<div class="viewcode-block" id="ClientResponse">
+<a class="viewcode-back" href="../../api/client.html#vt.ClientResponse">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ClientResponse</span><span class="p">:</span>
   <span class="c1"># pylint: disable=line-too-long</span>
 <span class="w">  </span><span class="sd">&quot;&quot;&quot;Class representing the HTTP responses returned by the client.</span>
 
 <span class="sd">  This class is just a thing wrapper around `aiohttp.ClientResponse</span>
 <span class="sd">  &lt;https://aiohttp.readthedocs.io/en/stable/client_reference.html#aiohttp.ClientResponse&gt;`_</span>
 <span class="sd">  that allows using it in both asynchronous and synchronous mode. Instances of</span>
-<span class="sd">  this class have all the attributes that you can find in `aiohttp.ClientResponse`,</span>
+<span class="sd">  this class have all the attributes that you can find in</span>
+<span class="sd">  `aiohttp.ClientResponse`,</span>
 <span class="sd">  like `version`, `status`, `method`, `url`, and so on. Methods in</span>
 <span class="sd">  `aiohttp.ClientResponse` that return a coroutine have two flavors in this</span>
 <span class="sd">  class: synchronous and asynchronous. For example,</span>
@@ -147,53 +159,54 @@
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="c1"># pylint: enable=line-too-long</span>
 
-  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aiohttp_resp</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aiohttp_resp</span><span class="p">:</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">ClientResponse</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_aiohttp_resp</span> <span class="o">=</span> <span class="n">aiohttp_resp</span>
 
-  <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
     <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_aiohttp_resp</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">content</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">content</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;StreamReader&quot;</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">StreamReader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_aiohttp_resp</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
 
-  <span class="k">async</span> <span class="k">def</span> <span class="nf">_get_chunked_response</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">buffer</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_get_chunked_response</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
+    <span class="n">buffer</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span>
     <span class="k">async</span> <span class="k">for</span> <span class="n">data</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">iter_chunks</span><span class="p">():</span>
       <span class="n">buffer</span> <span class="o">+=</span> <span class="n">data</span>
     <span class="k">return</span> <span class="n">buffer</span>
 
-  <span class="k">async</span> <span class="k">def</span> <span class="nf">read_async</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Transfer-encoding&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;chunked&#39;</span><span class="p">:</span>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">read_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Transfer-encoding&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;chunked&quot;</span><span class="p">:</span>
       <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_chunked_response</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aiohttp_resp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 
-  <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">read_async</span><span class="p">())</span>
 
-  <span class="k">async</span> <span class="k">def</span> <span class="nf">json_async</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Transfer-encoding&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;chunked&#39;</span><span class="p">:</span>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">json_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">:</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Transfer-encoding&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;chunked&quot;</span><span class="p">:</span>
       <span class="n">response_content</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_chunked_response</span><span class="p">()</span>
       <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response_content</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aiohttp_resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
 
-  <span class="k">def</span> <span class="nf">json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">json</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">json_async</span><span class="p">())</span>
 
-  <span class="k">async</span> <span class="k">def</span> <span class="nf">text_async</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Transfer-encoding&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;chunked&#39;</span><span class="p">:</span>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">text_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Transfer-encoding&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;chunked&quot;</span><span class="p">:</span>
       <span class="n">response_content</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_chunked_response</span><span class="p">()</span>
       <span class="k">return</span> <span class="n">response_content</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_aiohttp_resp</span><span class="o">.</span><span class="n">get_encoding</span><span class="p">())</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aiohttp_resp</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
 
-  <span class="k">def</span> <span class="nf">text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">text</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">text_async</span><span class="p">())</span></div>
 
 
-<span class="k">class</span> <span class="nc">StreamReader</span><span class="p">:</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">StreamReader</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">&quot;&quot;&quot;Class representing the HTTP responses returned by the client.</span>
 
 <span class="sd">  This class is just a thing wrapper around `aiohttp.StreamReader</span>
@@ -209,44 +222,46 @@
 <span class="sd">  https://aiohttp.readthedocs.io/en/stable/streams.html#aiohttp.StreamReader</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
-  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aiohttp_stream_reader</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aiohttp_stream_reader</span><span class="p">:</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">StreamReader</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_aiohttp_stream_reader</span> <span class="o">=</span> <span class="n">aiohttp_stream_reader</span>
 
-  <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
     <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_aiohttp_stream_reader</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
 
-  <span class="k">async</span> <span class="k">def</span> <span class="nf">read_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">read_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
     <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aiohttp_stream_reader</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">read_async</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
 
-  <span class="k">async</span> <span class="k">def</span> <span class="nf">readany_async</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">readany_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
     <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aiohttp_stream_reader</span><span class="o">.</span><span class="n">readany</span><span class="p">()</span>
 
-  <span class="k">def</span> <span class="nf">readany</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">readany</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">readany_async</span><span class="p">())</span>
 
-  <span class="k">async</span> <span class="k">def</span> <span class="nf">readexactly_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">readexactly_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
     <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aiohttp_stream_reader</span><span class="o">.</span><span class="n">readexactly</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">readexactly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">readexactly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">readexactly_async</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
 
-  <span class="k">async</span> <span class="k">def</span> <span class="nf">readline_async</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">readline_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
     <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aiohttp_stream_reader</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
 
-  <span class="k">def</span> <span class="nf">readline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">readline</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">readline_async</span><span class="p">())</span>
 
-  <span class="k">async</span> <span class="k">def</span> <span class="nf">readchunk_async</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">readchunk_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
     <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aiohttp_stream_reader</span><span class="o">.</span><span class="n">readchunk</span><span class="p">()</span>
 
-  <span class="k">def</span> <span class="nf">readchunk</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">readchunk</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
     <span class="k">return</span> <span class="n">make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">readchunk_async</span><span class="p">())</span>
 
 
-<div class="viewcode-block" id="Client"><a class="viewcode-back" href="../../api/client.html#vt.Client">[docs]</a><span class="k">class</span> <span class="nc">Client</span><span class="p">:</span>
+<div class="viewcode-block" id="Client">
+<a class="viewcode-back" href="../../api/client.html#vt.Client">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Client</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">&quot;&quot;&quot;Client for interacting with VirusTotal.</span>
 
 <span class="sd">  :param apikey: Your VirusTotal API key.</span>
@@ -261,6 +276,7 @@
 <span class="sd">    made by the client (None by default).</span>
 <span class="sd">  :param headers: Dict of headers defined by the user.</span>
 <span class="sd">  :param verify_ssl: Whether to verify the certificate in SSL connections.</span>
+<span class="sd">  :param connector: (Optional) A custom aiohttp connector.</span>
 <span class="sd">  :type apikey: str</span>
 <span class="sd">  :type agent: str</span>
 <span class="sd">  :type host: str</span>
@@ -269,17 +285,28 @@
 <span class="sd">  :type proxy: str</span>
 <span class="sd">  :type headers: dict</span>
 <span class="sd">  :type verify_ssl: bool</span>
+<span class="sd">  :type connector: aiohttp.BaseConnector</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
-  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apikey</span><span class="p">,</span> <span class="n">agent</span><span class="o">=</span><span class="s1">&#39;unknown&#39;</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trust_env</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-               <span class="n">timeout</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">proxy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verify_ssl</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span>
+      <span class="n">apikey</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+      <span class="n">agent</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+      <span class="n">host</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+      <span class="n">trust_env</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+      <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">300</span><span class="p">,</span>
+      <span class="n">proxy</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+      <span class="n">headers</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+      <span class="n">verify_ssl</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+      <span class="n">connector</span><span class="p">:</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">BaseConnector</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize the client with the provided API key.&quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">apikey</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;API key must be a string&#39;</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;API key must be a string&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">apikey</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;API key can not be an empty string&#39;</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;API key can not be an empty string&quot;</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_host</span> <span class="o">=</span> <span class="n">host</span> <span class="ow">or</span> <span class="n">_API_HOST</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_apikey</span> <span class="o">=</span> <span class="n">apikey</span>
@@ -290,78 +317,101 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_proxy</span> <span class="o">=</span> <span class="n">proxy</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_user_headers</span> <span class="o">=</span> <span class="n">headers</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_verify_ssl</span> <span class="o">=</span> <span class="n">verify_ssl</span>
+    <span class="k">if</span> <span class="n">connector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_connector</span> <span class="o">=</span> <span class="n">connector</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># the TCPConnector class expects to be instantiated inside a event loop.</span>
+      <span class="c1"># If there is none, create one.</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="n">event_loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
+      <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
+        <span class="n">event_loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">new_event_loop</span><span class="p">()</span>
+        <span class="n">asyncio</span><span class="o">.</span><span class="n">set_event_loop</span><span class="p">(</span><span class="n">event_loop</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">_full_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_connector</span> <span class="o">=</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">TCPConnector</span><span class="p">(</span>
+          <span class="n">ssl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_verify_ssl</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="n">event_loop</span>
+      <span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_full_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">IndexError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Not enough arguments to fill all placeholders in path&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">exc</span>  <span class="c1"># pylint: disable=line-too-long</span>
-    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;http&#39;</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+          <span class="s2">&quot;Not enough arguments to fill all placeholders in path&quot;</span>
+      <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>  <span class="c1"># pylint: disable=line-too-long</span>
+    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;http&quot;</span><span class="p">):</span>
       <span class="k">return</span> <span class="n">path</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_host</span> <span class="o">+</span> <span class="n">_ENDPOINT_PREFIX</span> <span class="o">+</span> <span class="n">path</span>
 
-  <span class="k">def</span> <span class="nf">_get_session</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_get_session</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">ClientSession</span><span class="p">:</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_session</span><span class="p">:</span>
       <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
-          <span class="s1">&#39;X-Apikey&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apikey</span><span class="p">,</span>
-          <span class="s1">&#39;Accept-Encoding&#39;</span><span class="p">:</span> <span class="s1">&#39;gzip&#39;</span><span class="p">,</span>
-          <span class="s1">&#39;User-Agent&#39;</span><span class="p">:</span> <span class="n">_USER_AGENT_FMT</span><span class="o">.</span><span class="n">format_map</span><span class="p">({</span>
-              <span class="s1">&#39;agent&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_agent</span><span class="p">,</span> <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="n">__version__</span><span class="p">})</span>
+          <span class="s2">&quot;X-Apikey&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apikey</span><span class="p">,</span>
+          <span class="s2">&quot;Accept-Encoding&quot;</span><span class="p">:</span> <span class="s2">&quot;gzip&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;User-Agent&quot;</span><span class="p">:</span> <span class="n">_USER_AGENT_FMT</span><span class="o">.</span><span class="n">format_map</span><span class="p">(</span>
+              <span class="p">{</span><span class="s2">&quot;agent&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_agent</span><span class="p">,</span> <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="n">__version__</span><span class="p">}</span>
+          <span class="p">),</span>
       <span class="p">}</span>
 
       <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_headers</span><span class="p">:</span>
         <span class="n">headers</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_user_headers</span><span class="p">)</span>
 
       <span class="bp">self</span><span class="o">.</span><span class="n">_session</span> <span class="o">=</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">ClientSession</span><span class="p">(</span>
-        <span class="n">connector</span><span class="o">=</span><span class="n">aiohttp</span><span class="o">.</span><span class="n">TCPConnector</span><span class="p">(</span><span class="n">ssl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_verify_ssl</span><span class="p">),</span>
-        <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
-        <span class="n">trust_env</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_trust_env</span><span class="p">,</span>
-        <span class="n">timeout</span><span class="o">=</span><span class="n">aiohttp</span><span class="o">.</span><span class="n">ClientTimeout</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_timeout</span><span class="p">))</span>
+          <span class="n">connector</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_connector</span><span class="p">,</span>
+          <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+          <span class="n">trust_env</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_trust_env</span><span class="p">,</span>
+          <span class="n">timeout</span><span class="o">=</span><span class="n">aiohttp</span><span class="o">.</span><span class="n">ClientTimeout</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_timeout</span><span class="p">),</span>
+      <span class="p">)</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_session</span>
 
-  <span class="k">async</span> <span class="k">def</span> <span class="fm">__aenter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="fm">__aenter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span>
 
-  <span class="k">async</span> <span class="k">def</span> <span class="fm">__aexit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_type</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="fm">__aexit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_type</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
     <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">close_async</span><span class="p">()</span>
 
-  <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span>
 
-  <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_type</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_type</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-  <span class="k">def</span> <span class="nf">_extract_data_from_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">json_response</span><span class="p">):</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="s1">&#39;data&#39;</span> <span class="ow">in</span> <span class="n">json_response</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;response does not returns a data field&#39;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">json_response</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_extract_data_from_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">json_response</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="s2">&quot;data&quot;</span> <span class="ow">in</span> <span class="n">json_response</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;response does not returns a data field&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">json_response</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
 
-  <span class="k">async</span> <span class="k">def</span> <span class="nf">_response_to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_response_to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="n">ClientResponse</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">:</span>
     <span class="n">error</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_error_async</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">error</span><span class="p">:</span>
       <span class="k">raise</span> <span class="n">error</span>
     <span class="k">return</span> <span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">json_async</span><span class="p">()</span>
 
-  <span class="k">async</span> <span class="k">def</span> <span class="nf">_response_to_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_response_to_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="n">ClientResponse</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Object</span><span class="p">:</span>
     <span class="n">json_response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_to_json</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="k">return</span> <span class="n">Object</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_extract_data_from_json</span><span class="p">(</span><span class="n">json_response</span><span class="p">))</span>
     <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;response is not an object: </span><span class="si">{</span><span class="n">err</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">err</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;response is not an object: </span><span class="si">{</span><span class="n">err</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">err</span>
 
-<div class="viewcode-block" id="Client.close_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.close_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">close_async</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.close_async">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.close_async">[docs]</a>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">close_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Like :func:`close` but returns a coroutine.&quot;&quot;&quot;</span>
     <span class="c1"># Using getattr(self, &#39;_session&#39;, None) instead of self._session because</span>
     <span class="c1"># close_async can be called from __del__ when the object is not yet</span>
     <span class="c1"># inialized and therefore the object doesn&#39;t have a _session. Calling</span>
     <span class="c1"># self._session in that case would raise AttributeError. See:</span>
     <span class="c1"># https://github.com/VirusTotal/vt-py/issues/125#issue-1449917146</span>
-    <span class="n">session</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_session&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">session</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_session&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">session</span><span class="p">:</span>
       <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_session</span> <span class="o">=</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="Client.close"><a class="viewcode-back" href="../../api/client.html#vt.Client.close">[docs]</a>  <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Client.close">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.close">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Closes the client.</span>
 
 <span class="sd">    When the client is not needed anymore it must be closed for releasing</span>
@@ -372,24 +422,56 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">close_async</span><span class="p">())</span></div>
 
-<div class="viewcode-block" id="Client.delete"><a class="viewcode-back" href="../../api/client.html#vt.Client.delete">[docs]</a>  <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Client.delete">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.delete">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">delete</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span>
+      <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+      <span class="o">*</span><span class="n">path_args</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+      <span class="n">data</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+      <span class="n">json_data</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ClientResponse</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Sends a DELETE request to a given API endpoint.</span>
 
 <span class="sd">    :param path: Path to API endpoint, can contain format placeholders {}.</span>
 <span class="sd">    :param path_args: A variable number of arguments that are put into any</span>
 <span class="sd">      placeholders used in path.</span>
+<span class="sd">    :param data: Data sent in the request body.</span>
+<span class="sd">    :param json_data: dict containing data to send in the request body as JSON.</span>
 <span class="sd">    :type path: str</span>
+<span class="sd">    :type data: A string or bytes</span>
+<span class="sd">    :type json_data: dict</span>
 <span class="sd">    :returns: An instance of :class:`ClientResponse`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">delete_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="n">make_sync</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delete_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">json_data</span><span class="o">=</span><span class="n">json_data</span><span class="p">)</span>
+    <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Client.delete_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.delete_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">delete_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Client.delete_async">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.delete_async">[docs]</a>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">delete_async</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span>
+      <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+      <span class="o">*</span><span class="n">path_args</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+      <span class="n">data</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+      <span class="n">json_data</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ClientResponse</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Like :func:`delete` but returns a coroutine.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">ClientResponse</span><span class="p">(</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_session</span><span class="p">()</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">_full_url</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">),</span> <span class="n">proxy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_proxy</span><span class="p">))</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_full_url</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">),</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+            <span class="n">json</span><span class="o">=</span><span class="n">json_data</span><span class="p">,</span>
+            <span class="n">proxy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_proxy</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Client.download_file"><a class="viewcode-back" href="../../api/client.html#vt.Client.download_file">[docs]</a>  <span class="k">def</span> <span class="nf">download_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_hash</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Client.download_file">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.download_file">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">download_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_hash</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">BinaryIO</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Downloads a file given its _ (SHA-256, SHA-1 or MD5).</span>
 
 <span class="sd">    The file identified by the hash will be written to the provided file</span>
@@ -402,7 +484,10 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">download_file_async</span><span class="p">(</span><span class="n">file_hash</span><span class="p">,</span> <span class="n">file</span><span class="p">))</span></div>
 
-  <span class="k">async</span> <span class="k">def</span> <span class="nf">__download_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
+
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">__download_async</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">BinaryIO</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Downloads a file and writes it to file.</span>
 
 <span class="sd">    :param endpoint: endpoint to download the file from.</span>
@@ -413,16 +498,29 @@
     <span class="k">if</span> <span class="n">error</span><span class="p">:</span>
       <span class="k">raise</span> <span class="n">error</span>
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-      <span class="n">chunk</span> <span class="o">=</span> <span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">read_async</span><span class="p">(</span><span class="mi">1024</span><span class="o">*</span><span class="mi">1024</span><span class="p">)</span>
+      <span class="n">chunk</span> <span class="o">=</span> <span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">read_async</span><span class="p">(</span><span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">)</span>
       <span class="k">if</span> <span class="ow">not</span> <span class="n">chunk</span><span class="p">:</span>
         <span class="k">break</span>
       <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Client.download_file_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.download_file_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">download_file_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_hash</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.download_file_async">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.download_file_async">[docs]</a>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">download_file_async</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span> <span class="n">file_hash</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">BinaryIO</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Like :func:`download_file` but returns a coroutine.&quot;&quot;&quot;</span>
-    <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__download_async</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;/files/</span><span class="si">{</span><span class="n">file_hash</span><span class="si">}</span><span class="s1">/download&#39;</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span></div>
+    <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__download_async</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/files/</span><span class="si">{</span><span class="n">file_hash</span><span class="si">}</span><span class="s2">/download&quot;</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Client.download_zip_files"><a class="viewcode-back" href="../../api/client.html#vt.Client.download_zip_files">[docs]</a>  <span class="k">def</span> <span class="nf">download_zip_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hashes</span><span class="p">,</span> <span class="n">zipfile</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sleep_time</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Client.download_zip_files">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.download_zip_files">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">download_zip_files</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span>
+      <span class="n">hashes</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+      <span class="n">zipfile</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">BinaryIO</span><span class="p">,</span>
+      <span class="n">password</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+      <span class="n">sleep_time</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a bundle zip bundle containing one or multiple files.</span>
 
 <span class="sd">    The file identified by the hash will be written to the provided file</span>
@@ -435,44 +533,58 @@
 <span class="sd">    :param sleep_time: optional, seconds to sleep between each request.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">make_sync</span><span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">download_zip_files_async</span><span class="p">(</span><span class="n">hashes</span><span class="p">,</span> <span class="n">zipfile</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">sleep_time</span><span class="p">))</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">download_zip_files_async</span><span class="p">(</span><span class="n">hashes</span><span class="p">,</span> <span class="n">zipfile</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">sleep_time</span><span class="p">)</span>
+    <span class="p">)</span></div>
 
-  <span class="k">async</span> <span class="k">def</span> <span class="nf">download_zip_files_async</span><span class="p">(</span>
-      <span class="bp">self</span><span class="p">,</span> <span class="n">hashes</span><span class="p">,</span> <span class="n">zipfile</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sleep_time</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
 
-    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;hashes&#39;</span><span class="p">:</span> <span class="n">hashes</span><span class="p">}</span>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">download_zip_files_async</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span>
+      <span class="n">hashes</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+      <span class="n">zipfile</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">BinaryIO</span><span class="p">,</span>
+      <span class="n">password</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+      <span class="n">sleep_time</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;hashes&quot;</span><span class="p">:</span> <span class="n">hashes</span><span class="p">}</span>
     <span class="k">if</span> <span class="n">password</span><span class="p">:</span>
-      <span class="n">data</span><span class="p">[</span><span class="s1">&#39;password&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">password</span>
+      <span class="n">data</span><span class="p">[</span><span class="s2">&quot;password&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">password</span>
 
     <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">post_async</span><span class="p">(</span>
-        <span class="s1">&#39;/intelligence/zip_files&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">data</span><span class="p">}))</span>
+        <span class="s2">&quot;/intelligence/zip_files&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+    <span class="p">)</span>
     <span class="n">error</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_error_async</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">error</span><span class="p">:</span>
       <span class="k">raise</span> <span class="n">error</span>
 
-    <span class="n">res_data</span> <span class="o">=</span> <span class="p">(</span><span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">json_async</span><span class="p">())[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
+    <span class="n">res_data</span> <span class="o">=</span> <span class="p">(</span><span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">json_async</span><span class="p">())[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
 
     <span class="c1"># wait until the zip file is ready</span>
-    <span class="k">while</span> <span class="n">res_data</span><span class="p">[</span><span class="s1">&#39;attributes&#39;</span><span class="p">][</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;creating&#39;</span><span class="p">,</span> <span class="s1">&#39;starting&#39;</span><span class="p">):</span>
+    <span class="k">while</span> <span class="n">res_data</span><span class="p">[</span><span class="s2">&quot;attributes&quot;</span><span class="p">][</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;creating&quot;</span><span class="p">,</span> <span class="s2">&quot;starting&quot;</span><span class="p">):</span>
       <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">sleep_time</span><span class="p">)</span>
       <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_async</span><span class="p">(</span>
-          <span class="sa">f</span><span class="s1">&#39;/intelligence/zip_files/</span><span class="si">{</span><span class="n">res_data</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+          <span class="sa">f</span><span class="s1">&#39;/intelligence/zip_files/</span><span class="si">{</span><span class="n">res_data</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
+      <span class="p">)</span>
       <span class="n">error</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_error_async</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">error</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">error</span>
-      <span class="n">res_data</span> <span class="o">=</span> <span class="p">(</span><span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">json_async</span><span class="p">())[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
+      <span class="n">res_data</span> <span class="o">=</span> <span class="p">(</span><span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">json_async</span><span class="p">())[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
 
     <span class="c1"># check for errors creating the zip file</span>
-    <span class="k">if</span> <span class="n">res_data</span><span class="p">[</span><span class="s1">&#39;attributes&#39;</span><span class="p">][</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;finished&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">res_data</span><span class="p">[</span><span class="s2">&quot;attributes&quot;</span><span class="p">][</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;finished&quot;</span><span class="p">:</span>
       <span class="k">raise</span> <span class="n">APIError</span><span class="p">(</span>
-          <span class="s1">&#39;ServerError&#39;</span><span class="p">,</span>
-          <span class="sa">f</span><span class="s1">&#39;Error when creating zip file: </span><span class="si">{</span><span class="n">res_data</span><span class="p">[</span><span class="s2">&quot;attributes&quot;</span><span class="p">][</span><span class="s2">&quot;status&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+          <span class="s2">&quot;ServerError&quot;</span><span class="p">,</span>
+          <span class="sa">f</span><span class="s1">&#39;Error when creating zip file: </span><span class="si">{</span><span class="n">res_data</span><span class="p">[</span><span class="s2">&quot;attributes&quot;</span><span class="p">][</span><span class="s2">&quot;status&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+      <span class="p">)</span>
 
     <span class="c1"># download the zip file</span>
     <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__download_async</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s1">&#39;/intelligence/zip_files/</span><span class="si">{</span><span class="n">res_data</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/download&#39;</span><span class="p">,</span> <span class="n">zipfile</span><span class="p">)</span>
+        <span class="sa">f</span><span class="s1">&#39;/intelligence/zip_files/</span><span class="si">{</span><span class="n">res_data</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/download&#39;</span><span class="p">,</span> <span class="n">zipfile</span>
+    <span class="p">)</span>
 
-<div class="viewcode-block" id="Client.feed"><a class="viewcode-back" href="../../api/client.html#vt.Client.feed">[docs]</a>  <span class="k">def</span> <span class="nf">feed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feed_type</span><span class="p">,</span> <span class="n">cursor</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.feed">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.feed">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">feed</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span> <span class="n">feed_type</span><span class="p">:</span> <span class="n">FeedType</span><span class="p">,</span> <span class="n">cursor</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Feed</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns an iterator for a VirusTotal feed.</span>
 
 <span class="sd">    This functions returns an iterator that allows to retrieve a continuous</span>
@@ -489,7 +601,15 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">Feed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feed_type</span><span class="p">,</span> <span class="n">cursor</span><span class="o">=</span><span class="n">cursor</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Client.get"><a class="viewcode-back" href="../../api/client.html#vt.Client.get">[docs]</a>  <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Client.get">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.get">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span>
+      <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+      <span class="o">*</span><span class="n">path_args</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+      <span class="n">params</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ClientResponse</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Sends a GET request to a given API endpoint.</span>
 
 <span class="sd">    This is a low-level function that returns a raw HTTP response, no error</span>
@@ -506,14 +626,31 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Client.get_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.get_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">get_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Client.get_async">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.get_async">[docs]</a>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_async</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span>
+      <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+      <span class="o">*</span><span class="n">path_args</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+      <span class="n">params</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ClientResponse</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Like :func:`get` but returns a coroutine.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">ClientResponse</span><span class="p">(</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_session</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_full_url</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">),</span>
-            <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">proxy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_proxy</span><span class="p">))</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_full_url</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">),</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">proxy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_proxy</span>
+        <span class="p">)</span>
+    <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Client.get_data"><a class="viewcode-back" href="../../api/client.html#vt.Client.get_data">[docs]</a>  <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Client.get_data">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.get_data">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">get_data</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span>
+      <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+      <span class="o">*</span><span class="n">path_args</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+      <span class="n">params</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Sends a GET request to a given API endpoint and returns response&#39;s data.</span>
 
 <span class="sd">    Most VirusTotal API responses are JSON-encoded with the following format::</span>
@@ -538,12 +675,25 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_data_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Client.get_data_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.get_data_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">get_data_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Client.get_data_async">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.get_data_async">[docs]</a>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_data_async</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span>
+      <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+      <span class="o">*</span><span class="n">path_args</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+      <span class="n">params</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Like :func:`get_data` but returns a coroutine.&quot;&quot;&quot;</span>
     <span class="n">json_response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_json_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_data_from_json</span><span class="p">(</span><span class="n">json_response</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Client.get_error_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.get_error_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">get_error_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Client.get_error_async">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.get_error_async">[docs]</a>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_error_async</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="n">ClientResponse</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">APIError</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Given a :class:`ClientResponse` returns a :class:`APIError`</span>
 
 <span class="sd">    This function checks if the response from the VirusTotal backend was an</span>
@@ -556,15 +706,23 @@
     <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
       <span class="k">return</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status</span> <span class="o">&gt;=</span> <span class="mi">400</span> <span class="ow">and</span> <span class="n">response</span><span class="o">.</span><span class="n">status</span> <span class="o">&lt;=</span> <span class="mi">499</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">content_type</span> <span class="o">==</span> <span class="s1">&#39;application/json&#39;</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">content_type</span> <span class="o">==</span> <span class="s2">&quot;application/json&quot;</span><span class="p">:</span>
         <span class="n">json_response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">json_async</span><span class="p">()</span>
-        <span class="n">error</span> <span class="o">=</span> <span class="n">json_response</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">)</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">json_response</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">error</span><span class="p">:</span>
           <span class="k">return</span> <span class="n">APIError</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
-      <span class="k">return</span> <span class="n">APIError</span><span class="p">(</span><span class="s1">&#39;ClientError&#39;</span><span class="p">,</span> <span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">text_async</span><span class="p">())</span>
-    <span class="k">return</span> <span class="n">APIError</span><span class="p">(</span><span class="s1">&#39;ServerError&#39;</span><span class="p">,</span> <span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">text_async</span><span class="p">())</span></div>
+      <span class="k">return</span> <span class="n">APIError</span><span class="p">(</span><span class="s2">&quot;ClientError&quot;</span><span class="p">,</span> <span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">text_async</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">APIError</span><span class="p">(</span><span class="s2">&quot;ServerError&quot;</span><span class="p">,</span> <span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">text_async</span><span class="p">())</span></div>
 
-<div class="viewcode-block" id="Client.get_json"><a class="viewcode-back" href="../../api/client.html#vt.Client.get_json">[docs]</a>  <span class="k">def</span> <span class="nf">get_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Client.get_json">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.get_json">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">get_json</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span>
+      <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+      <span class="o">*</span><span class="n">path_args</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+      <span class="n">params</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Sends a GET request to a given API endpoint and parses the response.</span>
 
 <span class="sd">    Most VirusTotal API responses are JSON-encoded. This function parses the</span>
@@ -581,12 +739,28 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_json_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Client.get_json_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.get_json_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">get_json_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Client.get_json_async">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.get_json_async">[docs]</a>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_json_async</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span>
+      <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+      <span class="o">*</span><span class="n">path_args</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+      <span class="n">params</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Like :func:`get_json` but returns a coroutine.&quot;&quot;&quot;</span>
     <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
     <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_to_json</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Client.get_object"><a class="viewcode-back" href="../../api/client.html#vt.Client.get_object">[docs]</a>  <span class="k">def</span> <span class="nf">get_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Client.get_object">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.get_object">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">get_object</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span>
+      <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+      <span class="o">*</span><span class="n">path_args</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+      <span class="n">params</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Object</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Sends a GET request to a given API endpoint and returns an object.</span>
 
 <span class="sd">    The endpoint specified must return an object, not a collection. This</span>
@@ -605,12 +779,29 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_object_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Client.get_object_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.get_object_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">get_object_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Client.get_object_async">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.get_object_async">[docs]</a>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_object_async</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span>
+      <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+      <span class="o">*</span><span class="n">path_args</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+      <span class="n">params</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Object</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Like :func:`get_object` but returns a coroutine.&quot;&quot;&quot;</span>
     <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
     <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_to_object</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Client.patch"><a class="viewcode-back" href="../../api/client.html#vt.Client.patch">[docs]</a>  <span class="k">def</span> <span class="nf">patch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">json_data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Client.patch">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.patch">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">patch</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span>
+      <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+      <span class="o">*</span><span class="n">path_args</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+      <span class="n">data</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+      <span class="n">json_data</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ClientResponse</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Sends a PATCH request to a given API endpoint.</span>
 
 <span class="sd">    This is a low-level function that returns a raw HTTP response, no error</span>
@@ -629,14 +820,32 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">patch_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">json_data</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Client.patch_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.patch_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">patch_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">json_data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Client.patch_async">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.patch_async">[docs]</a>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">patch_async</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span>
+      <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+      <span class="o">*</span><span class="n">path_args</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+      <span class="n">data</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+      <span class="n">json_data</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ClientResponse</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Like :func:`patch` but returns a coroutine.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">ClientResponse</span><span class="p">(</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_session</span><span class="p">()</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_full_url</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">),</span>
-            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">json_data</span><span class="p">,</span> <span class="n">proxy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_proxy</span><span class="p">))</span></div>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+            <span class="n">json</span><span class="o">=</span><span class="n">json_data</span><span class="p">,</span>
+            <span class="n">proxy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_proxy</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Client.patch_object"><a class="viewcode-back" href="../../api/client.html#vt.Client.patch_object">[docs]</a>  <span class="k">def</span> <span class="nf">patch_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Client.patch_object">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.patch_object">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">patch_object</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Object</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Object</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Sends a PATCH request for modifying an object.</span>
 
 <span class="sd">    This function modifies an object. The endpoint must be one that identifies</span>
@@ -653,14 +862,28 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">patch_object_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="n">obj</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Client.patch_object_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.patch_object_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">patch_object_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Client.patch_object_async">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.patch_object_async">[docs]</a>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">patch_object_async</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Object</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Object</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Like :func:`patch_object` but returns a coroutine.&quot;&quot;&quot;</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">modified_attributes_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)}</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">modified_attributes_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)}</span>
 
     <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">patch_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">json_data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
     <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_to_object</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Client.post"><a class="viewcode-back" href="../../api/client.html#vt.Client.post">[docs]</a>  <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">json_data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Client.post">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.post">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span>
+      <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+      <span class="o">*</span><span class="n">path_args</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+      <span class="n">data</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+      <span class="n">json_data</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ClientResponse</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Sends a POST request to a given API endpoint.</span>
 
 <span class="sd">    This is a low-level function that returns a raw HTTP response, no error</span>
@@ -678,16 +901,35 @@
 <span class="sd">    :returns: An instance of :class:`ClientResponse`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">make_sync</span><span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">post_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">json_data</span><span class="o">=</span><span class="n">json_data</span><span class="p">))</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">post_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">json_data</span><span class="o">=</span><span class="n">json_data</span><span class="p">)</span>
+    <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Client.post_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.post_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">post_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">json_data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Client.post_async">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.post_async">[docs]</a>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">post_async</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span>
+      <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+      <span class="o">*</span><span class="n">path_args</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+      <span class="n">data</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+      <span class="n">json_data</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ClientResponse</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Like :func:`post` but returns a coroutine.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">ClientResponse</span><span class="p">(</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_session</span><span class="p">()</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_full_url</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">),</span>
-            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">json_data</span><span class="p">,</span> <span class="n">proxy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_proxy</span><span class="p">))</span></div>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+            <span class="n">json</span><span class="o">=</span><span class="n">json_data</span><span class="p">,</span>
+            <span class="n">proxy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_proxy</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Client.post_object"><a class="viewcode-back" href="../../api/client.html#vt.Client.post_object">[docs]</a>  <span class="k">def</span> <span class="nf">post_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Client.post_object">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.post_object">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">post_object</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Object</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Object</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Sends a POST request for creating an object.</span>
 
 <span class="sd">    This function create a new object. The endpoint must be one that identifies</span>
@@ -704,15 +946,30 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">post_object_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="n">obj</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Client.post_object_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.post_object_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">post_object_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Client.post_object_async">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.post_object_async">[docs]</a>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">post_object_async</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Object</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Object</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Like :func:`post_object` but returns a coroutine.&quot;&quot;&quot;</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()}</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()}</span>
 
     <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">post_async</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">json_data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
     <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_to_object</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Client.iterator"><a class="viewcode-back" href="../../api/client.html#vt.Client.iterator">[docs]</a>  <span class="k">def</span> <span class="nf">iterator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cursor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Client.iterator">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.iterator">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">iterator</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span>
+      <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+      <span class="o">*</span><span class="n">path_args</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+      <span class="n">params</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+      <span class="n">cursor</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+      <span class="n">limit</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+      <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns an iterator for the collection specified by the given path.</span>
 
 <span class="sd">    The endpoint specified by path must return a collection of objects. An</span>
@@ -738,10 +995,21 @@
 <span class="sd">    :type batch_size: int</span>
 <span class="sd">    :returns: An instance of :class:`Iterator`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">Iterator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_full_url</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">),</span>
-        <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">cursor</span><span class="o">=</span><span class="n">cursor</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">Iterator</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_full_url</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">path_args</span><span class="p">),</span>
+        <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
+        <span class="n">cursor</span><span class="o">=</span><span class="n">cursor</span><span class="p">,</span>
+        <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
+        <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+    <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Client.scan_file"><a class="viewcode-back" href="../../api/client.html#vt.Client.scan_file">[docs]</a>  <span class="k">def</span> <span class="nf">scan_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">wait_for_completion</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Client.scan_file">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.scan_file">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">scan_file</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">BinaryIO</span><span class="p">,</span> <span class="n">wait_for_completion</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Object</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Scans a file.</span>
 
 <span class="sd">    :param file: File to be scanned.</span>
@@ -751,14 +1019,20 @@
 <span class="sd">    :type wait_for_completion: bool</span>
 <span class="sd">    :returns: An instance of :class:`Object` of analysis type.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scan_file_async</span><span class="p">(</span>
-        <span class="n">file</span><span class="p">,</span> <span class="n">wait_for_completion</span><span class="o">=</span><span class="n">wait_for_completion</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="n">make_sync</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scan_file_async</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">wait_for_completion</span><span class="o">=</span><span class="n">wait_for_completion</span><span class="p">)</span>
+    <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Client.scan_file_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.scan_file_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">scan_file_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">wait_for_completion</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Client.scan_file_async">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.scan_file_async">[docs]</a>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">scan_file_async</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">BinaryIO</span><span class="p">,</span> <span class="n">wait_for_completion</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Object</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Like :func:`scan_file` but returns a coroutine.&quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">IOBase</span><span class="p">):</span>
-      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Expected a file to be a file object, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">file</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected a file to be a file object, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">file</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="c1"># The snippet below could be replaced with this simpler code:</span>
     <span class="c1">#</span>
@@ -774,16 +1048,18 @@
     <span class="c1"># and fails with this Content-Disposition header.</span>
 
     <span class="n">part</span> <span class="o">=</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">get_payload</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
-    <span class="n">filename</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;unknown&#39;</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;unknown&quot;</span>
     <span class="n">disposition</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;form-data; name=&quot;file&quot;; filename=&quot;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
-    <span class="n">part</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s1">&#39;Content-Disposition&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">disposition</span>
-    <span class="n">form_data</span> <span class="o">=</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">MultipartWriter</span><span class="p">(</span><span class="s1">&#39;form-data&#39;</span><span class="p">)</span>
+    <span class="n">part</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;Content-Disposition&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">disposition</span>
+    <span class="n">form_data</span> <span class="o">=</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">MultipartWriter</span><span class="p">(</span><span class="s2">&quot;form-data&quot;</span><span class="p">)</span>
     <span class="n">form_data</span><span class="o">.</span><span class="n">append_payload</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
 
-    <span class="n">upload_url</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data_async</span><span class="p">(</span><span class="s1">&#39;/files/upload_url&#39;</span><span class="p">)</span>
+    <span class="n">upload_url</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data_async</span><span class="p">(</span><span class="s2">&quot;/files/upload_url&quot;</span><span class="p">)</span>
     <span class="n">response</span> <span class="o">=</span> <span class="n">ClientResponse</span><span class="p">(</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_session</span><span class="p">()</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
-          <span class="n">upload_url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">form_data</span><span class="p">,</span> <span class="n">proxy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_proxy</span><span class="p">))</span>
+            <span class="n">upload_url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">form_data</span><span class="p">,</span> <span class="n">proxy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_proxy</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
 
     <span class="n">analysis</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_to_object</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
 
@@ -792,7 +1068,10 @@
 
     <span class="k">return</span> <span class="n">analysis</span></div>
 
-<div class="viewcode-block" id="Client.scan_url"><a class="viewcode-back" href="../../api/client.html#vt.Client.scan_url">[docs]</a>  <span class="k">def</span> <span class="nf">scan_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">wait_for_completion</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Client.scan_url">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.scan_url">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">scan_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">wait_for_completion</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Object</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Scans a URL.</span>
 
 <span class="sd">    :param url: The URL to be scanned.</span>
@@ -802,17 +1081,44 @@
 <span class="sd">    :type wait_for_completion: bool</span>
 <span class="sd">    :returns: An instance of :class:`Object` of analysis type.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scan_url_async</span><span class="p">(</span>
-        <span class="n">url</span><span class="p">,</span> <span class="n">wait_for_completion</span><span class="o">=</span><span class="n">wait_for_completion</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="n">make_sync</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scan_url_async</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">wait_for_completion</span><span class="o">=</span><span class="n">wait_for_completion</span><span class="p">)</span>
+    <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Client.scan_url_async"><a class="viewcode-back" href="../../api/client.html#vt.Client.scan_url_async">[docs]</a>  <span class="k">async</span> <span class="k">def</span> <span class="nf">scan_url_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">wait_for_completion</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Client.scan_url_private">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.scan_url_private">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">scan_url_private</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">wait_for_completion</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Object</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Scans a URL privately.</span>
+
+<span class="sd">    :param url: The URL to be scanned.</span>
+<span class="sd">    :param wait_for_completion: If True the function doesn&#39;t return until the</span>
+<span class="sd">       analysis has been completed.</span>
+<span class="sd">    :type url: str</span>
+<span class="sd">    :type wait_for_completion: bool</span>
+<span class="sd">    :returns: An instance of :class:`Object` of analysis type.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scan_url_private_async</span><span class="p">(</span>
+        <span class="n">url</span><span class="p">,</span> <span class="n">wait_for_completion</span><span class="o">=</span><span class="n">wait_for_completion</span>
+    <span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="Client.scan_url_async">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.scan_url_async">[docs]</a>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">scan_url_async</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">wait_for_completion</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Object</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Like :func:`scan_url` but returns a coroutine.&quot;&quot;&quot;</span>
     <span class="n">form_data</span> <span class="o">=</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">FormData</span><span class="p">()</span>
-    <span class="n">form_data</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s1">&#39;url&#39;</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+    <span class="n">form_data</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s2">&quot;url&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
 
     <span class="n">response</span> <span class="o">=</span> <span class="n">ClientResponse</span><span class="p">(</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_session</span><span class="p">()</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">_full_url</span><span class="p">(</span><span class="s1">&#39;/urls&#39;</span><span class="p">),</span> <span class="n">data</span><span class="o">=</span><span class="n">form_data</span><span class="p">,</span> <span class="n">proxy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_proxy</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_full_url</span><span class="p">(</span><span class="s2">&quot;/urls&quot;</span><span class="p">),</span> <span class="n">data</span><span class="o">=</span><span class="n">form_data</span><span class="p">,</span> <span class="n">proxy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_proxy</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
 
     <span class="n">analysis</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_to_object</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
 
@@ -821,16 +1127,103 @@
 
     <span class="k">return</span> <span class="n">analysis</span></div>
 
-  <span class="k">async</span> <span class="k">def</span> <span class="nf">_wait_for_analysis_completion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Client.scan_url_private_async">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.scan_url_private_async">[docs]</a>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">scan_url_private_async</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">wait_for_completion</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Object</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Like :func:`scan_url_private` but returns a coroutine.&quot;&quot;&quot;</span>
+    <span class="n">form_data</span> <span class="o">=</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">FormData</span><span class="p">()</span>
+    <span class="n">form_data</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s2">&quot;url&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+
+    <span class="n">response</span> <span class="o">=</span> <span class="n">ClientResponse</span><span class="p">(</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_session</span><span class="p">()</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_full_url</span><span class="p">(</span><span class="s2">&quot;/private/urls&quot;</span><span class="p">),</span> <span class="n">data</span><span class="o">=</span><span class="n">form_data</span><span class="p">,</span> <span class="n">proxy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_proxy</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">analysis</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_to_object</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">wait_for_completion</span><span class="p">:</span>
+      <span class="n">analysis</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for_analysis_completion</span><span class="p">(</span><span class="n">analysis</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">analysis</span></div>
+
+
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_wait_for_analysis_completion</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span> <span class="n">analysis</span><span class="p">:</span> <span class="n">Object</span><span class="p">,</span> <span class="n">private_path</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Object</span><span class="p">:</span>
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-      <span class="n">analysis</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object_async</span><span class="p">(</span><span class="s1">&#39;/analyses/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">analysis</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-      <span class="k">if</span> <span class="n">analysis</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s1">&#39;completed&#39;</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">private_path</span><span class="p">:</span>
+        <span class="n">analysis</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object_async</span><span class="p">(</span>
+            <span class="s2">&quot;/private/analyses/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">analysis</span><span class="o">.</span><span class="n">id</span>
+        <span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">analysis</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object_async</span><span class="p">(</span><span class="s2">&quot;/analyses/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">analysis</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">analysis</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;completed&quot;</span><span class="p">:</span>
         <span class="k">break</span>
       <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">analysis</span>
 
-  <span class="k">async</span> <span class="k">def</span> <span class="nf">wait_for_analysis_completion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for_analysis_completion</span><span class="p">(</span><span class="n">analysis</span><span class="p">)</span></div>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">wait_for_analysis_completion</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span> <span class="n">analysis</span><span class="p">:</span> <span class="n">Object</span><span class="p">,</span> <span class="n">private_path</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Object</span><span class="p">:</span>
+    <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for_analysis_completion</span><span class="p">(</span><span class="n">analysis</span><span class="p">,</span> <span class="n">private_path</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Client.scan_file_private">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.scan_file_private">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">scan_file_private</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span>
+      <span class="n">file</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">BinaryIO</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+      <span class="n">wait_for_completion</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Object</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Scan file privately.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      file: File to scan (path string or file object)</span>
+<span class="sd">      wait_for_completion: Wait for completion</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      Object: Analysis object with scan results</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scan_file_private_async</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">wait_for_completion</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="Client.scan_file_private_async">
+<a class="viewcode-back" href="../../api/client.html#vt.Client.scan_file_private_async">[docs]</a>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">scan_file_private_async</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span>
+      <span class="n">file</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">BinaryIO</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+      <span class="n">wait_for_completion</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Object</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Async version of scan_file_private&quot;&quot;&quot;</span>
+
+    <span class="c1"># Handle string path</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+      <span class="k">async</span> <span class="k">with</span> <span class="n">aiofiles</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">file_content</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="k">await</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+        <span class="n">file_content</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">scan_file_private_async</span><span class="p">(</span>
+            <span class="n">file_content</span><span class="p">,</span> <span class="n">wait_for_completion</span><span class="o">=</span><span class="n">wait_for_completion</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Create form data for private scan</span>
+    <span class="n">form</span> <span class="o">=</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">FormData</span><span class="p">()</span>
+    <span class="n">form</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s2">&quot;file&quot;</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+
+    <span class="c1"># Get private upload URL and submit</span>
+    <span class="n">upload_url</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data_async</span><span class="p">(</span><span class="s2">&quot;/private/files/upload_url&quot;</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">post_async</span><span class="p">(</span><span class="n">upload_url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">form</span><span class="p">)</span>
+
+    <span class="n">analysis</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_to_object</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">wait_for_completion</span><span class="p">:</span>
+      <span class="n">analysis</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for_analysis_completion</span><span class="p">(</span><span class="n">analysis</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">analysis</span></div>
+</div>
+
 </pre></div>
 
            </div>

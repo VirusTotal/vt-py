@@ -1,31 +1,33 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>vt.iterator &mdash; vt-py  documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
 
-
-
+          
+          
           <a href="../../index.html" class="icon icon-home">
             vt-py
           </a>
@@ -68,7 +70,7 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-
+             
   <h1>Source code for vt.iterator</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Copyright © 2019 The vt-py authors. All Rights Reserved.</span>
 <span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
@@ -85,27 +87,35 @@
 
 <span class="sd">&quot;&quot;&quot;Defines an iterator to loop through VT API collections.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">.object</span> <span class="kn">import</span> <span class="n">Object</span>
-<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">make_sync</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">typing</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Iterator&#39;</span><span class="p">]</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.object</span><span class="w"> </span><span class="kn">import</span> <span class="n">Object</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_sync</span>
+
+<span class="k">if</span> <span class="n">typing</span><span class="o">.</span><span class="n">TYPE_CHECKING</span><span class="p">:</span>
+  <span class="kn">from</span><span class="w"> </span><span class="nn">.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">Client</span>
 
 
-<div class="viewcode-block" id="Iterator"><a class="viewcode-back" href="../../api/iterator.html#vt.Iterator">[docs]</a><span class="k">class</span> <span class="nc">Iterator</span><span class="p">:</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Iterator&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="Iterator">
+<a class="viewcode-back" href="../../api/iterator.html#vt.Iterator">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Iterator</span><span class="p">:</span>
   <span class="c1"># pylint: disable=line-too-long</span>
 <span class="w">  </span><span class="sd">&quot;&quot;&quot;Iterator allows iterating over object collections.</span>
 
 <span class="sd">  Some endpoints in the VirusTotal API represent a collection of objects, for</span>
 <span class="sd">  example:</span>
 
-<span class="sd">  `/files/{id}/comments &lt;https://docs.virustotal.com/reference/files-comments-get&gt;`_</span>
+<span class="sd">  `/files/{id}/comments &lt;https://docs.virustotal.com/reference/get-comments&gt;`_</span>
 
-<span class="sd">  `/intelligence/search &lt;https://docs.virustotal.com/reference/intelligence-search&gt;`_</span>
+<span class="sd">  `/intelligence/search &lt;https://docs.virustotal.com/reference/search&gt;`_</span>
 
 <span class="sd">  These collections can be iterated using an instance of this class.</span>
 
 <span class="sd">  Learn more about collections in the VirusTotal API in:</span>
-<span class="sd">  https://docs.virustotal.com/reference/collections</span>
+<span class="sd">  https://docs.virustotal.com/reference/collections-create</span>
 
 <span class="sd">  The following example iterates over the most recent 200 comments, retrieving</span>
 <span class="sd">  them in batches of 20:</span>
@@ -132,77 +142,90 @@
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="c1"># pylint: disable=line-too-long</span>
 
-  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cursor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span>
+      <span class="n">client</span><span class="p">:</span> <span class="s2">&quot;Client&quot;</span><span class="p">,</span>
+      <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+      <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+      <span class="n">cursor</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+      <span class="n">limit</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+      <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+  <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initializes an iterator.</span>
 
 <span class="sd">    This function is not intended to be called directly. Client.iterator() is</span>
-<span class="sd">    the preferred way for creating an iteraror.</span>
+<span class="sd">    the preferred way for creating an iterator.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">client</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="n">path</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_params</span> <span class="o">=</span> <span class="n">params</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span> <span class="o">=</span> <span class="n">params</span> <span class="ow">or</span> <span class="p">{}</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_batch_size</span> <span class="o">=</span> <span class="n">batch_size</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_limit</span> <span class="o">=</span> <span class="n">limit</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_items</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_items</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_server_cursor</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_server_cursor</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_batch_cursor</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">if</span> <span class="s1">&#39;cursor&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">:</span>
+    <span class="k">if</span> <span class="s2">&quot;cursor&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">:</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Do not pass &quot;cursor&quot; as a path param&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="s1">&#39;limit&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">:</span>
+    <span class="k">if</span> <span class="s2">&quot;limit&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">:</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Do not pass &quot;limit&quot; as a path param&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">cursor</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_server_cursor</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">batch_cursor</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_server_cursor</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">batch_cursor</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
       <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_server_cursor</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;invalid cursor&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid cursor&quot;</span><span class="p">)</span>
       <span class="k">try</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_batch_cursor</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">batch_cursor</span><span class="p">)</span>
       <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;invalid cursor&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">exc</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid cursor&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
 
-  <span class="k">def</span> <span class="nf">_build_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_build_params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">:</span>
     <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_server_cursor</span><span class="p">:</span>
-      <span class="n">params</span><span class="p">[</span><span class="s1">&#39;cursor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_server_cursor</span>
+      <span class="n">params</span><span class="p">[</span><span class="s2">&quot;cursor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_server_cursor</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch_size</span><span class="p">:</span>
-      <span class="n">params</span><span class="p">[</span><span class="s1">&#39;limit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch_size</span>
+      <span class="n">params</span><span class="p">[</span><span class="s2">&quot;limit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch_size</span>
     <span class="k">return</span> <span class="n">params</span>
 
-  <span class="k">def</span> <span class="nf">_parse_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">json_resp</span><span class="p">,</span> <span class="n">batch_cursor</span><span class="p">):</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">json_resp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">),</span> <span class="nb">list</span><span class="p">):</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="si">}</span><span class="s1"> is not a collection&#39;</span><span class="p">)</span>
-    <span class="n">meta</span> <span class="o">=</span> <span class="n">json_resp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;meta&#39;</span><span class="p">,</span> <span class="p">{})</span>
-    <span class="n">items</span> <span class="o">=</span> <span class="n">json_resp</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="n">batch_cursor</span><span class="p">:]</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_parse_response</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span> <span class="n">json_resp</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">,</span> <span class="n">batch_cursor</span><span class="p">:</span> <span class="nb">int</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">],</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">json_resp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">),</span> <span class="nb">list</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="si">}</span><span class="s2"> is not a collection&quot;</span><span class="p">)</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="n">json_resp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;meta&quot;</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="n">json_resp</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="n">batch_cursor</span><span class="p">:]</span>
+
     <span class="k">return</span> <span class="n">items</span><span class="p">,</span> <span class="n">meta</span>
 
-  <span class="k">async</span> <span class="k">def</span> <span class="nf">_get_batch_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_cursor</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_get_batch_async</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span> <span class="n">batch_cursor</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">],</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">]:</span>
     <span class="n">json_resp</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">get_json_async</span><span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_build_params</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_build_params</span><span class="p">()</span>
+    <span class="p">)</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_response</span><span class="p">(</span><span class="n">json_resp</span><span class="p">,</span> <span class="n">batch_cursor</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span>
 
-  <span class="k">def</span> <span class="fm">__aiter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__aiter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span>
 
-  <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Object</span><span class="p">:</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="k">return</span> <span class="n">make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="fm">__anext__</span><span class="p">())</span>
     <span class="k">except</span> <span class="ne">StopAsyncIteration</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">StopIteration</span><span class="p">()</span> <span class="kn">from</span> <span class="nn">exc</span>
+      <span class="k">raise</span> <span class="ne">StopIteration</span><span class="p">()</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
 
-  <span class="k">async</span> <span class="k">def</span> <span class="fm">__anext__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="fm">__anext__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Object</span><span class="p">:</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_limit</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_limit</span><span class="p">:</span>
       <span class="k">raise</span> <span class="ne">StopAsyncIteration</span><span class="p">()</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_items</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cursor</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_items</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_batch_async</span><span class="p">()</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_server_cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;cursor&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_server_cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;cursor&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_batch_cursor</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_items</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_server_cursor</span><span class="p">:</span>
       <span class="k">raise</span> <span class="ne">StopAsyncIteration</span><span class="p">()</span>
@@ -212,7 +235,7 @@
     <span class="k">return</span> <span class="n">Object</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">cursor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">cursor</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Cursor indicating the last returned object.</span>
 
 <span class="sd">    This cursor can be used for creating a new iterator that continues where</span>
@@ -220,10 +243,10 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_server_cursor</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span><span class="p">:</span>
       <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_server_cursor</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_batch_cursor</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_server_cursor</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_batch_cursor</span><span class="p">)</span>
 
   <span class="nd">@property</span>
-  <span class="k">async</span> <span class="k">def</span> <span class="nf">meta_async</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">meta_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Meta information.</span>
 
 <span class="sd">    The cursor is not included, as it&#39;s exposed as a property.</span>
@@ -231,13 +254,14 @@
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="c1"># Load the first batch of items in order to retrieve the meta info.</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_items</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_batch_async</span><span class="p">()</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_server_cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;cursor&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_server_cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;cursor&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_batch_cursor</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">meta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">meta</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">make_sync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meta_async</span><span class="p">)</span></div>
+
 </pre></div>
 
            </div>
@@ -253,7 +277,7 @@
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     provided by <a href="https://readthedocs.org">Read the Docs</a>.
-
+   
 
 </footer>
         </div>
@@ -264,7 +288,7 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
+  </script> 
 
 </body>
 </html>

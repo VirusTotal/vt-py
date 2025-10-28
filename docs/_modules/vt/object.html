@@ -1,31 +1,33 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>vt.object &mdash; vt-py  documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
 
-
-
+          
+          
           <a href="../../index.html" class="icon icon-home">
             vt-py
           </a>
@@ -68,7 +70,7 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-
+             
   <h1>Source code for vt.object</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Copyright © 2019 The vt-py authors. All Rights Reserved.</span>
 <span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
@@ -85,38 +87,56 @@
 
 <span class="sd">&quot;&quot;&quot;Defines a VT object and other helper classes.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">datetime</span>
-<span class="kn">import</span> <span class="nn">functools</span>
-<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">typing</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Object&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Object&quot;</span><span class="p">]</span>
 
 
-<span class="k">class</span> <span class="nc">WhistleBlowerDict</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">WhistleBlowerDict</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">UserDict</span><span class="p">):</span>
 <span class="w">  </span><span class="sd">&quot;&quot;&quot;Helper class for detecting changes in a dictionary.</span>
 
 <span class="sd">  This class wraps a standard Python dictionary and calls the provided callback</span>
 <span class="sd">  whenever a change occurs in the dictionary.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initial_dict</span><span class="p">,</span> <span class="n">on_change_callback</span><span class="p">):</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span> <span class="n">initial_dict</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">,</span> <span class="n">on_change_callback</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span>
+  <span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_on_change_callback</span> <span class="o">=</span> <span class="n">on_change_callback</span>
-    <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">initial_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">initial_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
       <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
         <span class="n">initial_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">WhistleBlowerDict</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">on_change_callback</span><span class="p">)</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">initial_dict</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
       <span class="n">value</span> <span class="o">=</span> <span class="n">WhistleBlowerDict</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_change_callback</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_on_change_callback</span><span class="p">()</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="fm">__delitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__delitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_on_change_callback</span><span class="p">()</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__delitem__</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="Object"><a class="viewcode-back" href="../../api/object.html#vt.Object">[docs]</a><span class="k">class</span> <span class="nc">Object</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">to_plain_dict</span><span class="p">(</span><span class="n">d</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">:</span>
+  <span class="n">plain</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">UserDict</span><span class="p">):</span>
+      <span class="n">plain</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">to_plain_dict</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+      <span class="n">plain</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">to_plain_dict</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">plain</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+  <span class="k">return</span> <span class="n">plain</span>
+
+<div class="viewcode-block" id="Object">
+<a class="viewcode-back" href="../../api/object.html#vt.Object">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Object</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">&quot;&quot;&quot;This class encapsulates any type of object in the VirusTotal API.</span>
 
 <span class="sd">  Instances of this class are usually obtained from calls to</span>
@@ -133,14 +153,16 @@
   <span class="c1"># Python datetime object transparently.</span>
 
   <span class="n">DATE_ATTRIBUTES</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^.+_date$&#39;</span><span class="p">),</span>
-    <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^date$&#39;</span><span class="p">),</span>
-    <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^last_login$&#39;</span><span class="p">),</span>
-    <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^user_since$&#39;</span><span class="p">),</span>
+      <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^.+_date$&quot;</span><span class="p">),</span>
+      <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^date$&quot;</span><span class="p">),</span>
+      <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^last_login$&quot;</span><span class="p">),</span>
+      <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^user_since$&quot;</span><span class="p">),</span>
   <span class="p">)</span>
 
-<div class="viewcode-block" id="Object.from_dict"><a class="viewcode-back" href="../../api/object.html#vt.Object.from_dict">[docs]</a>  <span class="nd">@classmethod</span>
-  <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj_dict</span><span class="p">):</span>
+<div class="viewcode-block" id="Object.from_dict">
+<a class="viewcode-back" href="../../api/object.html#vt.Object.from_dict">[docs]</a>
+  <span class="nd">@classmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj_dict</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates an object from its dictionary representation.</span>
 
 <span class="sd">    The dictionary representation of a VirusTotal API object has the following</span>
@@ -161,34 +183,38 @@
 <span class="sd">    not, an exception is raised.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj_dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-          <span class="sa">f</span><span class="s1">&#39;Expecting dictionary, got: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">obj_dict</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expecting dictionary, got: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">obj_dict</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;id&#39;</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">):</span>
       <span class="k">if</span> <span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">obj_dict</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Object </span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="s1"> not found&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Object </span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="s2"> not found&quot;</span><span class="p">)</span>
 
     <span class="n">obj</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span>
-        <span class="n">obj_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">),</span>
-        <span class="n">obj_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">),</span>
-        <span class="n">obj_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;attributes&#39;</span><span class="p">))</span>
+        <span class="n">obj_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">),</span> <span class="n">obj_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">),</span> <span class="n">obj_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;attributes&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
 
-    <span class="k">if</span> <span class="s1">&#39;context_attributes&#39;</span> <span class="ow">in</span> <span class="n">obj_dict</span><span class="p">:</span>
-      <span class="n">obj</span><span class="o">.</span><span class="n">_context_attributes</span> <span class="o">=</span> <span class="n">obj_dict</span><span class="p">[</span><span class="s1">&#39;context_attributes&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s2">&quot;context_attributes&quot;</span> <span class="ow">in</span> <span class="n">obj_dict</span><span class="p">:</span>
+      <span class="n">obj</span><span class="o">.</span><span class="n">_context_attributes</span> <span class="o">=</span> <span class="n">obj_dict</span><span class="p">[</span><span class="s2">&quot;context_attributes&quot;</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="s1">&#39;relationships&#39;</span> <span class="ow">in</span> <span class="n">obj_dict</span><span class="p">:</span>
-      <span class="n">obj</span><span class="o">.</span><span class="n">_relationships</span> <span class="o">=</span> <span class="n">obj_dict</span><span class="p">[</span><span class="s1">&#39;relationships&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s2">&quot;relationships&quot;</span> <span class="ow">in</span> <span class="n">obj_dict</span><span class="p">:</span>
+      <span class="n">obj</span><span class="o">.</span><span class="n">_relationships</span> <span class="o">=</span> <span class="n">obj_dict</span><span class="p">[</span><span class="s2">&quot;relationships&quot;</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="s1">&#39;error&#39;</span> <span class="ow">in</span> <span class="n">obj_dict</span><span class="p">:</span>
-      <span class="n">obj</span><span class="o">.</span><span class="n">_error</span> <span class="o">=</span> <span class="n">obj_dict</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s2">&quot;error&quot;</span> <span class="ow">in</span> <span class="n">obj_dict</span><span class="p">:</span>
+      <span class="n">obj</span><span class="o">.</span><span class="n">_error</span> <span class="o">=</span> <span class="n">obj_dict</span><span class="p">[</span><span class="s2">&quot;error&quot;</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="n">obj</span></div>
 
-  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj_type</span><span class="p">,</span> <span class="n">obj_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">obj_attributes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span>
+      <span class="n">obj_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+      <span class="n">obj_id</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+      <span class="n">obj_attributes</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initializes a VirusTotal API object.&quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj_attributes</span><span class="p">,</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))):</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Object attributes must be a dictionary&#39;</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Object attributes must be a dictionary&quot;</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">=</span> <span class="n">obj_type</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="n">obj_id</span>
@@ -204,63 +230,71 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_modified_data</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_error</span> <span class="o">=</span> <span class="kc">None</span>
 
-  <span class="k">def</span> <span class="nf">__on_attr_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_modified_attrs&#39;</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_on_attr_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_modified_attrs&quot;</span><span class="p">):</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_modified_attrs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="fm">__getattribute__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__getattribute__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
     <span class="n">value</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">Object</span><span class="o">.</span><span class="n">DATE_ATTRIBUTES</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">attr</span><span class="p">):</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcfromtimestamp</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
         <span class="k">break</span>
     <span class="k">return</span> <span class="n">value</span>
 
-  <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
       <span class="n">value</span> <span class="o">=</span> <span class="n">WhistleBlowerDict</span><span class="p">(</span>
-          <span class="n">value</span><span class="p">,</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__on_attr_change</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
+          <span class="n">value</span><span class="p">,</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_attr_change</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
+      <span class="p">)</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
       <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">timestamp</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">attr</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span> <span class="ow">or</span> <span class="n">value</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">attr</span><span class="p">]:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">__on_attr_change</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_on_attr_change</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&lt;vt.object.Object </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s1">&gt;&#39;</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;vt.object.Object </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
 
-  <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">&#39;</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span>
 
-<div class="viewcode-block" id="Object.set_data"><a class="viewcode-back" href="../../api/object.html#vt.Object.set_data">[docs]</a>  <span class="k">def</span> <span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<div class="viewcode-block" id="Object.set_data">
+<a class="viewcode-back" href="../../api/object.html#vt.Object.set_data">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Sets a field of the object&#39;s data.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_modified_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
 
+
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">context_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_context_attributes&#39;</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">context_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_context_attributes&quot;</span><span class="p">):</span>
       <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_context_attributes</span>
     <span class="k">return</span> <span class="p">{}</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">relationships</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_relationships&#39;</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">relationships</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_relationships&quot;</span><span class="p">):</span>
       <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_relationships</span>
     <span class="k">return</span> <span class="p">{}</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">error</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">]:</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_error</span>
 
-<div class="viewcode-block" id="Object.get"><a class="viewcode-back" href="../../api/object.html#vt.Object.get">[docs]</a>  <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Object.get">
+<a class="viewcode-back" href="../../api/object.html#vt.Object.get">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns an attribute by name.</span>
 
 <span class="sd">    If the attribute is not present in the object, it returns None</span>
@@ -273,31 +307,33 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">attr_name</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span></div>
 
-  <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">modified_attributes_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="p">,</span> <span class="s1">&#39;attributes&#39;</span><span class="p">:</span> <span class="p">{}}</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">modified_attributes_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="p">,</span> <span class="s2">&quot;attributes&quot;</span><span class="p">:</span> <span class="p">{}}</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">:</span>
-      <span class="n">result</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span>
+      <span class="n">result</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span>
 
     <span class="n">attributes</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">):</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">modified_attributes_only</span> <span class="ow">or</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modified_attrs</span><span class="p">:</span>
           <span class="n">attributes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="k">if</span> <span class="n">attributes</span><span class="p">:</span>
-      <span class="n">result</span><span class="p">[</span><span class="s1">&#39;attributes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">attributes</span>
+      <span class="n">result</span><span class="p">[</span><span class="s2">&quot;attributes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">attributes</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">relationships</span><span class="p">:</span>
-      <span class="n">result</span><span class="p">[</span><span class="s1">&#39;relationships&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relationships</span>
+      <span class="n">result</span><span class="p">[</span><span class="s2">&quot;relationships&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relationships</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">context_attributes</span><span class="p">:</span>
-      <span class="n">result</span><span class="p">[</span><span class="s1">&#39;context_attributes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">context_attributes</span>
+      <span class="n">result</span><span class="p">[</span><span class="s2">&quot;context_attributes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">context_attributes</span>
 
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modified_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
       <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
 
-    <span class="k">return</span> <span class="n">result</span></div>
+    <span class="k">return</span> <span class="n">to_plain_dict</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
+
 </pre></div>
 
            </div>
@@ -313,7 +349,7 @@
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     provided by <a href="https://readthedocs.org">Read the Docs</a>.
-
+   
 
 </footer>
         </div>
@@ -324,7 +360,7 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
+  </script> 
 
 </body>
 </html>

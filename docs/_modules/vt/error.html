@@ -1,18 +1,20 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>vt.error &mdash; vt-py  documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
   
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -85,17 +87,23 @@
 
 <span class="sd">&quot;&quot;&quot;Defines a class to handle errors returned by the VT API.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="APIError"><a class="viewcode-back" href="../../api/client.html#vt.APIError">[docs]</a><span class="k">class</span> <span class="nc">APIError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">typing</span>
+
+
+<div class="viewcode-block" id="APIError">
+<a class="viewcode-back" href="../../api/client.html#vt.APIError">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">APIError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">  </span><span class="sd">&quot;&quot;&quot;Class that encapsules errors returned by the VirusTotal API.&quot;&quot;&quot;</span>
 
   <span class="nd">@classmethod</span>
-  <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">dict_error</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">dict_error</span><span class="p">[</span><span class="s1">&#39;code&#39;</span><span class="p">],</span> <span class="n">dict_error</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">))</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">dict_error</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">dict_error</span><span class="p">[</span><span class="s2">&quot;code&quot;</span><span class="p">],</span> <span class="nb">str</span><span class="p">(</span><span class="n">dict_error</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;message&quot;</span><span class="p">)))</span>
 
-  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="n">code</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span></div>
+
 </pre></div>
 
            </div>

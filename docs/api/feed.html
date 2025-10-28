@@ -1,34 +1,36 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Feed &mdash; vt-py  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Object" href="object.html" />
-    <link rel="prev" title="Client" href="client.html" />
+    <link rel="prev" title="Client" href="client.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
 
-
-
+          
+          
           <a href="../index.html" class="icon icon-home">
             vt-py
           </a>
@@ -79,9 +81,9 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-
+             
   <section id="feed">
-<h1>Feed<a class="headerlink" href="#feed" title="Permalink to this heading"></a></h1>
+<h1>Feed<a class="headerlink" href="#feed" title="Link to this heading"></a></h1>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This feature is available only for premium users.</p>
@@ -89,10 +91,10 @@
 <p>VT module.</p>
 <dl class="py class">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">vt.</span></span><span class="sig-name descname"><span class="pre">Feed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feed_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cursor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/feed.html#Feed"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">vt.</span></span><span class="sig-name descname"><span class="pre">Feed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="client.html#vt.Client" title="vt.Client"><span class="pre">Client</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">feed_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FeedType</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cursor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/feed.html#Feed"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Feed represents a stream of objects received from VirusTotal in real-time.</p>
 <p>For more information about VirusTotal Feeds see:
-<a class="reference external" href="https://docs.virustotal.com/reference/feeds">https://docs.virustotal.com/reference/feeds</a></p>
+<a class="reference external" href="https://docs.virustotal.com/reference/file-feed">https://docs.virustotal.com/reference/file-feed</a></p>
 <p>In the example below the loop iterates forever, retrieving file objects as
 they are processed by VirusTotal. For a more elaborate example see the file
 examples/file_feed.py in this repository.</p>
@@ -105,7 +107,7 @@ examples/file_feed.py in this repository.</p>
 <a class="reference internal" href="client.html#vt.Client.feed" title="vt.Client.feed"><code class="xref py py-func docutils literal notranslate"><span class="pre">vt.Client.feed()</span></code></a> method instead.</p>
 <dl class="py property">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cursor</span></span></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cursor</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em></dt>
 <dd><p>Returns a cursor indicating the last item retrieved from the feed.</p>
 <p>This cursor can be used for creating a new Feed object that continues where
 a previous one left.</p>
@@ -115,7 +117,7 @@ a previous one left.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">vt.</span></span><span class="sig-name descname"><span class="pre">FeedType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/feed.html#FeedType"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">vt.</span></span><span class="sig-name descname"><span class="pre">FeedType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vt/feed.html#FeedType"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Feed types.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py">
@@ -153,7 +155,7 @@ a previous one left.</p>
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     provided by <a href="https://readthedocs.org">Read the Docs</a>.
-
+   
 
 </footer>
         </div>
@@ -164,7 +166,7 @@ a previous one left.</p>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
+  </script> 
 
 </body>
 </html>

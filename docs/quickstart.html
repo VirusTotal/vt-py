@@ -1,34 +1,36 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Quickstart &mdash; vt-py  documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="API reference" href="apireference.html" />
-    <link rel="prev" title="Overview" href="overview.html" />
+    <link rel="prev" title="Overview" href="overview.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
 
-
-
+          
+          
           <a href="index.html" class="icon icon-home">
             vt-py
           </a>
@@ -81,13 +83,13 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-
+             
   <section id="quickstart">
-<h1>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this heading"></a></h1>
+<h1>Quickstart<a class="headerlink" href="#quickstart" title="Link to this heading"></a></h1>
 <section id="get-information-about-a-file">
-<h2>Get information about a file<a class="headerlink" href="#get-information-about-a-file" title="Permalink to this heading"></a></h2>
+<h2>Get information about a file<a class="headerlink" href="#get-information-about-a-file" title="Link to this heading"></a></h2>
 <p>Start by importing the <cite>vt</cite> module:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">vt</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">vt</span>
 </pre></div>
 </div>
 <p>Create a client, replace <cite>&lt;apikey&gt;</cite> with your actual VirusTotal API key:</p>
@@ -136,7 +138,7 @@ on the safe side, as it will return <cite>None</cite> if the <cite>pe_info</cite
 present.</p>
 </section>
 <section id="get-information-about-an-url">
-<h2>Get information about an URL<a class="headerlink" href="#get-information-about-an-url" title="Permalink to this heading"></a></h2>
+<h2>Get information about an URL<a class="headerlink" href="#get-information-about-an-url" title="Link to this heading"></a></h2>
 <p>Create a client as explained in the previous section and ask for the desired
 URL as follows:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">url_id</span> <span class="o">=</span> <span class="n">vt</span><span class="o">.</span><span class="n">url_id</span><span class="p">(</span><span class="s2">&quot;http://www.virustotal.com&quot;</span><span class="p">)</span>
@@ -167,7 +169,7 @@ function. This other code is equivalent:</p>
 </div>
 </section>
 <section id="scan-a-file">
-<h2>Scan a file<a class="headerlink" href="#scan-a-file" title="Permalink to this heading"></a></h2>
+<h2>Scan a file<a class="headerlink" href="#scan-a-file" title="Link to this heading"></a></h2>
 <p>Before scanning a file is highly recommended that you look up for it as
 described in <a class="reference external" href="#get-information-about-a-file">Get information about a file</a>.
 If the file already exists and the latest analysis is fresh enough, you can
@@ -197,7 +199,7 @@ it’s status is <cite>completed</cite>:</p>
 until the analysis has been completed.</p>
 </section>
 <section id="scan-an-url">
-<h2>Scan an URL<a class="headerlink" href="#scan-an-url" title="Permalink to this heading"></a></h2>
+<h2>Scan an URL<a class="headerlink" href="#scan-an-url" title="Link to this heading"></a></h2>
 <p>Scanning a URL is very similar to <a class="reference external" href="#scan-a-file">scanning a file</a>, you just
 need to use <code class="xref py py-meth docutils literal notranslate"><span class="pre">vt.Client.scan_url()</span></code> instead of <code class="xref py py-meth docutils literal notranslate"><span class="pre">vt.Client.scan_file()</span></code>:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">analysis</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">scan_url</span><span class="p">(</span><span class="s1">&#39;https://somedomain.com/foo/bar&#39;</span><span class="p">)</span>
@@ -205,7 +207,7 @@ need to use <code class="xref py py-meth docutils literal notranslate"><span cla
 </div>
 </section>
 <section id="download-a-file">
-<h2>Download a file<a class="headerlink" href="#download-a-file" title="Permalink to this heading"></a></h2>
+<h2>Download a file<a class="headerlink" href="#download-a-file" title="Link to this heading"></a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This feature is available only for premium users.</p>
@@ -219,7 +221,7 @@ must be opened in <cite>“wb”</cite> mode:</p>
 </div>
 </section>
 <section id="start-and-abort-a-retrohunt-job">
-<h2>Start and abort a Retrohunt job<a class="headerlink" href="#start-and-abort-a-retrohunt-job" title="Permalink to this heading"></a></h2>
+<h2>Start and abort a Retrohunt job<a class="headerlink" href="#start-and-abort-a-retrohunt-job" title="Link to this heading"></a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This feature is available only for premium users.</p>
@@ -271,7 +273,7 @@ endpoint doesn’t expect an object, just a POST request with an empty body. The
 result from <code class="xref py py-meth docutils literal notranslate"><span class="pre">vt.Client.post()</span></code> is a <code class="xref py py-class docutils literal notranslate"><span class="pre">vt.ClientResponse</span></code> instance.</p>
 </section>
 <section id="create-a-livehunt-ruleset">
-<h2>Create a LiveHunt ruleset<a class="headerlink" href="#create-a-livehunt-ruleset" title="Permalink to this heading"></a></h2>
+<h2>Create a LiveHunt ruleset<a class="headerlink" href="#create-a-livehunt-ruleset" title="Link to this heading"></a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This feature is available only for premium users.</p>
@@ -302,7 +304,7 @@ was created with <cite>enabled=False</cite> by default:</p>
 </div>
 </section>
 <section id="closing">
-<h2>Closing<a class="headerlink" href="#closing" title="Permalink to this heading"></a></h2>
+<h2>Closing<a class="headerlink" href="#closing" title="Link to this heading"></a></h2>
 <p>Once you’re done using the client, call <cite>client.close()</cite> at the end of your
 script, to make sure the client is properly closed. Otherwise you might see
 tracebacks indicating the client was never closed.</p>
@@ -337,7 +339,7 @@ the client is automatically closed after exiting, so there’s no need to call c
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     provided by <a href="https://readthedocs.org">Read the Docs</a>.
-
+   
 
 </footer>
         </div>
@@ -348,7 +350,7 @@ the client is automatically closed after exiting, so there’s no need to call c
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
+  </script> 
 
 </body>
 </html>

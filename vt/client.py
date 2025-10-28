@@ -917,7 +917,9 @@ class Client:
         self.scan_url_async(url, wait_for_completion=wait_for_completion)
     )
 
-  def scan_url_private(self, url: str, wait_for_completion: bool = False) -> Object:
+  def scan_url_private(
+      self, url: str, wait_for_completion: bool = False
+  ) -> Object:
     """Scans a URL privately.
 
     :param url: The URL to be scanned.
@@ -927,9 +929,9 @@ class Client:
     :type wait_for_completion: bool
     :returns: An instance of :class:`Object` of analysis type.
     """
-    return make_sync(
-        self.scan_url_private_async(url, wait_for_completion=wait_for_completion)
-    )
+    return make_sync(self.scan_url_private_async(
+        url, wait_for_completion=wait_for_completion
+    ))
 
   async def scan_url_async(
       self, url: str, wait_for_completion: bool = False
@@ -942,7 +944,7 @@ class Client:
         await self._get_session().post(
             self._full_url("/urls"), data=form_data, proxy=self._proxy
         )
-    ) 
+    )
 
     analysis = await self._response_to_object(response)
 

@@ -24,7 +24,7 @@ import argparse
 import vt
 
 
-def main():
+def main() -> None:
   parser = argparse.ArgumentParser(
       description=(
           "Make a VirusTotal Intelligence search and prints the matching"

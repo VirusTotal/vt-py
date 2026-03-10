@@ -16,10 +16,12 @@
 import argparse
 import io
 from pprint import pprint
+from typing import TextIO
+
 import vt
 
 
-def update_collection(client, collection_id, file):
+def update_collection(client: vt.Client, collection_id: str, file: TextIO) -> vt.Object:
   """Update a VirusTotal collection.
 
   Args:
@@ -38,11 +40,11 @@ def update_collection(client, collection_id, file):
   )
 
 
-def generate_ui_link(collection_id):
+def generate_ui_link(collection_id: str) -> str:
   return f"https://www.virustotal.com/gui/collection/{collection_id}"
 
 
-def main():
+def main() -> None:
   parser = argparse.ArgumentParser(
       description="Update a VirusTotal collection."
   )
@@ -63,7 +65,7 @@ def main():
 
   client.close()
   pprint(collection_obj.to_dict())
-
+  assert collection_obj.id is not None
   print(f"Link:\n{generate_ui_link(collection_obj.id)}")
 
 

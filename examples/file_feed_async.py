@@ -27,6 +27,8 @@ import asyncio
 import json
 import os
 import signal
+import typing
+
 import vt
 
 
@@ -34,17 +36,22 @@ class FeedReader:
   """Reads and processes a VirusTotal file feed batch."""
 
   def __init__(
-      self, apikey, output_dir, num_workers=4, download_files=False, cursor=None
-  ):
+      self,
+      apikey: str,
+      output_dir: str,
+      num_workers: int = 4,
+      download_files: bool = False,
+      cursor: typing.Optional[str] = None
+  ) -> None:
     self._apikey = apikey
     self._aborted = False
     self._cursor = cursor
     self._output_dir = output_dir
     self._num_workers = num_workers
     self._download_files = download_files
-    self._queue = asyncio.Queue(maxsize=num_workers)
+    self._queue: asyncio.Queue = asyncio.Queue(maxsize=num_workers)
 
-  async def _get_from_feed_and_enqueue(self):
+  async def _get_from_feed_and_enqueue(self) -> None:
     """Get files from the file feed and put them into a queue."""
     async with vt.Client(self._apikey) as client:
       feed = client.feed(vt.FeedType.FILES, cursor=self._cursor)
@@ -56,7 +63,7 @@ class FeedReader:
 
       self._enqueue_files_task.done()
 
-  async def _process_files_from_queue(self):
+  async def _process_files_from_queue(self) -> None:
     """Process files put in the queue by _get_from_feed_and_enqueue.
 
     This function runs in a loop until the feed reader is aborted, once aborted
@@ -65,7 +72,7 @@ class FeedReader:
     async with vt.Client(self._apikey) as client:
       while not self._aborted or not self._queue.empty():
         file_obj = await self._queue.get()
-        file_path = os.path.join(self._output_dir, file_obj.id)
+        file_path: str = os.path.join(self._output_dir, file_obj.id)
         # Write a file <sha256>.json with file's metadata and another file
         # named <sha256> with the file's content.
         with open(file_path + ".json", mode="w", encoding="utf-8") as f:
@@ -87,10 +94,10 @@ class FeedReader:
       task = self._worker_tasks.pop(0)
       task.done()
 
-  def abort(self):
+  def abort(self) -> None:
     self._aborted = True
 
-  def cursor(self):
+  def cursor(self) -> typing.Optional[str]:
     return self._cursor
 
   def run(self):
@@ -114,7 +121,7 @@ class FeedReader:
     # If the program is interrupted, abort it gracefully.
     signals = (signal.SIGINT,)
     for s in signals:
-      loop.add_signal_handler(s, self.abort)
+      loop.add_signal_handler(s, self.abort) # type: ignore
 
     # Wait until all worker tasks has completed.
     loop_tasks.extend(self._worker_tasks)

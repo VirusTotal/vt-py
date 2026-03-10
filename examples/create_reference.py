@@ -20,10 +20,19 @@ privileges for creating References.
 import argparse
 import base64
 from pprint import pprint
+from typing import Any
+
 import vt
 
 
-def create_reference(url, creation_date, title, author, client, iocs):
+def create_reference(
+        url: str,
+        creation_date: str,
+        title: str,
+        author: str,
+        client: vt.Client,
+        iocs: dict[str, list[str]]
+  ) -> vt.Object:
   """Creates a reference in VirusTotal.
 
   Args:
@@ -74,7 +83,7 @@ def create_reference(url, creation_date, title, author, client, iocs):
     return client.post_object("/references", obj=reference_obj)
 
 
-def add_iocs_to_reference_payload(iocs, reference_payload):
+def add_iocs_to_reference_payload(iocs: dict[str, list[str]], reference_payload: dict[str, Any]) -> None:
   """Adds IOCs relationships to a given reference.
 
   Args:
@@ -101,7 +110,7 @@ def add_iocs_to_reference_payload(iocs, reference_payload):
     }
 
 
-def main():
+def main() -> None:
   parser = argparse.ArgumentParser(
       description="Create references and add IOCs to them."
   )
@@ -109,7 +118,7 @@ def main():
   parser.add_argument("--apikey", required=True, help="your VirusTotal API key")
 
   args = parser.parse_args()
-  client = vt.Client(args.apikey)
+  client: vt.Client = vt.Client(args.apikey)
 
   # Reference's URL.
   url = (
@@ -159,7 +168,7 @@ def main():
   }
 
   # Create Reference
-  reference_obj = create_reference(
+  reference_obj: vt.Object = create_reference(
       url=url,
       creation_date="2021-01-25 00:00:00",
       title="New campaign targeting security researchers",

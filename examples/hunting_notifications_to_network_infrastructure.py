@@ -19,6 +19,7 @@ the VirusTotal files that matched a Hunting Notification Ruleset.
 
 import argparse
 import asyncio
+import typing
 from collections import defaultdict
 import datetime
 
@@ -28,22 +29,22 @@ import vt
 class HuntingNotificationToNetworkInfrastructureHandler:
   """Class for handling the process of analysing Hunting Notifications."""
 
-  def __init__(self, apikey):
+  def __init__(self, apikey: str) -> None:
     self.apikey = apikey
-    self.queue = asyncio.Queue()
-    self.files_queue = asyncio.Queue()
-    self.networking_counters = {
+    self.queue: asyncio.Queue = asyncio.Queue()
+    self.files_queue: asyncio.Queue = asyncio.Queue()
+    self.networking_counters: dict[str, dict[str, int]] = {
         "domains": defaultdict(lambda: 0),
         "ips": defaultdict(lambda: 0),
         "urls": defaultdict(lambda: 0),
     }
-    self.networking_infrastructure = defaultdict(
+    self.networking_infrastructure: dict[str, dict[str, typing.Any]] = defaultdict(
         lambda: defaultdict(lambda: {})
     )
 
   async def get_hunting_notification_files(
-      self, search_filter, date_filter, max_files
-  ):
+      self, search_filter: str, date_filter: int, max_files: int
+  ) -> None:
     """Get/Enqueue files related with a certain Hunting Ruleset.
 
     :param search_filter: filter for getting notifications of a specific
@@ -68,10 +69,10 @@ class HuntingNotificationToNetworkInfrastructureHandler:
         if f.context_attributes["notification_date"] > date_filter:
           await self.files_queue.put(f.sha256)
 
-  async def get_file_async(self, file_hash, relationships=None):
+  async def get_file_async(self, file_hash: str, relationships: typing.Optional[str] = None) -> vt.Object:
     """Get a file object from VT.
 
-    :param hash: SHA-256, SHA-1 or MD5 hash that describes the
+    :param file_hash: SHA-256, SHA-1 or MD5 hash that describes the
     :param relationships: relationships to be retrieved alongside with the file.
     Different relationship names should be separated by a comma.
     :type file_hash: str
@@ -86,7 +87,7 @@ class HuntingNotificationToNetworkInfrastructureHandler:
       file_obj = await client.get_object_async(url)
     return file_obj
 
-  async def get_network_infrastructure(self):
+  async def get_network_infrastructure(self) -> None:
     """Process a file and get its network infrastructure."""
 
     while True:
@@ -124,7 +125,7 @@ class HuntingNotificationToNetworkInfrastructureHandler:
       self.networking_infrastructure[file_hash]["urls"] = contacted_urls
       self.files_queue.task_done()
 
-  async def build_network_infrastructure(self):
+  async def build_network_infrastructure(self) -> None:
     """Build the statistics about the network infrastructure of a file."""
 
     while True:
@@ -138,7 +139,7 @@ class HuntingNotificationToNetworkInfrastructureHandler:
         self.networking_counters[item_type][address] += 1
       self.queue.task_done()
 
-  def print_results(self):
+  def print_results(self) -> None:
     """Print results of the network infrastructure analysis."""
 
     print("TOP CONTACTED DOMAINS")
@@ -178,7 +179,7 @@ class HuntingNotificationToNetworkInfrastructureHandler:
                 print(f'\t\t{address["context_attributes"]["url"]}')
 
 
-async def main():
+async def main() -> None:
   parser = argparse.ArgumentParser(
       description="Get files matching a Hunting Ruleset in VirusTotal."
   )
@@ -207,7 +208,7 @@ async def main():
   limit_datetime = datetime.datetime.combine(
       limit_date, datetime.datetime.min.time()
   )
-  timestamp_to_compare = datetime.datetime.timestamp(limit_datetime)
+  timestamp_to_compare = round(datetime.datetime.timestamp(limit_datetime))
 
   handler = HuntingNotificationToNetworkInfrastructureHandler(args.apikey)
 

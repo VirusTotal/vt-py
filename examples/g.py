@@ -45,14 +45,14 @@ SUPPORTED_CHECKSUM_LENS = (32, 40, 64)
 logging.basicConfig(format="%(message)s", level=logging.INFO)
 
 
-def download_from_vt(file_id):
+def download_from_vt(file_id: str) -> None:
   if len(file_id) not in SUPPORTED_CHECKSUM_LENS:
     logging.warning("Unsupported checksum length - %d", len(file_id))
     return
 
   with open(file_id, "wb") as f:
     try:
-      with vt.Client(os.environ.get(API_KEY_ENV_VAR)) as vt_client:
+      with vt.Client(os.environ.get(API_KEY_ENV_VAR)) as vt_client: # type: ignore
         vt_client.download_file(file_id, f)
     except Exception as e:  # pylint: disable=broad-exception-caught
       logging.error(

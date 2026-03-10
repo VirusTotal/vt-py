@@ -23,7 +23,7 @@ import argparse
 import vt
 
 
-def process_item(item):
+def process_item(item: vt.Object) -> None:
   """Processes a fetched item from the feed."""
   try:
     tags = item.tags
@@ -38,10 +38,10 @@ def process_item(item):
   if "executes-dropped-file" in tags or "powershell.exe" in "\n".join(
       processes_created
   ):
-    print(item.id.split("_")[0])
+    print(item.id.split("_")[0]) # type: ignore
 
 
-def main():
+def main() -> None:
   parser = argparse.ArgumentParser(
       description=(
           "Get file behaviour reports from the VirusTotal feed. "

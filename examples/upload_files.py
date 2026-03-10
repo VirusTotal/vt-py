@@ -21,13 +21,13 @@ import sys
 import vt
 
 
-async def get_files_to_upload(queue, path):
+async def get_files_to_upload(queue: asyncio.Queue, path: str) -> int:
   """Finds which files will be uploaded to VirusTotal."""
   if os.path.isfile(path):
     await queue.put(path)
     return 1
 
-  n_files = 0
+  n_files: int = 0
   with os.scandir(path) as it:
     for entry in it:
       if not entry.name.startswith(".") and entry.is_file():
@@ -36,7 +36,7 @@ async def get_files_to_upload(queue, path):
   return n_files
 
 
-async def upload_hashes(queue, apikey):
+async def upload_hashes(queue: asyncio.Queue, apikey: str) -> list[tuple[vt.Object, str]]:
   """Uploads selected files to VirusTotal."""
   return_values = []
 
@@ -52,14 +52,14 @@ async def upload_hashes(queue, apikey):
   return return_values
 
 
-async def process_analysis_results(apikey, analysis, file_path):
+async def process_analysis_results(apikey: str, analysis: vt.Object, file_path: str) -> None:
   async with vt.Client(apikey) as client:
     completed_analysis = await client.wait_for_analysis_completion(analysis)
     print(f"{file_path}: {completed_analysis.stats}")
     print(f"analysis id: {completed_analysis.id}")
 
 
-async def main():
+async def main() -> None:
   parser = argparse.ArgumentParser(description="Upload files to VirusTotal.")
 
   parser.add_argument("--apikey", required=True, help="your VirusTotal API key")
@@ -79,7 +79,7 @@ async def main():
     print(f"ERROR: file {args.path} not found.")
     sys.exit(1)
 
-  queue = asyncio.Queue()
+  queue: asyncio.Queue = asyncio.Queue()
   n_files = await get_files_to_upload(queue, args.path)
 
   worker_tasks = []

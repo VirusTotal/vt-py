@@ -18,6 +18,8 @@ import logging
 import os
 import sys
 import time
+import typing
+
 import vt
 
 
@@ -35,12 +37,12 @@ logging.basicConfig(
 class DownloadTopNFilesHandler:
   """Handler for Downloading files from VT."""
 
-  def __init__(self, apikey, num_files):
+  def __init__(self, apikey: str, num_files: int) -> None:
     self.apikey = apikey
     self.num_files = num_files
-    self.queue = asyncio.Queue()
+    self.queue: asyncio.Queue = asyncio.Queue()
 
-  async def download_files(self, download_path):
+  async def download_files(self, download_path: str) -> None:
     """Download files in queue to the path referenced by `download_path`.
 
     Args:
@@ -56,7 +58,7 @@ class DownloadTopNFilesHandler:
           await client.download_file_async(file_hash, f)
         self.queue.task_done()
 
-  async def queue_file_hashes(self, search):
+  async def queue_file_hashes(self, search: str) -> None:
     """Retrieve files from VT and enqueue them for being downloaded.
 
     Args:
@@ -70,7 +72,7 @@ class DownloadTopNFilesHandler:
         await self.queue.put(file_obj.sha256)
 
   @staticmethod
-  def create_download_folder(path=None):
+  def create_download_folder(path: typing.Optional[str] = None) -> str:
     """Create the folder where the downloaded files will be put."""
     local_path = path or DEFAULT_PATH
     folder_name = time.strftime("%Y%m%dT%H%M%S")
@@ -84,7 +86,7 @@ class DownloadTopNFilesHandler:
     return folder_path
 
 
-async def main():
+async def main() -> None:
   """Download the top-n results of a given Intelligence search."""
 
   usage = "usage: prog [options] <intelligence_query/local_file_with_hashes>"

@@ -52,7 +52,7 @@ async def scan_file_private(
       console.print(f"[red]Error: {e}[/red]")
 
 
-def main():
+def main() -> None:
   parser = argparse.ArgumentParser(
       description="Scan file privately using VirusTotal API"
   )

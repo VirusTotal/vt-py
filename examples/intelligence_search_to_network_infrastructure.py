@@ -26,8 +26,10 @@ https://docs.virustotal.com/docs/virustotal-intelligence-introduction
 
 import argparse
 import asyncio
+import typing
 from collections import defaultdict
 import re
+from typing import Any
 
 import vt
 
@@ -37,21 +39,21 @@ class VTISearchToNetworkInfrastructureHandler:
 
   _SEARCH_ENTITY_REGEX = re.compile(r"entity: (\w+)")
 
-  def __init__(self, apikey):
+  def __init__(self, apikey: str) -> None:
     self.apikey = apikey
-    self.queue = asyncio.Queue()
-    self.files_queue = asyncio.Queue()
+    self.queue: asyncio.Queue = asyncio.Queue()
+    self.files_queue: asyncio.Queue = asyncio.Queue()
 
-    self.networking_counters = {
+    self.networking_counters: dict[str, dict[str, int]] = {
         "domains": defaultdict(lambda: 0),
         "ips": defaultdict(lambda: 0),
         "urls": defaultdict(lambda: 0),
     }
-    self.networking_infrastructure = defaultdict(
+    self.networking_infrastructure: dict[str, dict[str, Any]] = defaultdict(
         lambda: defaultdict(lambda: {})
     )
 
-  async def get_file_async(self, checksum, relationships=None):
+  async def get_file_async(self, checksum: str, relationships: typing.Optional[str] = None) -> vt.Object:
     """Look up a file object."""
     url = "/files/{}"
     async with vt.Client(self.apikey) as client:
@@ -61,7 +63,7 @@ class VTISearchToNetworkInfrastructureHandler:
 
     return file_obj
 
-  async def get_matching_files(self, query, max_files):
+  async def get_matching_files(self, query: str, max_files: int) -> None:
     """Query intelligence for files matching the given criteria."""
     if not isinstance(query, str):
       raise ValueError("Search filter must be a string.")
@@ -82,7 +84,7 @@ class VTISearchToNetworkInfrastructureHandler:
 
       print("Search concluded, waiting on network infrastructure retrieval...")
 
-  async def get_network(self):
+  async def get_network(self) -> None:
     """Retrieve the network infrastructure related to matching files."""
     while True:
       checksum = await self.files_queue.get()
@@ -121,7 +123,7 @@ class VTISearchToNetworkInfrastructureHandler:
       self.networking_infrastructure[checksum]["urls"] = contacted_urls
       self.files_queue.task_done()
 
-  async def build_network(self):
+  async def build_network(self) -> None:
     """Build the stats of the network infrastructure."""
     while True:
       item = await self.queue.get()
@@ -134,7 +136,7 @@ class VTISearchToNetworkInfrastructureHandler:
         self.networking_counters[item_type][address] += 1
       self.queue.task_done()
 
-  def print_results(self):
+  def print_results(self) -> None:
     """Pretty print network IoCs for the given VTI search query."""
     print("\n\n=== Results: ===")
     for item in self.networking_infrastructure.items():
@@ -147,7 +149,7 @@ class VTISearchToNetworkInfrastructureHandler:
             print(f"{k}: {v}")
 
 
-async def main():
+async def main() -> None:
   """Perform a VTI search and extract IoCs for each of the matches."""
   parser = argparse.ArgumentParser(
       description="Generate network IoCs for files matching a VTI query."

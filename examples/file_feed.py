@@ -27,7 +27,7 @@ import os
 import vt
 
 
-def main():
+def main() -> None:
   parser = argparse.ArgumentParser(
       description=(
           "Get files from the VirusTotal feed. For each file in the feed a"
@@ -55,20 +55,22 @@ def main():
 
   if not os.path.exists(args.output):
     os.makedirs(args.output)
-
+  
+  file_obj: vt.Object
+  
   with vt.Client(args.apikey) as client:
     # Iterate over the file feed, one file at a time. This loop doesn't
     # finish, when the feed is consumed it will keep waiting for more files.
     for file_obj in client.feed(vt.FeedType.FILES, cursor=args.cursor):
       # Write the file's metadata into a JSON-encoded file. The name of the
       # JSON file will be <SHA-256>.json
-      file_path = os.path.join(args.output, file_obj.id)
+      file_path = os.path.join(args.output, file_obj.id) # type: ignore
       with open(file_path + ".json", mode="w", encoding="utf-8") as f:
         f.write(json.dumps(file_obj.to_dict()))
       if args.download_files:
         # Download the file and write it to the output directory with the
         # SHA-256 as its name.
-        download_url = file_obj.context_attributes["download_url"]
+        download_url: str = file_obj.context_attributes["download_url"]
         response = client.get(download_url)
         with open(file_path, mode="wb") as f:
           f.write(response.read())

@@ -21,10 +21,13 @@ The scripts receives a file as input having a domain/IP address per line.
 import argparse
 import asyncio
 import ipaddress
+import typing
+from typing import Any
+
 import vt
 
 
-def is_ip_address(netloc):
+def is_ip_address(netloc: str) -> bool:
   """Checks whether a given value is a IP address or not.
 
   Args:
@@ -41,12 +44,12 @@ def is_ip_address(netloc):
     return True
 
 
-def get_detection_rate(stats):
+def get_detection_rate(stats: dict[str, Any]) -> str:
   """Get detection rate as string."""
   return f'{stats["malicious"]}/{sum(stats.values())}'
 
 
-def print_results(res, netloc):
+def print_results(res: list[tuple[typing.Optional[str], int, str]], netloc: str):
   """Print results for a given netloc.
 
   Results are only printed if there's a suspicious sighting.
@@ -59,12 +62,12 @@ def print_results(res, netloc):
     )
 
 
-async def get_netloc_relationship(apikey, netloc, rel_type):
+async def get_netloc_relationship(apikey: str, netloc: str, rel_type: str) -> tuple[typing.Optional[str], int, str]:
   """Gets a netloc relationship and returns the highest detection rate."""
   path = "ip_addresses" if is_ip_address(netloc) else "domains"
   async with vt.Client(apikey) as client:
     it = client.iterator(f"/{path}/{netloc}/{rel_type}", limit=20)
-    stats = [
+    stats: list[str] = [
         get_detection_rate(f.last_analysis_stats)
         async for f in it
         if f.last_analysis_stats["malicious"]
@@ -77,7 +80,11 @@ async def get_netloc_relationship(apikey, netloc, rel_type):
       return None, 0, ""
 
 
-async def get_netloc_report_relationships(loop, apikey, netloc):
+async def get_netloc_report_relationships(
+        loop: asyncio.AbstractEventLoop,
+        apikey: str,
+        netloc: str
+  ) -> None:
   """Gets report and relationships for a given network location."""
   if not netloc:
     return
@@ -93,7 +100,7 @@ async def get_netloc_report_relationships(loop, apikey, netloc):
         loop.create_task(get_netloc_relationship(apikey, netloc, rel_type))
     )
 
-  results = await asyncio.gather(*tasks, return_exceptions=True)
+  results: list = await asyncio.gather(*tasks, return_exceptions=True) # type: ignore
   print_results(results, netloc)
 
 

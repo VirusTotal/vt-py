@@ -23,7 +23,7 @@ import argparse
 import vt
 
 
-def process_item(item):
+def process_item(item: vt.Object) -> None:
   """Processes a fetched item from the feed."""
   total_clean = sum(item.last_analysis_stats.values())
   num_spaces = 100 - len(item.url) if len(item.url) < 100 else 10
@@ -33,7 +33,7 @@ def process_item(item):
   )
 
 
-def main():
+def main() -> None:
   parser = argparse.ArgumentParser(
       description=(
           "Get URLs from the VirusTotal feed. "

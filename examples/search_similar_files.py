@@ -22,6 +22,8 @@ import argparse
 import asyncio
 import hashlib
 import sys
+import typing
+
 import pefile
 import vt
 
@@ -33,7 +35,7 @@ SEARCHES = [
 ]
 
 
-def compute_hashes(path):
+def compute_hashes(path: str) -> tuple[str, typing.Optional[str]]:
   """Computes imphash and rich PE."""
   pe = pefile.PE(path)
 
@@ -48,21 +50,25 @@ def compute_hashes(path):
   return imphash, rich
 
 
-def detection_rate_str(file_obj):
+def detection_rate_str(file_obj: vt.Object):
   """Returns a string representing detection rate."""
   stats = file_obj.last_analysis_stats
   return f'{stats["malicious"]}/{sum(stats.values())}'
 
 
 async def search_files(
-    apikey, numfiles, hash_type, hash_value, search_type, search_value
-):
+        apikey: str,
+        numfiles: int,
+        hash_type: str,
+        hash_value: str,
+        search_type: str,
+        search_value: str
+  ) -> set[str]:
   """Searches files on VirusTotal based on hash and a filter value.
 
   Args:
     apikey: str, VirusTotal API key.
     numfiles: int, Max number of files to retrieve per search.
-    queue: asyncio queue to put results to.
     hash_type: str, Can be either rich_pe_header_hash or imphash.
     hash_value: str, Hash value to search for.
     search_type: str, field to search by. Can be either tag or have.
@@ -93,7 +99,7 @@ async def search_files(
   return urls
 
 
-async def main():
+async def main() -> None:
   parser = argparse.ArgumentParser(
       description=(
           "Search similar files to a given one without uploading it "
@@ -143,9 +149,9 @@ async def main():
       )
 
   urls = await asyncio.gather(*tasks)
-  urls = set().union(*urls)
-  if urls:
-    print("\nRelated URLs:\n{}".format("\n\t".join(urls)))
+  unique_urls = set().union(*urls)
+  if unique_urls:
+    print("\nRelated URLs:\n{}".format("\n\t".join(unique_urls)))
 
 
 if __name__ == "__main__":

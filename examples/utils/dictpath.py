@@ -9,6 +9,8 @@ for querying JSON data structures. JsonPath is to JSON what XPath is to XML.
 JsonPath was as proposed in http://goessner.net/articles/JsonPath/.
 See https://github.com/h2non/jsonpath-ng for details about JsonPath.
 """
+import typing
+from typing import Any
 
 import jsonpath_ng
 
@@ -16,20 +18,19 @@ import jsonpath_ng
 # across the codebase. We store the already parsed paths in _PARSED_PATH_CACHE
 # and reuse them instead of parsing them again.
 
-_PARSED_PATH_CACHE = {}
-
+_PARSED_PATH_CACHE: dict[str, typing.Union[jsonpath_ng.JSONPath, None]] = {}
 
 class DictPathException(Exception):
   """Represents exceptions raised by the dictpath module."""
 
 
-def iterate(data, path):
+def iterate(data: dict[str, Any], path: str) -> typing.Generator[Any, None, None]:
   """Generator that returns values in data matching the given JsonPath."""
 
   if not data:
     return
 
-  parsed_path = _PARSED_PATH_CACHE.get(path)
+  parsed_path: typing.Union[jsonpath_ng.JSONPath, None] = _PARSED_PATH_CACHE.get(path)
 
   if not parsed_path:
     parsed_path = jsonpath_ng.parse(path)
@@ -39,12 +40,12 @@ def iterate(data, path):
     yield item.value
 
 
-def get_all(data, path):
+def get_all(data: dict[str, Any], path: str) -> list[Any]:
   """Returns a list with all values in data matching the given JsonPath."""
   return list(iterate(data, path))
 
 
-def get(data, path, default=None):
+def get(data: dict[Any, Any], path: str, default: Any = None) -> Any:
   """Returns the value in data matching the given JsonPath.
 
   If the path matches more than one value an exception is raised.

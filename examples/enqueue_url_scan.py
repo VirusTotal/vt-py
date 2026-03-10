@@ -15,10 +15,12 @@
 
 import argparse
 import asyncio
+from typing import TextIO
+
 import vt
 
 
-async def get_urls_to_enqueue(queue, path, url):
+async def get_urls_to_enqueue(queue: asyncio.Queue, path: TextIO, url: str):
   """Finds which URLs will be enqueued to scan in VirusTotal."""
   if url:
     await queue.put(url)
@@ -28,7 +30,7 @@ async def get_urls_to_enqueue(queue, path, url):
     await queue.put(u.strip())
 
 
-async def enqueue_urls(queue, apikey):
+async def enqueue_urls(queue: asyncio.Queue, apikey: str):
   """Enqueues URLs in VirusTotal."""
   async with vt.Client(apikey) as client:
     while not queue.empty():

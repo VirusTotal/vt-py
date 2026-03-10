@@ -18,6 +18,8 @@ import asyncio
 import io
 import os
 import sys
+from typing import TextIO
+
 import vt
 
 program_description = """
@@ -28,12 +30,12 @@ file is specified hashes are read from the standard input.
 """
 
 
-async def read_hashes(queue, input_file):
+async def read_hashes(queue: asyncio.Queue, input_file: TextIO):
   for file_hash in input_file:
     await queue.put(file_hash.strip("\n"))
 
 
-async def download_files(queue, args):
+async def download_files(queue: asyncio.Queue, args: argparse.Namespace):
   async with vt.Client(args.apikey) as client:
     while not queue.empty():
       file_hash = await queue.get()
@@ -50,7 +52,7 @@ async def download_files(queue, args):
         queue.task_done()
 
 
-async def main():
+async def main() -> None:
   parser = argparse.ArgumentParser(description=program_description)
 
   parser.add_argument("--apikey", required=True, help="your VirusTotal API key")
@@ -73,13 +75,15 @@ async def main():
 
   if not os.path.exists(args.output):
     os.makedirs(args.output)
-
+  
+  input_file: TextIO
+  
   if args.input:
     input_file = open(args.input, encoding="utf-8")  # pylint: disable=consider-using-with
   else:
     input_file = sys.stdin
 
-  queue = asyncio.Queue()
+  queue: asyncio.Queue = asyncio.Queue()
   asyncio.create_task(read_hashes(queue, input_file))
 
   worker_tasks = []

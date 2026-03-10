@@ -30,6 +30,8 @@ import json
 import os
 import re
 import sys
+from typing import Any
+
 import vt
 
 
@@ -45,15 +47,15 @@ EMPTY_DOMAIN_LIST_MSG = (
 )
 
 
-def extract_domains_from_rule(rules):
+def extract_domains_from_rule(rules: str) -> Any:
   """Extract the domain list from the comment of a yara rule."""
   return json.loads(rules.split("*/")[0].split("---", 2)[1])
 
 
-async def get_rulesets():
+async def get_rulesets() -> dict[str, dict[str, Any]]:
   """Retrieve a rule from VT to get currently monitored properties."""
-  rulesets = {}
-  async with vt.Client(os.environ.get(API_KEY_ENV_VAR)) as client:
+  rulesets: dict[str, dict[str, Any]] = {}
+  async with vt.Client(os.environ.get(API_KEY_ENV_VAR)) as client: # type: ignore
     try:
       rulesets_it = client.iterator(
           "/intelligence/hunting_rulesets",
@@ -76,7 +78,7 @@ async def get_rulesets():
     return rulesets
 
 
-def render_template(entity, domains):
+def render_template(entity: str, domains: list[str]):
   domain_list = json.dumps(domains, indent=1)
   template = ""
   body_template = os.path.join(TEMPLATE_DIR, "_body.yara")
@@ -108,7 +110,7 @@ def render_template(entity, domains):
   return template
 
 
-async def build_rulesets(queue, rulesets, domains):
+async def build_rulesets(queue: asyncio.Queue, rulesets: dict[str, dict[str, Any]], domains: list[str]):
   for entity in RULESET_ENTITY:
     task = {
         "name": RULESET_PREFIX + entity,
@@ -192,7 +194,7 @@ def load_bulk_file_domains(filename):
   return domains
 
 
-async def main():
+async def main() -> None:
   parser = argparse.ArgumentParser(
       description=(
           "Manage a set of YARA nethunting rules by adding/removing domains."
@@ -253,7 +255,7 @@ async def main():
     print(EMPTY_DOMAIN_LIST_MSG)
     sys.exit(1)
 
-  domains = rulesets.get("url", {}).get("domains", [])
+  domains: list[str] = rulesets.get("url", {}).get("domains", [])
   if args.list:
     if not domains:
       print(EMPTY_DOMAIN_LIST_MSG)
@@ -292,7 +294,7 @@ async def main():
       print(f"- {domain}")
 
     # Update the rulesets
-    queue = asyncio.Queue()
+    queue: asyncio.Queue = asyncio.Queue()
 
     await build_rulesets(queue, rulesets, new_domain_list)
 

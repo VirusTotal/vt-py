@@ -19,6 +19,7 @@ the VirusTotal files that matched a RetroHunt Job in VT.
 
 import argparse
 import asyncio
+import typing
 from collections import defaultdict
 from datetime import datetime
 
@@ -31,27 +32,27 @@ class RetroHuntJobToNetworkInfrastructureHandler:
 
   MIN_IN_COMMON = 1
 
-  def __init__(self, apikey):
+  def __init__(self, apikey: str) -> None:
     self.apikey = apikey
-    self.networking_queue = asyncio.Queue()
-    self.files_queue = asyncio.Queue()
-    self.files_commonalities = {
+    self.networking_queue: asyncio.Queue = asyncio.Queue()
+    self.files_queue: asyncio.Queue = asyncio.Queue()
+    self.files_commonalities: dict[str, dict[typing.Union[str, datetime], list[str]]] = {
         "Creation Time": defaultdict(lambda: []),
         "Imphash": defaultdict(lambda: []),
         "Date Signed": defaultdict(lambda: []),
         "Signers": defaultdict(lambda: []),
         "File Version": defaultdict(lambda: []),
     }
-    self.networking_counters = {
+    self.networking_counters: dict[str, dict[str, int]] = {
         "domains": defaultdict(lambda: 0),
         "ips": defaultdict(lambda: 0),
         "urls": defaultdict(lambda: 0),
     }
-    self.networking_infrastructure = defaultdict(
+    self.networking_infrastructure: dict[str, dict] = defaultdict(
         lambda: defaultdict(lambda: {})
     )
 
-  async def get_retrohunt_matching_files(self, retrohunt_job_id, max_files):
+  async def get_retrohunt_matching_files(self, retrohunt_job_id: str, max_files: int) -> None:
     """Get files related with the selected RetroHunt Job.
 
     :param retrohunt_job_id: Identifier of the RetroHunt Job whose files we want
@@ -71,7 +72,7 @@ class RetroHuntJobToNetworkInfrastructureHandler:
       async for f in files:
         await self.files_queue.put(f)
 
-  async def get_file_statistics(self):
+  async def get_file_statistics(self) -> None:
     """Process a file and get its statistics."""
     while True:
       file_obj = await self.files_queue.get()
@@ -79,7 +80,7 @@ class RetroHuntJobToNetworkInfrastructureHandler:
       await self.get_commonalities(file_obj)
       self.files_queue.task_done()
 
-  async def get_network_infrastructure(self, file_obj):
+  async def get_network_infrastructure(self, file_obj: vt.Object) -> None:
     """Process a file and get its network infrastructure."""
 
     file_hash = file_obj.sha256
@@ -108,7 +109,7 @@ class RetroHuntJobToNetworkInfrastructureHandler:
     self.networking_infrastructure[file_hash]["ips"] = contacted_ips
     self.networking_infrastructure[file_hash]["urls"] = contacted_urls
 
-  async def get_commonalities(self, file_obj):
+  async def get_commonalities(self, file_obj: vt.Object) -> None:
     """Process a file and get the information to be put in common.
 
     :param file_obj: File object to be processed.
@@ -119,8 +120,8 @@ class RetroHuntJobToNetworkInfrastructureHandler:
     file_signers = dictpath.get_all(
         file_dict, '$.attributes.signature_info["signers details"][*].name'
     )
-    creation_dates = dictpath.get_all(file_dict, "$.attributes.creation_date")
-    creation_dates = (datetime.fromtimestamp(x) for x in creation_dates)
+    list_creation_dates = dictpath.get_all(file_dict, "$.attributes.creation_date")
+    creation_dates = (datetime.fromtimestamp(x) for x in list_creation_dates)
     imphashes = dictpath.get_all(file_dict, "$.attributes.pe_info.imphash")
     signed_dates = dictpath.get_all(
         file_dict, '$.attributes.signature_info.["signing date"]'
@@ -144,7 +145,7 @@ class RetroHuntJobToNetworkInfrastructureHandler:
     for file_version in file_versions:
       self.files_commonalities["File Version"][file_version].append(file_hash)
 
-  async def build_network_infrastructure(self):
+  async def build_network_infrastructure(self) -> None:
     """Build the statistics about the network infrastructure of a file."""
 
     while True:
@@ -158,7 +159,7 @@ class RetroHuntJobToNetworkInfrastructureHandler:
         self.networking_counters[item_type][address] += 1
       self.networking_queue.task_done()
 
-  def print_results(self):
+  def print_results(self) -> None:
     """Print results of network infrastructure and commonalities analysis."""
 
     print("TOP CONTACTED DOMAINS")
@@ -208,7 +209,7 @@ class RetroHuntJobToNetworkInfrastructureHandler:
             print(f'\t{"":<32}\t{file_hash:<32}')
 
 
-async def main():
+async def main() -> None:
   parser = argparse.ArgumentParser(
       description="Get files from the VirusTotal feed."
   )

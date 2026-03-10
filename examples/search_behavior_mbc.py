@@ -40,12 +40,13 @@ logging.basicConfig(
 class FetchMBCHandler:
   """Handler for Downloading files from VT."""
 
-  def __init__(self, apikey, num_files):
+  def __init__(self, apikey: str, num_files: int) -> None:
     self.apikey = apikey
     self.num_files = num_files
-    self.queue = asyncio.Queue()
+    self.queue: asyncio.Queue = asyncio.Queue()
 
-  async def parse_mbc_from_behavior_report(self, file_hash, behavior_report):
+  @staticmethod
+  async def parse_mbc_from_behavior_report(file_hash: str, behavior_report: vt.Object) -> None:
     """Parse MBC rule ID from report."""
 
     signature_matches = getattr(behavior_report, "signature_matches", None)
@@ -63,7 +64,7 @@ class FetchMBCHandler:
       for mbc in mbc_entries:
         print(f"sha256: {file_hash}  mbc:{mbc}")
 
-  async def fetch_behavior_reports(self):
+  async def fetch_behavior_reports(self) -> None:
     """Fetch file behavior reports."""
 
     async with vt.Client(self.apikey) as client:
@@ -78,7 +79,7 @@ class FetchMBCHandler:
         await self.parse_mbc_from_behavior_report(file_hash, behavior_report)
         self.queue.task_done()
 
-  async def queue_file_hashes(self, search):
+  async def queue_file_hashes(self, search: str) -> None:
     """Retrieve files from VT and enqueue them for being downloaded.
 
     Args:
@@ -92,7 +93,7 @@ class FetchMBCHandler:
         await self.queue.put(file_obj.sha256)
 
 
-async def main():
+async def main() -> None:
   """Search behaviour reports with MBC."""
 
   usage = "usage: prog [options] <intelligence_query/local_file_with_hashes>"

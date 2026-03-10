@@ -30,7 +30,7 @@ import sys
 import vt
 
 
-async def get_rules_files(queue, path):
+async def get_rules_files(queue: asyncio.Queue, path: str) -> None:
   """Finds which rules will be uploaded to VirusTotal."""
   if os.path.isfile(path):
     await queue.put(path)
@@ -42,11 +42,11 @@ async def get_rules_files(queue, path):
         await queue.put(entry.path)
 
 
-async def upload_rules(queue, apikey, enable):
+async def upload_rules(queue: asyncio.Queue, apikey: str, enable: bool) -> None:
   """Uploads selected files to VirusTotal."""
   async with vt.Client(apikey) as client:
     while not queue.empty():
-      file_path = await queue.get()
+      file_path: str = await queue.get()
       with open(file_path, encoding="utf-8") as f:
         ruleset = vt.Object(
             obj_type="hunting_ruleset",
@@ -68,7 +68,7 @@ async def upload_rules(queue, apikey, enable):
       queue.task_done()
 
 
-async def main():
+async def main() -> None:
   parser = argparse.ArgumentParser(
       description="Import YARA rules to a VirusTotal account."
   )
@@ -95,7 +95,7 @@ async def main():
     print(f"ERROR: file {args.path} not found.")
     sys.exit(1)
 
-  queue = asyncio.Queue()
+  queue: asyncio.Queue = asyncio.Queue()
   asyncio.create_task(get_rules_files(queue, args.path))
 
   worker_tasks = []

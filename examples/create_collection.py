@@ -19,7 +19,7 @@ import vt
 from pprint import pprint
 
 
-def create_collection(client, name, description, file):
+def create_collection(client: vt.Client, name: str, description: str, file: io.IOBase) -> vt.Object:
   """Creates a reference in VirusTotal.
 
   Args:
@@ -32,18 +32,18 @@ def create_collection(client, name, description, file):
     The new collection object.
   """
 
-  collection_obj = vt.Object(
+  collection_obj: vt.Object = vt.Object(
       "collection", obj_attributes={"name": name, "description": description}
   )
   collection_obj.set_data("raw_items", file.read())
   return client.post_object("/collections", obj=collection_obj)
 
 
-def generate_ui_link(collection_id):
+def generate_ui_link(collection_id: str) -> str:
   return f"https://www.virustotal.com/gui/collection/{collection_id}"
 
 
-def main():
+def main() -> None:
   parser = argparse.ArgumentParser(
       description="Create a VirusTotal collection."
   )
@@ -55,7 +55,7 @@ def main():
   )
 
   args = parser.parse_args()
-  client = vt.Client(args.apikey)
+  client: vt.Client = vt.Client(args.apikey)
 
   # Typical usage would be to create a collection from a text file with IOCs:
   # with open('iocs.txt') as f:
@@ -68,7 +68,7 @@ def main():
   client.close()
   pprint(collection_obj.to_dict())
 
-  print(f"Link:\n{generate_ui_link(collection_obj.id)}")
+  print(f"Link:\n{generate_ui_link(collection_obj.id)}") # type: ignore
 
 
 if __name__ == "__main__":

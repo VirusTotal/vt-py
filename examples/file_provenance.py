@@ -25,7 +25,7 @@ import sys
 import vt
 
 
-async def get_provenance_info(apikey, file_hash):
+async def get_provenance_info(apikey: str, file_hash: str) -> tuple:
   async with vt.Client(apikey) as client:
     file_obj = await client.get_object_async(f'/files/{file_hash}')
 

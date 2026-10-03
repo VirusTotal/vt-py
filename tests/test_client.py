@@ -721,7 +721,7 @@ def test_429_blocks_the_endpoint_locally(httpserver):
     assert len(httpserver.log) == 2
 
 
-def test_429_without_retry_after_does_not_block(httpserver):
+def test_quota_429_without_retry_after_does_not_block(httpserver):
   httpserver.expect_request(
       "/api/v3/files/01020304050607080900a0b0c0ddead", method="GET"
   ).respond_with_data(
@@ -736,6 +736,26 @@ def test_429_without_retry_after_does_not_block(httpserver):
         client.get_object("/files/01020304050607080900a0b0c0ddead")
 
   assert len(httpserver.log) == 2
+
+
+def test_edge_429_without_retry_after_blocks_by_default(httpserver):
+  httpserver.expect_request(
+      "/api/v3/files/01020304050607080900a0b0c0ddead", method="GET"
+  ).respond_with_data(
+      status=429,
+      content_type="text/html",
+      response_data="<title>429</title>429 Too Many Requests",
+  )
+
+  with new_client(httpserver) as client:
+    with pytest.raises(APIError):
+      client.get_object("/files/01020304050607080900a0b0c0ddead")
+    with pytest.raises(APIError) as e_info:
+      client.get_object("/files/01020304050607080900a0b0c0ddead")
+    assert e_info.value.code == "QuotaExceededError"
+    assert 50 <= e_info.value.retry_after <= 60
+
+  assert len(httpserver.log) == 1
 
 
 def test_endpoint_block_expires(httpserver, monkeypatch):

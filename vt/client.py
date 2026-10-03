@@ -49,6 +49,11 @@ _ENDPOINT_PREFIX = "/api/v3"
 # (e.g. "files", "download_url"); anything else is an object ID.
 _ENDPOINT_SEGMENT_RE = re.compile(r"^[a-z_]+$")
 
+# Seconds an endpoint is blocked after a 429 without Retry-After, such as the
+# ones returned by the rate limits at the edge. QuotaExceededError responses
+# without Retry-After are not blocked: those quotas don't reset over time.
+_DEFAULT_BLOCK_SECONDS = 60
+
 # AppEngine server decides whether or not it should serve gzipped content
 # based on Accept-Encoding and User-Agent. Non-standard UAs are not served
 # with gzipped content unless it contains the string "gzip" somewhere.
@@ -266,9 +271,10 @@ class Client:
   ):
     """Initialize the client with the provided API key.
 
-    When the API answers a request with 429 (rate limit or quota exceeded)
-    and a Retry-After header, further requests to the same endpoint fail
-    locally with a QuotaExceededError until that time has passed, without
+    When the API answers a request with 429 (rate limit or quota exceeded),
+    further requests to the same endpoint fail locally with a
+    QuotaExceededError for the time in the Retry-After header (60 seconds if
+    it's missing, except for quota errors that don't reset over time), without
     reaching the API. Requests are never retried automatically.
     """
 
@@ -340,6 +346,10 @@ class Client:
     response = await self._get_session().request(method, url, **kwargs)
     if response.status == 429:
       retry_after = _parse_retry_after(response.headers.get("Retry-After"))
+      if retry_after is None and await self._error_code(response) != (
+          "QuotaExceededError"
+      ):
+        retry_after = _DEFAULT_BLOCK_SECONDS
       if retry_after:
         now = time.monotonic()
         # Drop expired blocks so the dict doesn't grow with unused endpoints.
@@ -348,6 +358,18 @@ class Client:
         }
         self._blocked_until[key] = now + retry_after
     return response
+
+  @staticmethod
+  async def _error_code(
+      response: aiohttp.ClientResponse,
+  ) -> typing.Optional[str]:
+    """Returns the error code in a JSON error response, if any."""
+    if response.content_type != "application/json":
+      return None
+    try:
+      return (await response.json()).get("error", {}).get("code")
+    except (ValueError, AttributeError, aiohttp.ClientError):
+      return None
 
   def _get_session(self) -> aiohttp.ClientSession:
     if not self._session:

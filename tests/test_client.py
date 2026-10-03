@@ -732,14 +732,15 @@ def test_429_with_long_retry_after_fails_fast_locally(httpserver):
     assert e_info.value.retry_after == 3600
     assert len(httpserver.log) == 1
 
-    # The same endpoint family now fails without contacting the API.
+    # Endpoints sharing the general API quota now fail without contacting
+    # the API.
     with pytest.raises(APIError) as e_info:
-      client.get_object("/files/01020304050607080900a0b0c0ddead")
+      client.get_json("/urls/abc")
     assert e_info.value.code == "QuotaExceededError"
     assert 3590 <= e_info.value.retry_after <= 3600
     assert len(httpserver.log) == 1
 
-    # Other endpoint families are not affected.
+    # Endpoints with their own quota (Intelligence searches) are not affected.
     client.get_json("/intelligence/search")
     assert len(httpserver.log) == 2
 
@@ -796,41 +797,43 @@ def test_fail_fast_block_expires(httpserver, monkeypatch):
 
 
 @pytest.mark.parametrize(
-    "url, scope",
+    "url, family",
     [
-        ("https://www.virustotal.com/api/v3/files/abc", "/files"),
-        ("https://www.virustotal.com/api/v3/files/abc/relationships", "/files"),
+        ("https://www.virustotal.com/api/v3/files/abc", "api_requests"),
+        (
+            "https://www.virustotal.com/api/v3/files/abc/relationships",
+            "api_requests",
+        ),
+        ("https://www.virustotal.com/api/v3/urls/abc", "api_requests"),
+        (
+            "https://www.virustotal.com/api/v3/files/abc/download",
+            "intelligence_downloads",
+        ),
+        (
+            "https://www.virustotal.com/api/v3/files/abc/download_url",
+            "intelligence_downloads",
+        ),
+        (
+            "https://www.virustotal.com/api/v3/file_behaviours/x/pcap",
+            "intelligence_downloads",
+        ),
+        (
+            "https://www.virustotal.com/api/v3/intelligence/zip_files/1",
+            "intelligence_downloads",
+        ),
         (
             "https://www.virustotal.com/api/v3/intelligence/search",
-            "/intelligence/search",
+            "intelligence_searches",
         ),
-        ("https://www.virustotal.com/api/v3/monitor/items/x", "/monitor/items"),
-        ("https://www.virustotal.com/api/v3/", "/"),
+        ("https://www.virustotal.com/api/v3/search", "intelligence_searches"),
+        (
+            "https://www.virustotal.com/api/v3/private/files/abc/analyse",
+            "private_scanning",
+        ),
     ],
 )
-def test_rate_limit_scope(url, scope):
+def test_quota_family(url, family):
   # pylint: disable=import-outside-toplevel,protected-access
   from vt import client as client_module
 
-  assert client_module._rate_limit_scope(url) == scope
-
-
-def test_blocked_scopes_are_bounded_and_expired_ones_dropped(monkeypatch):
-  # pylint: disable=protected-access
-  now = [1000.0]
-  monkeypatch.setattr("vt.client.time.monotonic", lambda: now[0])
-  monkeypatch.setattr("vt.client._MAX_BLOCKED_SCOPES", 3)
-  client = Client("dummy_api_key")
-
-  client._block("/a", 10)
-  client._block("/b", 100)
-  now[0] += 20
-  # "/a" expired and is dropped when blocking a new family.
-  client._block("/c", 100)
-  assert set(client._blocked_until) == {"/b", "/c"}
-
-  client._block("/d", 50)
-  # The limit is reached: the block expiring first ("/d") is evicted.
-  client._block("/e", 100)
-  assert len(client._blocked_until) == 3
-  assert "/d" not in client._blocked_until
+  assert client_module._quota_family(url) == family

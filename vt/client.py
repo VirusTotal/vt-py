@@ -20,6 +20,7 @@ import email.utils
 import io
 import json
 import random
+import re
 import time
 import typing
 import os
@@ -45,14 +46,16 @@ _API_HOST = "https://www.virustotal.com"
 # prefix in the paths you request as it's prepended automatically.
 _ENDPOINT_PREFIX = "/api/v3"
 
-# Upper bound for the number of blocked endpoint families remembered by a
-# client. Families are a small fixed set (one per API route family), so this is
-# just a safeguard against unbounded growth.
-_MAX_BLOCKED_SCOPES = 256
-
-# Endpoint families with their own quotas, identified by their first two path
-# segments instead of just the first one.
-_TWO_SEGMENT_SCOPES = ("intelligence", "monitor", "private", "feeds")
+# Endpoints consuming quotas other than the general API requests quota
+# (hourly/daily/monthly), as (path regexp, quota family) tuples. Everything
+# else shares the general quota, so a 429 there blocks all of it.
+_QUOTA_FAMILIES = (
+    (r"^/files/[^/]+/download(_url)?$", "intelligence_downloads"),
+    (r"^/file_behaviours/[^/]+/(evtx|memdump|pcap)$", "intelligence_downloads"),
+    (r"^/intelligence/zip_files(/.*)?$", "intelligence_downloads"),
+    (r"^/(intelligence/)?search$", "intelligence_searches"),
+    (r"^/private/.*$", "private_scanning"),
+)
 
 # AppEngine server decides whether or not it should serve gzipped content
 # based on Accept-Encoding and User-Agent. Non-standard UAs are not served
@@ -94,21 +97,22 @@ def _parse_retry_after(value: typing.Optional[str]) -> typing.Optional[int]:
   return max(0, int((retry_at - now).total_seconds()))
 
 
-def _rate_limit_scope(url: str) -> str:
-  """Returns the endpoint family a URL belongs to, e.g. "/files".
+def _quota_family(url: str) -> str:
+  """Returns the quota family consumed by a request to the given URL.
 
-  Quota blocks are remembered per endpoint family, so that exhausting one quota
-  (e.g. Intelligence searches) doesn't block unrelated endpoints.
+  Most endpoints consume the general API requests quota ("api_requests"),
+  which is exhausted for all of them at once. A few consume their own quotas
+  (Intelligence downloads and searches, private scanning) and are blocked
+  independently.
   """
   path = urllib.parse.urlsplit(url).path
   if path.startswith(_ENDPOINT_PREFIX):
     path = path[len(_ENDPOINT_PREFIX) :]
-  parts = [part for part in path.split("/") if part]
-  if not parts:
-    return "/"
-  if parts[0] in _TWO_SEGMENT_SCOPES and len(parts) > 1:
-    return "/" + "/".join(parts[:2])
-  return "/" + parts[0]
+  path = "/" + path.strip("/")
+  for regexp, family in _QUOTA_FAMILIES:
+    if re.match(regexp, path):
+      return family
+  return "api_requests"
 
 
 class ClientResponse:
@@ -279,9 +283,10 @@ class Client:
     `max_retries` times, waiting what the Retry-After header says if it's at
     most `max_retry_wait` seconds (or using exponential backoff if the header
     is missing). If the server asks to wait longer, the error is raised and,
-    when `quota_fail_fast` is enabled, further requests to the same endpoint
-    family fail locally with the same error until that time has passed, without
-    reaching the API.
+    when `quota_fail_fast` is enabled, further requests consuming the same quota
+    fail locally with the same error until that time has passed, without
+    reaching the API. Most endpoints share the general API requests quota;
+    Intelligence downloads and searches and private scanning have their own.
     """
 
     if not isinstance(apikey, str):
@@ -302,7 +307,7 @@ class Client:
     self._max_retries = max_retries
     self._max_retry_wait = max_retry_wait
     self._quota_fail_fast = quota_fail_fast
-    # Endpoint family -> time.monotonic() until which requests fail locally.
+    # Quota family -> time.monotonic() until which requests fail locally.
     self._blocked_until: typing.Dict[str, float] = {}
     if connector is not None:
       self._connector = connector
@@ -331,37 +336,21 @@ class Client:
     return self._host + _ENDPOINT_PREFIX + path
 
   def _check_blocked(self, url: str) -> None:
-    """Raises the last quota error if the endpoint family is still blocked."""
-    scope = _rate_limit_scope(url)
-    blocked_until = self._blocked_until.get(scope)
+    """Raises the last quota error if the URL's quota family is blocked."""
+    family = _quota_family(url)
+    blocked_until = self._blocked_until.get(family)
     if blocked_until is None:
       return
     remaining = blocked_until - time.monotonic()
     if remaining <= 0:
-      del self._blocked_until[scope]
+      del self._blocked_until[family]
       return
     raise APIError(
         "QuotaExceededError",
-        f"Quota exceeded for {scope} endpoints, retry in {int(remaining) + 1}s"
+        f"{family} quota exceeded, retry in {int(remaining) + 1}s"
         " (raised by the client without contacting the API)",
         retry_after=int(remaining) + 1,
     )
-
-  def _block(self, scope: str, seconds: float) -> None:
-    """Blocks an endpoint family for the given number of seconds."""
-    now = time.monotonic()
-    # Drop expired blocks so that the dict only holds active ones.
-    for expired in [k for k, v in self._blocked_until.items() if v <= now]:
-      del self._blocked_until[expired]
-    if (
-        scope not in self._blocked_until
-        and len(self._blocked_until) >= _MAX_BLOCKED_SCOPES
-    ):
-      # Evict the block that expires first.
-      del self._blocked_until[
-          min(self._blocked_until, key=self._blocked_until.get)
-      ]
-    self._blocked_until[scope] = now + seconds
 
   async def _request_async(
       self, method: str, url: str, retryable: bool = True, **kwargs: typing.Any
@@ -381,7 +370,9 @@ class Client:
       retry_after = _parse_retry_after(response.headers.get("Retry-After"))
       if retry_after is not None and retry_after > self._max_retry_wait:
         if self._quota_fail_fast:
-          self._block(_rate_limit_scope(url), retry_after)
+          self._blocked_until[_quota_family(url)] = (
+              time.monotonic() + retry_after
+          )
         return response
       if not retryable or attempt >= self._max_retries:
         return response

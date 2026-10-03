@@ -19,8 +19,11 @@ import datetime
 import email.utils
 import io
 import json
+import re
+import time
 import typing
 import os
+import urllib.parse
 import aiofiles
 
 import aiohttp
@@ -41,6 +44,15 @@ _API_HOST = "https://www.virustotal.com"
 # All API endpoints start with this prefix, you don't need to include the
 # prefix in the paths you request as it's prepended automatically.
 _ENDPOINT_PREFIX = "/api/v3"
+
+# Path segments made only of these characters are part of the endpoint name
+# (e.g. "files", "download_url"); anything else is an object ID.
+_ENDPOINT_SEGMENT_RE = re.compile(r"^[a-z_]+$")
+
+# Seconds an endpoint is blocked after a 429 without Retry-After, such as the
+# ones returned by the rate limits at the edge. QuotaExceededError responses
+# without Retry-After are not blocked: those quotas don't reset over time.
+_DEFAULT_BLOCK_SECONDS = 60
 
 # AppEngine server decides whether or not it should serve gzipped content
 # based on Accept-Encoding and User-Agent. Non-standard UAs are not served
@@ -80,6 +92,22 @@ def _parse_retry_after(value: typing.Optional[str]) -> typing.Optional[int]:
     retry_at = retry_at.replace(tzinfo=datetime.timezone.utc)
   now = datetime.datetime.now(datetime.timezone.utc)
   return max(0, int((retry_at - now).total_seconds()))
+
+
+def _endpoint_key(method: str, url: str) -> str:
+  """Returns a key identifying the endpoint a request is sent to.
+
+  Object IDs in the path are replaced by "*", so that all the requests to
+  the same endpoint share the key, e.g. "GET /files/*/download".
+  """
+  path = urllib.parse.urlsplit(url).path
+  if path.startswith(_ENDPOINT_PREFIX):
+    path = path[len(_ENDPOINT_PREFIX) :]
+  segments = [
+      seg if _ENDPOINT_SEGMENT_RE.match(seg) else "*"
+      for seg in path.strip("/").split("/")
+  ]
+  return f"{method.upper()} /{'/'.join(segments)}"
 
 
 class ClientResponse:
@@ -241,7 +269,14 @@ class Client:
       verify_ssl: bool = True,
       connector: aiohttp.BaseConnector = None,
   ):
-    """Initialize the client with the provided API key."""
+    """Initialize the client with the provided API key.
+
+    When the API answers a request with 429 (rate limit or quota exceeded),
+    further requests to the same endpoint fail locally with a
+    QuotaExceededError for the time in the Retry-After header (60 seconds if
+    it's missing, except for quota errors that don't reset over time), without
+    reaching the API. Requests are never retried automatically.
+    """
 
     if not isinstance(apikey, str):
       raise ValueError("API key must be a string")
@@ -258,6 +293,8 @@ class Client:
     self._proxy = proxy
     self._user_headers = headers
     self._verify_ssl = verify_ssl
+    # Endpoint key -> time.monotonic() until which requests fail locally.
+    self._blocked_until: typing.Dict[str, float] = {}
     if connector is not None:
       self._connector = connector
     else:
@@ -283,6 +320,56 @@ class Client:
     if path.startswith("http"):
       return path
     return self._host + _ENDPOINT_PREFIX + path
+
+  def _check_blocked(self, key: str) -> None:
+    """Raises a quota error if the endpoint is blocked by a previous 429."""
+    blocked_until = self._blocked_until.get(key)
+    if blocked_until is None:
+      return
+    remaining = blocked_until - time.monotonic()
+    if remaining <= 0:
+      del self._blocked_until[key]
+      return
+    raise APIError(
+        "QuotaExceededError",
+        f"{key} answered 429 recently, retry in {int(remaining) + 1}s"
+        " (raised by the client without contacting the API)",
+        retry_after=int(remaining) + 1,
+    )
+
+  async def _request_async(
+      self, method: str, url: str, **kwargs: typing.Any
+  ) -> aiohttp.ClientResponse:
+    """Sends a request unless its endpoint is blocked by a previous 429."""
+    key = _endpoint_key(method, url)
+    self._check_blocked(key)
+    response = await self._get_session().request(method, url, **kwargs)
+    if response.status == 429:
+      retry_after = _parse_retry_after(response.headers.get("Retry-After"))
+      if retry_after is None and await self._error_code(response) != (
+          "QuotaExceededError"
+      ):
+        retry_after = _DEFAULT_BLOCK_SECONDS
+      if retry_after:
+        now = time.monotonic()
+        # Drop expired blocks so the dict doesn't grow with unused endpoints.
+        self._blocked_until = {
+            k: v for k, v in self._blocked_until.items() if v > now
+        }
+        self._blocked_until[key] = now + retry_after
+    return response
+
+  @staticmethod
+  async def _error_code(
+      response: aiohttp.ClientResponse,
+  ) -> typing.Optional[str]:
+    """Returns the error code in a JSON error response, if any."""
+    if response.content_type != "application/json":
+      return None
+    try:
+      return (await response.json()).get("error", {}).get("code")
+    except (ValueError, AttributeError, aiohttp.ClientError):
+      return None
 
   def _get_session(self) -> aiohttp.ClientSession:
     if not self._session:
@@ -390,7 +477,8 @@ class Client:
   ) -> ClientResponse:
     """Like :func:`delete` but returns a coroutine."""
     return ClientResponse(
-        await self._get_session().delete(
+        await self._request_async(
+            "DELETE",
             self._full_url(path, *path_args),
             data=data,
             json=json_data,
@@ -549,8 +637,11 @@ class Client:
   ) -> ClientResponse:
     """Like :func:`get` but returns a coroutine."""
     return ClientResponse(
-        await self._get_session().get(
-            self._full_url(path, *path_args), params=params, proxy=self._proxy
+        await self._request_async(
+            "GET",
+            self._full_url(path, *path_args),
+            params=params,
+            proxy=self._proxy,
         )
     )
 
@@ -722,7 +813,8 @@ class Client:
   ) -> ClientResponse:
     """Like :func:`patch` but returns a coroutine."""
     return ClientResponse(
-        await self._get_session().patch(
+        await self._request_async(
+            "PATCH",
             self._full_url(path, *path_args),
             data=data,
             json=json_data,
@@ -794,7 +886,8 @@ class Client:
   ) -> ClientResponse:
     """Like :func:`post` but returns a coroutine."""
     return ClientResponse(
-        await self._get_session().post(
+        await self._request_async(
+            "POST",
             self._full_url(path, *path_args),
             data=data,
             json=json_data,
@@ -919,8 +1012,11 @@ class Client:
 
     upload_url = await self.get_data_async("/files/upload_url")
     response = ClientResponse(
-        await self._get_session().post(
-            upload_url, data=form_data, proxy=self._proxy
+        await self._request_async(
+            "POST",
+            upload_url,
+            data=form_data,
+            proxy=self._proxy,
         )
     )
 
@@ -969,8 +1065,11 @@ class Client:
     form_data.add_field("url", url)
 
     response = ClientResponse(
-        await self._get_session().post(
-            self._full_url("/urls"), data=form_data, proxy=self._proxy
+        await self._request_async(
+            "POST",
+            self._full_url("/urls"),
+            data=form_data,
+            proxy=self._proxy,
         )
     )
 
@@ -989,8 +1088,11 @@ class Client:
     form_data.add_field("url", url)
 
     response = ClientResponse(
-        await self._get_session().post(
-            self._full_url("/private/urls"), data=form_data, proxy=self._proxy
+        await self._request_async(
+            "POST",
+            self._full_url("/private/urls"),
+            data=form_data,
+            proxy=self._proxy,
         )
     )
 

@@ -664,3 +664,152 @@ async def test_scan_file_private_async(httpserver, private_scan):  # pylint: dis
           f, wait_for_completion=True
       )
     verify_analysis(analysis, status="completed")
+
+
+def _quota_error_body():
+  return json.dumps(
+      {"error": {"code": "QuotaExceededError", "message": "Quota exceeded"}}
+  )
+
+
+def test_429_with_short_retry_after_is_retried(httpserver):
+  path = "/api/v3/files/01020304050607080900a0b0c0ddead"
+  httpserver.expect_ordered_request(path, method="GET").respond_with_data(
+      status=429,
+      headers={"Retry-After": "0"},
+      content_type="application/json",
+      response_data=_quota_error_body(),
+  )
+  httpserver.expect_ordered_request(path, method="GET").respond_with_json({
+      "data": {
+          "id": "01020304050607080900a0b0c0ddead",
+          "type": "file",
+          "attributes": {},
+      }
+  })
+
+  with new_client(httpserver) as client:
+    obj = client.get_object("/files/01020304050607080900a0b0c0ddead")
+
+  assert obj.id == "01020304050607080900a0b0c0ddead"
+  assert len(httpserver.log) == 2
+
+
+def test_429_retries_are_bounded(httpserver):
+  path = "/api/v3/files/01020304050607080900a0b0c0ddead"
+  httpserver.expect_request(path, method="GET").respond_with_data(
+      status=429,
+      headers={"Retry-After": "0"},
+      content_type="application/json",
+      response_data=_quota_error_body(),
+  )
+
+  with pytest.raises(APIError) as e_info:
+    with new_client(httpserver) as client:
+      client.get_object("/files/01020304050607080900a0b0c0ddead")
+
+  assert e_info.value.code == "QuotaExceededError"
+  # The first attempt plus max_retries (2) retries.
+  assert len(httpserver.log) == 3
+
+
+def test_429_with_long_retry_after_fails_fast_locally(httpserver):
+  httpserver.expect_request(
+      "/api/v3/files/01020304050607080900a0b0c0ddead", method="GET"
+  ).respond_with_data(
+      status=429,
+      headers={"Retry-After": "3600"},
+      content_type="application/json",
+      response_data=_quota_error_body(),
+  )
+  httpserver.expect_request(
+      "/api/v3/intelligence/search", method="GET"
+  ).respond_with_json({"data": []})
+
+  with new_client(httpserver) as client:
+    with pytest.raises(APIError) as e_info:
+      client.get_object("/files/01020304050607080900a0b0c0ddead")
+    assert e_info.value.retry_after == 3600
+    assert len(httpserver.log) == 1
+
+    # The same endpoint family now fails without contacting the API.
+    with pytest.raises(APIError) as e_info:
+      client.get_object("/files/01020304050607080900a0b0c0ddead")
+    assert e_info.value.code == "QuotaExceededError"
+    assert 3590 <= e_info.value.retry_after <= 3600
+    assert len(httpserver.log) == 1
+
+    # Other endpoint families are not affected.
+    client.get_json("/intelligence/search")
+    assert len(httpserver.log) == 2
+
+
+def test_fail_fast_can_be_disabled(httpserver):
+  httpserver.expect_request(
+      "/api/v3/files/01020304050607080900a0b0c0ddead", method="GET"
+  ).respond_with_data(
+      status=429,
+      headers={"Retry-After": "3600"},
+      content_type="application/json",
+      response_data=_quota_error_body(),
+  )
+
+  with Client(
+      "dummy_api_key",
+      host="http://" + httpserver.host + ":" + str(httpserver.port),
+      quota_fail_fast=False,
+  ) as client:
+    for _ in range(2):
+      with pytest.raises(APIError):
+        client.get_object("/files/01020304050607080900a0b0c0ddead")
+
+  assert len(httpserver.log) == 2
+
+
+def test_fail_fast_block_expires(httpserver, monkeypatch):
+  path = "/api/v3/files/01020304050607080900a0b0c0ddead"
+  httpserver.expect_ordered_request(path, method="GET").respond_with_data(
+      status=429,
+      headers={"Retry-After": "120"},
+      content_type="application/json",
+      response_data=_quota_error_body(),
+  )
+  httpserver.expect_ordered_request(path, method="GET").respond_with_json({
+      "data": {
+          "id": "01020304050607080900a0b0c0ddead",
+          "type": "file",
+          "attributes": {},
+      }
+  })
+
+  now = [1000.0]
+  monkeypatch.setattr("vt.client.time.monotonic", lambda: now[0])
+
+  with new_client(httpserver) as client:
+    with pytest.raises(APIError):
+      client.get_object("/files/01020304050607080900a0b0c0ddead")
+    now[0] += 121
+    obj = client.get_object("/files/01020304050607080900a0b0c0ddead")
+
+  assert obj.id == "01020304050607080900a0b0c0ddead"
+  assert len(httpserver.log) == 2
+
+
+@pytest.mark.parametrize(
+    "url, scope",
+    [
+        ("https://www.virustotal.com/api/v3/files/abc", "/files"),
+        ("https://www.virustotal.com/api/v3/files/abc/relationships", "/files"),
+        (
+            "https://www.virustotal.com/api/v3/intelligence/search",
+            "/intelligence/search",
+        ),
+        ("https://www.virustotal.com/api/v3/monitor/items/x", "/monitor/items"),
+        ("https://www.virustotal.com/api/v3/", "/"),
+    ],
+)
+def test_rate_limit_scope(url, scope):
+  # pylint: disable=import-outside-toplevel,protected-access
+  from vt import client as client_module
+
+  assert client_module._rate_limit_scope(url) == scope

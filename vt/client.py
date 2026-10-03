@@ -19,8 +19,11 @@ import datetime
 import email.utils
 import io
 import json
+import random
+import time
 import typing
 import os
+import urllib.parse
 import aiofiles
 
 import aiohttp
@@ -41,6 +44,10 @@ _API_HOST = "https://www.virustotal.com"
 # All API endpoints start with this prefix, you don't need to include the
 # prefix in the paths you request as it's prepended automatically.
 _ENDPOINT_PREFIX = "/api/v3"
+
+# Endpoint families with their own quotas, identified by their first two path
+# segments instead of just the first one.
+_TWO_SEGMENT_SCOPES = ("intelligence", "monitor", "private", "feeds")
 
 # AppEngine server decides whether or not it should serve gzipped content
 # based on Accept-Encoding and User-Agent. Non-standard UAs are not served
@@ -80,6 +87,23 @@ def _parse_retry_after(value: typing.Optional[str]) -> typing.Optional[int]:
     retry_at = retry_at.replace(tzinfo=datetime.timezone.utc)
   now = datetime.datetime.now(datetime.timezone.utc)
   return max(0, int((retry_at - now).total_seconds()))
+
+
+def _rate_limit_scope(url: str) -> str:
+  """Returns the endpoint family a URL belongs to, e.g. "/files".
+
+  Quota blocks are remembered per endpoint family, so that exhausting one quota
+  (e.g. Intelligence searches) doesn't block unrelated endpoints.
+  """
+  path = urllib.parse.urlsplit(url).path
+  if path.startswith(_ENDPOINT_PREFIX):
+    path = path[len(_ENDPOINT_PREFIX) :]
+  parts = [part for part in path.split("/") if part]
+  if not parts:
+    return "/"
+  if parts[0] in _TWO_SEGMENT_SCOPES and len(parts) > 1:
+    return "/" + "/".join(parts[:2])
+  return "/" + parts[0]
 
 
 class ClientResponse:
@@ -240,8 +264,20 @@ class Client:
       headers: typing.Optional[typing.Dict] = None,
       verify_ssl: bool = True,
       connector: aiohttp.BaseConnector = None,
+      max_retries: int = 2,
+      max_retry_wait: int = 60,
+      quota_fail_fast: bool = True,
   ):
-    """Initialize the client with the provided API key."""
+    """Initialize the client with the provided API key.
+
+    Requests answered with 429 (rate limit or quota exceeded) are retried up to
+    `max_retries` times, waiting what the Retry-After header says if it's at
+    most `max_retry_wait` seconds (or using exponential backoff if the header
+    is missing). If the server asks to wait longer, the error is raised and,
+    when `quota_fail_fast` is enabled, further requests to the same endpoint
+    family fail locally with the same error until that time has passed, without
+    reaching the API.
+    """
 
     if not isinstance(apikey, str):
       raise ValueError("API key must be a string")
@@ -258,6 +294,11 @@ class Client:
     self._proxy = proxy
     self._user_headers = headers
     self._verify_ssl = verify_ssl
+    self._max_retries = max_retries
+    self._max_retry_wait = max_retry_wait
+    self._quota_fail_fast = quota_fail_fast
+    # Endpoint family -> time.monotonic() until which requests fail locally.
+    self._blocked_until: typing.Dict[str, float] = {}
     if connector is not None:
       self._connector = connector
     else:
@@ -283,6 +324,54 @@ class Client:
     if path.startswith("http"):
       return path
     return self._host + _ENDPOINT_PREFIX + path
+
+  def _check_blocked(self, url: str) -> None:
+    """Raises the last quota error if the endpoint family is still blocked."""
+    scope = _rate_limit_scope(url)
+    blocked_until = self._blocked_until.get(scope)
+    if blocked_until is None:
+      return
+    remaining = blocked_until - time.monotonic()
+    if remaining <= 0:
+      del self._blocked_until[scope]
+      return
+    raise APIError(
+        "QuotaExceededError",
+        f"Quota exceeded for {scope} endpoints, retry in {int(remaining) + 1}s"
+        " (raised by the client without contacting the API)",
+        retry_after=int(remaining) + 1,
+    )
+
+  async def _request_async(
+      self, method: str, url: str, retryable: bool = True, **kwargs: typing.Any
+  ) -> aiohttp.ClientResponse:
+    """Sends a request honoring Retry-After on 429 responses.
+
+    A 429 means the request was not processed, so retrying it is safe even for
+    POST requests. Requests whose body can't be re-sent (e.g. multipart file
+    uploads) must pass retryable=False.
+    """
+    self._check_blocked(url)
+    attempt = 0
+    while True:
+      response = await self._get_session().request(method, url, **kwargs)
+      if response.status != 429:
+        return response
+      retry_after = _parse_retry_after(response.headers.get("Retry-After"))
+      if retry_after is not None and retry_after > self._max_retry_wait:
+        if self._quota_fail_fast:
+          self._blocked_until[_rate_limit_scope(url)] = (
+              time.monotonic() + retry_after
+          )
+        return response
+      if not retryable or attempt >= self._max_retries:
+        return response
+      if retry_after is None:
+        # Exponential backoff with jitter: ~1s, ~2s, ~4s...
+        retry_after = (2**attempt) * (0.5 + random.random() / 2)
+      response.release()
+      attempt += 1
+      await asyncio.sleep(retry_after)
 
   def _get_session(self) -> aiohttp.ClientSession:
     if not self._session:
@@ -390,7 +479,8 @@ class Client:
   ) -> ClientResponse:
     """Like :func:`delete` but returns a coroutine."""
     return ClientResponse(
-        await self._get_session().delete(
+        await self._request_async(
+            "DELETE",
             self._full_url(path, *path_args),
             data=data,
             json=json_data,
@@ -549,8 +639,11 @@ class Client:
   ) -> ClientResponse:
     """Like :func:`get` but returns a coroutine."""
     return ClientResponse(
-        await self._get_session().get(
-            self._full_url(path, *path_args), params=params, proxy=self._proxy
+        await self._request_async(
+            "GET",
+            self._full_url(path, *path_args),
+            params=params,
+            proxy=self._proxy,
         )
     )
 
@@ -722,7 +815,8 @@ class Client:
   ) -> ClientResponse:
     """Like :func:`patch` but returns a coroutine."""
     return ClientResponse(
-        await self._get_session().patch(
+        await self._request_async(
+            "PATCH",
             self._full_url(path, *path_args),
             data=data,
             json=json_data,
@@ -794,7 +888,8 @@ class Client:
   ) -> ClientResponse:
     """Like :func:`post` but returns a coroutine."""
     return ClientResponse(
-        await self._get_session().post(
+        await self._request_async(
+            "POST",
             self._full_url(path, *path_args),
             data=data,
             json=json_data,
@@ -919,8 +1014,12 @@ class Client:
 
     upload_url = await self.get_data_async("/files/upload_url")
     response = ClientResponse(
-        await self._get_session().post(
-            upload_url, data=form_data, proxy=self._proxy
+        await self._request_async(
+            "POST",
+            upload_url,
+            retryable=False,
+            data=form_data,
+            proxy=self._proxy,
         )
     )
 
@@ -969,8 +1068,12 @@ class Client:
     form_data.add_field("url", url)
 
     response = ClientResponse(
-        await self._get_session().post(
-            self._full_url("/urls"), data=form_data, proxy=self._proxy
+        await self._request_async(
+            "POST",
+            self._full_url("/urls"),
+            retryable=False,
+            data=form_data,
+            proxy=self._proxy,
         )
     )
 
@@ -989,8 +1092,12 @@ class Client:
     form_data.add_field("url", url)
 
     response = ClientResponse(
-        await self._get_session().post(
-            self._full_url("/private/urls"), data=form_data, proxy=self._proxy
+        await self._request_async(
+            "POST",
+            self._full_url("/private/urls"),
+            retryable=False,
+            data=form_data,
+            proxy=self._proxy,
         )
     )
 

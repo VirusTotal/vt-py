@@ -813,3 +813,24 @@ def test_rate_limit_scope(url, scope):
   from vt import client as client_module
 
   assert client_module._rate_limit_scope(url) == scope
+
+
+def test_blocked_scopes_are_bounded_and_expired_ones_dropped(monkeypatch):
+  # pylint: disable=protected-access
+  now = [1000.0]
+  monkeypatch.setattr("vt.client.time.monotonic", lambda: now[0])
+  monkeypatch.setattr("vt.client._MAX_BLOCKED_SCOPES", 3)
+  client = Client("dummy_api_key")
+
+  client._block("/a", 10)
+  client._block("/b", 100)
+  now[0] += 20
+  # "/a" expired and is dropped when blocking a new family.
+  client._block("/c", 100)
+  assert set(client._blocked_until) == {"/b", "/c"}
+
+  client._block("/d", 50)
+  # The limit is reached: the block expiring first ("/d") is evicted.
+  client._block("/e", 100)
+  assert len(client._blocked_until) == 3
+  assert "/d" not in client._blocked_until

@@ -45,6 +45,11 @@ _API_HOST = "https://www.virustotal.com"
 # prefix in the paths you request as it's prepended automatically.
 _ENDPOINT_PREFIX = "/api/v3"
 
+# Upper bound for the number of blocked endpoint families remembered by a
+# client. Families are a small fixed set (one per API route family), so this is
+# just a safeguard against unbounded growth.
+_MAX_BLOCKED_SCOPES = 256
+
 # Endpoint families with their own quotas, identified by their first two path
 # segments instead of just the first one.
 _TWO_SEGMENT_SCOPES = ("intelligence", "monitor", "private", "feeds")
@@ -342,6 +347,22 @@ class Client:
         retry_after=int(remaining) + 1,
     )
 
+  def _block(self, scope: str, seconds: float) -> None:
+    """Blocks an endpoint family for the given number of seconds."""
+    now = time.monotonic()
+    # Drop expired blocks so that the dict only holds active ones.
+    for expired in [k for k, v in self._blocked_until.items() if v <= now]:
+      del self._blocked_until[expired]
+    if (
+        scope not in self._blocked_until
+        and len(self._blocked_until) >= _MAX_BLOCKED_SCOPES
+    ):
+      # Evict the block that expires first.
+      del self._blocked_until[
+          min(self._blocked_until, key=self._blocked_until.get)
+      ]
+    self._blocked_until[scope] = now + seconds
+
   async def _request_async(
       self, method: str, url: str, retryable: bool = True, **kwargs: typing.Any
   ) -> aiohttp.ClientResponse:
@@ -360,9 +381,7 @@ class Client:
       retry_after = _parse_retry_after(response.headers.get("Retry-After"))
       if retry_after is not None and retry_after > self._max_retry_wait:
         if self._quota_fail_fast:
-          self._blocked_until[_rate_limit_scope(url)] = (
-              time.monotonic() + retry_after
-          )
+          self._block(_rate_limit_scope(url), retry_after)
         return response
       if not retryable or attempt >= self._max_retries:
         return response

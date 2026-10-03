@@ -19,7 +19,6 @@ import datetime
 import email.utils
 import io
 import json
-import random
 import re
 import time
 import typing
@@ -46,16 +45,9 @@ _API_HOST = "https://www.virustotal.com"
 # prefix in the paths you request as it's prepended automatically.
 _ENDPOINT_PREFIX = "/api/v3"
 
-# Endpoints consuming quotas other than the general API requests quota
-# (hourly/daily/monthly), as (path regexp, quota family) tuples. Everything
-# else shares the general quota, so a 429 there blocks all of it.
-_QUOTA_FAMILIES = (
-    (r"^/files/[^/]+/download(_url)?$", "intelligence_downloads"),
-    (r"^/file_behaviours/[^/]+/(evtx|memdump|pcap)$", "intelligence_downloads"),
-    (r"^/intelligence/zip_files(/.*)?$", "intelligence_downloads"),
-    (r"^/(intelligence/)?search$", "intelligence_searches"),
-    (r"^/private/.*$", "private_scanning"),
-)
+# Path segments made only of these characters are part of the endpoint name
+# (e.g. "files", "download_url"); anything else is an object ID.
+_ENDPOINT_SEGMENT_RE = re.compile(r"^[a-z_]+$")
 
 # AppEngine server decides whether or not it should serve gzipped content
 # based on Accept-Encoding and User-Agent. Non-standard UAs are not served
@@ -97,22 +89,20 @@ def _parse_retry_after(value: typing.Optional[str]) -> typing.Optional[int]:
   return max(0, int((retry_at - now).total_seconds()))
 
 
-def _quota_family(url: str) -> str:
-  """Returns the quota family consumed by a request to the given URL.
+def _endpoint_key(method: str, url: str) -> str:
+  """Returns a key identifying the endpoint a request is sent to.
 
-  Most endpoints consume the general API requests quota ("api_requests"),
-  which is exhausted for all of them at once. A few consume their own quotas
-  (Intelligence downloads and searches, private scanning) and are blocked
-  independently.
+  Object IDs in the path are replaced by "*", so that all the requests to
+  the same endpoint share the key, e.g. "GET /files/*/download".
   """
   path = urllib.parse.urlsplit(url).path
   if path.startswith(_ENDPOINT_PREFIX):
     path = path[len(_ENDPOINT_PREFIX) :]
-  path = "/" + path.strip("/")
-  for regexp, family in _QUOTA_FAMILIES:
-    if re.match(regexp, path):
-      return family
-  return "api_requests"
+  segments = [
+      seg if _ENDPOINT_SEGMENT_RE.match(seg) else "*"
+      for seg in path.strip("/").split("/")
+  ]
+  return f"{method.upper()} /{'/'.join(segments)}"
 
 
 class ClientResponse:
@@ -273,20 +263,13 @@ class Client:
       headers: typing.Optional[typing.Dict] = None,
       verify_ssl: bool = True,
       connector: aiohttp.BaseConnector = None,
-      max_retries: int = 2,
-      max_retry_wait: int = 60,
-      quota_fail_fast: bool = True,
   ):
     """Initialize the client with the provided API key.
 
-    Requests answered with 429 (rate limit or quota exceeded) are retried up to
-    `max_retries` times, waiting what the Retry-After header says if it's at
-    most `max_retry_wait` seconds (or using exponential backoff if the header
-    is missing). If the server asks to wait longer, the error is raised and,
-    when `quota_fail_fast` is enabled, further requests consuming the same quota
-    fail locally with the same error until that time has passed, without
-    reaching the API. Most endpoints share the general API requests quota;
-    Intelligence downloads and searches and private scanning have their own.
+    When the API answers a request with 429 (rate limit or quota exceeded)
+    and a Retry-After header, further requests to the same endpoint fail
+    locally with a QuotaExceededError until that time has passed, without
+    reaching the API. Requests are never retried automatically.
     """
 
     if not isinstance(apikey, str):
@@ -304,10 +287,7 @@ class Client:
     self._proxy = proxy
     self._user_headers = headers
     self._verify_ssl = verify_ssl
-    self._max_retries = max_retries
-    self._max_retry_wait = max_retry_wait
-    self._quota_fail_fast = quota_fail_fast
-    # Quota family -> time.monotonic() until which requests fail locally.
+    # Endpoint key -> time.monotonic() until which requests fail locally.
     self._blocked_until: typing.Dict[str, float] = {}
     if connector is not None:
       self._connector = connector
@@ -335,53 +315,39 @@ class Client:
       return path
     return self._host + _ENDPOINT_PREFIX + path
 
-  def _check_blocked(self, url: str) -> None:
-    """Raises the last quota error if the URL's quota family is blocked."""
-    family = _quota_family(url)
-    blocked_until = self._blocked_until.get(family)
+  def _check_blocked(self, key: str) -> None:
+    """Raises a quota error if the endpoint is blocked by a previous 429."""
+    blocked_until = self._blocked_until.get(key)
     if blocked_until is None:
       return
     remaining = blocked_until - time.monotonic()
     if remaining <= 0:
-      del self._blocked_until[family]
+      del self._blocked_until[key]
       return
     raise APIError(
         "QuotaExceededError",
-        f"{family} quota exceeded, retry in {int(remaining) + 1}s"
+        f"{key} answered 429 recently, retry in {int(remaining) + 1}s"
         " (raised by the client without contacting the API)",
         retry_after=int(remaining) + 1,
     )
 
   async def _request_async(
-      self, method: str, url: str, retryable: bool = True, **kwargs: typing.Any
+      self, method: str, url: str, **kwargs: typing.Any
   ) -> aiohttp.ClientResponse:
-    """Sends a request honoring Retry-After on 429 responses.
-
-    A 429 means the request was not processed, so retrying it is safe even for
-    POST requests. Requests whose body can't be re-sent (e.g. multipart file
-    uploads) must pass retryable=False.
-    """
-    self._check_blocked(url)
-    attempt = 0
-    while True:
-      response = await self._get_session().request(method, url, **kwargs)
-      if response.status != 429:
-        return response
+    """Sends a request unless its endpoint is blocked by a previous 429."""
+    key = _endpoint_key(method, url)
+    self._check_blocked(key)
+    response = await self._get_session().request(method, url, **kwargs)
+    if response.status == 429:
       retry_after = _parse_retry_after(response.headers.get("Retry-After"))
-      if retry_after is not None and retry_after > self._max_retry_wait:
-        if self._quota_fail_fast:
-          self._blocked_until[_quota_family(url)] = (
-              time.monotonic() + retry_after
-          )
-        return response
-      if not retryable or attempt >= self._max_retries:
-        return response
-      if retry_after is None:
-        # Exponential backoff with jitter: ~1s, ~2s, ~4s...
-        retry_after = (2**attempt) * (0.5 + random.random() / 2)
-      response.release()
-      attempt += 1
-      await asyncio.sleep(retry_after)
+      if retry_after:
+        now = time.monotonic()
+        # Drop expired blocks so the dict doesn't grow with unused endpoints.
+        self._blocked_until = {
+            k: v for k, v in self._blocked_until.items() if v > now
+        }
+        self._blocked_until[key] = now + retry_after
+    return response
 
   def _get_session(self) -> aiohttp.ClientSession:
     if not self._session:
@@ -1027,7 +993,6 @@ class Client:
         await self._request_async(
             "POST",
             upload_url,
-            retryable=False,
             data=form_data,
             proxy=self._proxy,
         )
@@ -1081,7 +1046,6 @@ class Client:
         await self._request_async(
             "POST",
             self._full_url("/urls"),
-            retryable=False,
             data=form_data,
             proxy=self._proxy,
         )
@@ -1105,7 +1069,6 @@ class Client:
         await self._request_async(
             "POST",
             self._full_url("/private/urls"),
-            retryable=False,
             data=form_data,
             proxy=self._proxy,
         )

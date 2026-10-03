@@ -672,32 +672,10 @@ def _quota_error_body():
   )
 
 
-def test_429_with_short_retry_after_is_retried(httpserver):
-  path = "/api/v3/files/01020304050607080900a0b0c0ddead"
-  httpserver.expect_ordered_request(path, method="GET").respond_with_data(
-      status=429,
-      headers={"Retry-After": "0"},
-      content_type="application/json",
-      response_data=_quota_error_body(),
-  )
-  httpserver.expect_ordered_request(path, method="GET").respond_with_json({
-      "data": {
-          "id": "01020304050607080900a0b0c0ddead",
-          "type": "file",
-          "attributes": {},
-      }
-  })
-
-  with new_client(httpserver) as client:
-    obj = client.get_object("/files/01020304050607080900a0b0c0ddead")
-
-  assert obj.id == "01020304050607080900a0b0c0ddead"
-  assert len(httpserver.log) == 2
-
-
-def test_429_retries_are_bounded(httpserver):
-  path = "/api/v3/files/01020304050607080900a0b0c0ddead"
-  httpserver.expect_request(path, method="GET").respond_with_data(
+def test_429_is_not_retried(httpserver):
+  httpserver.expect_request(
+      "/api/v3/files/01020304050607080900a0b0c0ddead", method="GET"
+  ).respond_with_data(
       status=429,
       headers={"Retry-After": "0"},
       content_type="application/json",
@@ -709,11 +687,10 @@ def test_429_retries_are_bounded(httpserver):
       client.get_object("/files/01020304050607080900a0b0c0ddead")
 
   assert e_info.value.code == "QuotaExceededError"
-  # The first attempt plus max_retries (2) retries.
-  assert len(httpserver.log) == 3
+  assert len(httpserver.log) == 1
 
 
-def test_429_with_long_retry_after_fails_fast_locally(httpserver):
+def test_429_blocks_the_endpoint_locally(httpserver):
   httpserver.expect_request(
       "/api/v3/files/01020304050607080900a0b0c0ddead", method="GET"
   ).respond_with_data(
@@ -723,8 +700,8 @@ def test_429_with_long_retry_after_fails_fast_locally(httpserver):
       response_data=_quota_error_body(),
   )
   httpserver.expect_request(
-      "/api/v3/intelligence/search", method="GET"
-  ).respond_with_json({"data": []})
+      "/api/v3/files/0a0b0c0d0e0f/download", method="GET"
+  ).respond_with_data("content")
 
   with new_client(httpserver) as client:
     with pytest.raises(APIError) as e_info:
@@ -732,34 +709,28 @@ def test_429_with_long_retry_after_fails_fast_locally(httpserver):
     assert e_info.value.retry_after == 3600
     assert len(httpserver.log) == 1
 
-    # Endpoints sharing the general API quota now fail without contacting
-    # the API.
+    # The same endpoint with another ID now fails without contacting the API.
     with pytest.raises(APIError) as e_info:
-      client.get_json("/urls/abc")
+      client.get_object("/files/0a0b0c0d0e0f")
     assert e_info.value.code == "QuotaExceededError"
     assert 3590 <= e_info.value.retry_after <= 3600
     assert len(httpserver.log) == 1
 
-    # Endpoints with their own quota (Intelligence searches) are not affected.
-    client.get_json("/intelligence/search")
+    # Other endpoints are not affected.
+    client.get("/files/0a0b0c0d0e0f/download")
     assert len(httpserver.log) == 2
 
 
-def test_fail_fast_can_be_disabled(httpserver):
+def test_429_without_retry_after_does_not_block(httpserver):
   httpserver.expect_request(
       "/api/v3/files/01020304050607080900a0b0c0ddead", method="GET"
   ).respond_with_data(
       status=429,
-      headers={"Retry-After": "3600"},
       content_type="application/json",
       response_data=_quota_error_body(),
   )
 
-  with Client(
-      "dummy_api_key",
-      host="http://" + httpserver.host + ":" + str(httpserver.port),
-      quota_fail_fast=False,
-  ) as client:
+  with new_client(httpserver) as client:
     for _ in range(2):
       with pytest.raises(APIError):
         client.get_object("/files/01020304050607080900a0b0c0ddead")
@@ -767,7 +738,7 @@ def test_fail_fast_can_be_disabled(httpserver):
   assert len(httpserver.log) == 2
 
 
-def test_fail_fast_block_expires(httpserver, monkeypatch):
+def test_endpoint_block_expires(httpserver, monkeypatch):
   path = "/api/v3/files/01020304050607080900a0b0c0ddead"
   httpserver.expect_ordered_request(path, method="GET").respond_with_data(
       status=429,
@@ -797,43 +768,33 @@ def test_fail_fast_block_expires(httpserver, monkeypatch):
 
 
 @pytest.mark.parametrize(
-    "url, family",
+    "method, url, key",
     [
-        ("https://www.virustotal.com/api/v3/files/abc", "api_requests"),
+        ("get", "https://www.virustotal.com/api/v3/files/abc1", "GET /files/*"),
         (
-            "https://www.virustotal.com/api/v3/files/abc/relationships",
-            "api_requests",
-        ),
-        ("https://www.virustotal.com/api/v3/urls/abc", "api_requests"),
-        (
-            "https://www.virustotal.com/api/v3/files/abc/download",
-            "intelligence_downloads",
+            "GET",
+            "https://www.virustotal.com/api/v3/files/abc1/download?x=1",
+            "GET /files/*/download",
         ),
         (
-            "https://www.virustotal.com/api/v3/files/abc/download_url",
-            "intelligence_downloads",
+            "GET",
+            "https://www.virustotal.com/api/v3/domains/example.com",
+            "GET /domains/*",
         ),
         (
-            "https://www.virustotal.com/api/v3/file_behaviours/x/pcap",
-            "intelligence_downloads",
+            "POST",
+            "https://www.virustotal.com/api/v3/intelligence/retrohunt_jobs",
+            "POST /intelligence/retrohunt_jobs",
         ),
         (
-            "https://www.virustotal.com/api/v3/intelligence/zip_files/1",
-            "intelligence_downloads",
-        ),
-        (
-            "https://www.virustotal.com/api/v3/intelligence/search",
-            "intelligence_searches",
-        ),
-        ("https://www.virustotal.com/api/v3/search", "intelligence_searches"),
-        (
-            "https://www.virustotal.com/api/v3/private/files/abc/analyse",
-            "private_scanning",
+            "POST",
+            "https://www.virustotal.com/api/v3/private/files/abc1/analyse",
+            "POST /private/files/*/analyse",
         ),
     ],
 )
-def test_quota_family(url, family):
+def test_endpoint_key(method, url, key):
   # pylint: disable=import-outside-toplevel,protected-access
   from vt import client as client_module
 
-  assert client_module._quota_family(url) == family
+  assert client_module._endpoint_key(method, url) == key

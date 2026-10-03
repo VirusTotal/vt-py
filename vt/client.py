@@ -15,6 +15,8 @@
 
 import asyncio
 import base64
+import datetime
+import email.utils
 import io
 import json
 import typing
@@ -57,6 +59,27 @@ def url_id(url: str) -> str:
   like `client.get_object('/urls/<id>')`
   """
   return base64.urlsafe_b64encode(url.encode()).decode().strip("=")
+
+
+def _parse_retry_after(value: typing.Optional[str]) -> typing.Optional[int]:
+  """Parses a Retry-After header value into a number of seconds.
+
+  The header can contain either a number of seconds or an HTTP date. Returns
+  None if the header is missing or can't be parsed.
+  """
+  if not value:
+    return None
+  value = value.strip()
+  if value.isdigit():
+    return int(value)
+  try:
+    retry_at = email.utils.parsedate_to_datetime(value)
+  except (TypeError, ValueError):
+    return None
+  if retry_at.tzinfo is None:
+    retry_at = retry_at.replace(tzinfo=datetime.timezone.utc)
+  now = datetime.datetime.now(datetime.timezone.utc)
+  return max(0, int((retry_at - now).total_seconds()))
 
 
 class ClientResponse:
@@ -585,14 +608,19 @@ class Client:
     """
     if response.status == 200:
       return None
+    retry_after = _parse_retry_after(response.headers.get("Retry-After"))
     if response.status >= 400 and response.status <= 499:
       if response.content_type == "application/json":
         json_response = await response.json_async()
         error = json_response.get("error")
         if error:
-          return APIError.from_dict(error)
-      return APIError("ClientError", await response.text_async())
-    return APIError("ServerError", await response.text_async())
+          return APIError.from_dict(error, retry_after=retry_after)
+      return APIError(
+          "ClientError", await response.text_async(), retry_after=retry_after
+      )
+    return APIError(
+        "ServerError", await response.text_async(), retry_after=retry_after
+    )
 
   def get_json(
       self,

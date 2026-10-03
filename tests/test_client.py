@@ -314,6 +314,71 @@ def test_download_file_with_error(httpserver):
   assert e_info.value.args[1] == "Resource not found."
 
 
+def test_error_with_retry_after_seconds(httpserver):
+  httpserver.expect_request(
+      "/api/v3/files/01020304050607080900a0b0c0ddead",
+      method="GET",
+      headers={"X-Apikey": "dummy_api_key"},
+  ).respond_with_data(
+      status=429,
+      headers={"Retry-After": "120"},
+      content_type="application/json",
+      response_data=json.dumps(
+          {"error": {"code": "QuotaExceededError", "message": "Quota exceeded"}}
+      ),
+  )
+
+  with pytest.raises(APIError) as e_info:
+    with new_client(httpserver) as client:
+      client.get_object("/files/01020304050607080900a0b0c0ddead")
+  assert e_info.value.code == "QuotaExceededError"
+  assert e_info.value.retry_after == 120
+
+
+def test_error_with_retry_after_http_date(httpserver):
+  retry_at = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(
+      minutes=10
+  )
+  httpserver.expect_request(
+      "/api/v3/files/01020304050607080900a0b0c0ddead",
+      method="GET",
+      headers={"X-Apikey": "dummy_api_key"},
+  ).respond_with_data(
+      status=429,
+      headers={
+          "Retry-After": retry_at.strftime("%a, %d %b %Y %H:%M:%S GMT")
+      },
+      content_type="application/json",
+      response_data=json.dumps(
+          {"error": {"code": "QuotaExceededError", "message": "Quota exceeded"}}
+      ),
+  )
+
+  with pytest.raises(APIError) as e_info:
+    with new_client(httpserver) as client:
+      client.get_object("/files/01020304050607080900a0b0c0ddead")
+  assert 590 <= e_info.value.retry_after <= 600
+
+
+def test_error_without_retry_after(httpserver):
+  httpserver.expect_request(
+      "/api/v3/files/01020304050607080900a0b0c0ddead",
+      method="GET",
+      headers={"X-Apikey": "dummy_api_key"},
+  ).respond_with_data(
+      status=404,
+      content_type="application/json",
+      response_data=json.dumps(
+          {"error": {"code": "NotFoundError", "message": "Resource not found."}}
+      ),
+  )
+
+  with pytest.raises(APIError) as e_info:
+    with new_client(httpserver) as client:
+      client.get_object("/files/01020304050607080900a0b0c0ddead")
+  assert e_info.value.retry_after is None
+
+
 def test_download_zip_file(httpserver):
   httpserver.expect_ordered_request(
       "/api/v3/intelligence/zip_files",

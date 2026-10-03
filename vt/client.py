@@ -609,7 +609,7 @@ class Client:
     if response.status == 200:
       return None
     retry_after = _parse_retry_after(response.headers.get("Retry-After"))
-    if response.status >= 400 and response.status <= 499:
+    if 400 <= response.status <= 499:
       if response.content_type == "application/json":
         json_response = await response.json_async()
         error = json_response.get("error")

@@ -90,6 +90,10 @@ class Feed:
       self._batch_time = datetime.utcnow() - timedelta(minutes=70)
       self._batch_skip = 0
 
+    # Keep the cursor property usable before the first object is retrieved,
+    # so that a position can be checkpointed and restored without having to
+    # consume an item first.
+    self._batch_cursor = self._batch_skip
     self._next_batch_time = self._batch_time
 
   async def _get_batch_async(self, batch_time: datetime) -> io.BytesIO:

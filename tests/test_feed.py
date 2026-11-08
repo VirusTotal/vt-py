@@ -191,6 +191,23 @@ def test_cursor(httpserver, test_iters, expected_cursor):
 
 
 @pytest.mark.parametrize(
+    "cursor, expected_cursor",
+    [
+        ("200102030405", "200102030405-0"),
+        ("200102030405-0", "200102030405-0"),
+        ("200102030405-2", "200102030405-2"),
+    ],
+)
+def test_cursor_before_iterating(httpserver, cursor, expected_cursor):
+  """A feed built from a cursor must report that cursor back before any
+  object has been retrieved, so that a position can be checkpointed and
+  restored without first consuming an item."""
+  with new_client(httpserver) as client:
+    feed = client.feed(FeedType.FILES, cursor=cursor)
+    assert feed.cursor == expected_cursor
+
+
+@pytest.mark.parametrize(
     "cursor, expected_file_id",
     [
         ("200102030405-0", "dummy_file_id_1"),

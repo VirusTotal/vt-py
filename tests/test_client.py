@@ -312,6 +312,39 @@ def test_download_file_with_error(httpserver):
         client.download_file("01020304050607080900a0b0c0ddead", f)
   assert e_info.value.args[0] == "NotFoundError"
   assert e_info.value.args[1] == "Resource not found."
+  assert e_info.value.status_code == 404
+
+
+def test_get_error_preserves_http_status_code_for_html_and_server_errors(httpserver):
+  httpserver.expect_request(
+      "/api/v3/files/notfound_html",
+      method="GET",
+      headers={"X-Apikey": "dummy_api_key"},
+  ).respond_with_data(
+      status=404,
+      content_type="text/html",
+      response_data="<html><title>Error 404 (Not Found)</title></html>",
+  )
+  httpserver.expect_request(
+      "/api/v3/files/bad_gateway",
+      method="GET",
+      headers={"X-Apikey": "dummy_api_key"},
+  ).respond_with_data(
+      status=502,
+      content_type="text/html",
+      response_data="<html><body>502 Bad Gateway</body></html>",
+  )
+
+  with new_client(httpserver) as client:
+    with pytest.raises(APIError) as err_404:
+      client.get_object("/files/notfound_html")
+    assert err_404.value.code == "ClientError"
+    assert err_404.value.status_code == 404
+
+    with pytest.raises(APIError) as err_502:
+      client.get_object("/files/bad_gateway")
+    assert err_502.value.code == "ServerError"
+    assert err_502.value.status_code == 502
 
 
 def test_download_zip_file(httpserver):

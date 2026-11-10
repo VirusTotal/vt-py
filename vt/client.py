@@ -587,12 +587,24 @@ class Client:
       return None
     if response.status >= 400 and response.status <= 499:
       if response.content_type == "application/json":
-        json_response = await response.json_async()
-        error = json_response.get("error")
-        if error:
-          return APIError.from_dict(error)
-      return APIError("ClientError", await response.text_async())
-    return APIError("ServerError", await response.text_async())
+        try:
+          json_response = await response.json_async()
+        except ValueError:
+          json_response = None
+        if isinstance(json_response, dict):
+          error = json_response.get("error")
+          if isinstance(error, dict) and "code" in error:
+            return APIError.from_dict(error, status_code=response.status)
+      return APIError(
+          "ClientError",
+          await response.text_async(),
+          status_code=response.status,
+      )
+    return APIError(
+        "ServerError",
+        await response.text_async(),
+        status_code=response.status,
+    )
 
   def get_json(
       self,
